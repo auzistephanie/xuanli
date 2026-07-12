@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>玄曆・設計稿 v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6efe2; --paper2:#efe5d0; --ink:#1c2440; --red:#b23a3a; --gold:#c9a24b; --jade:#3f7d6e;
+  --ink60:rgba(28,36,64,.6); --ink30:rgba(28,36,64,.25); --ink12:rgba(28,36,64,.12);
+  --d-bg:#131829; --d-card:#1c2440; --d-paper:#e9dfc9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#e7dcc4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" opacity="0.05"><circle cx="60" cy="60" r="38" fill="none" stroke="%231c2440" stroke-width="1"/><circle cx="60" cy="60" r="18" fill="none" stroke="%231c2440" stroke-width="1"/></svg>');
+  font-family:'Noto Sans TC',sans-serif;color:var(--ink);padding:48px 24px 80px}
+h1,h2,h3,.serif{font-family:'Noto Serif TC',serif}
+.page{max-width:1200px;margin:0 auto}
+
+/* ===== 頁面說明部分 ===== */
+.docHead{text-align:center;margin-bottom:56px}
+.sealBig{width:88px;height:88px;margin:0 auto 18px;background:var(--red);border-radius:14px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 0 rgba(178,58,58,.25), inset 0 0 0 3px rgba(246,239,226,.9), inset 0 0 0 6px var(--red);}
+.sealBig span{color:var(--paper);font-family:'Noto Serif TC',serif;font-weight:900;font-size:34px;line-height:1.05;letter-spacing:2px;writing-mode:vertical-rl}
+.docHead h1{font-size:34px;font-weight:900;letter-spacing:8px}
+.docHead p{color:var(--ink60);margin-top:10px;font-size:14px;letter-spacing:1px}
+.secTitle{display:flex;align-items:center;gap:14px;margin:64px 0 8px}
+.secTitle .no{font-family:'Noto Serif TC',serif;font-weight:900;color:var(--gold);font-size:15px;border:1.5px solid var(--gold);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.secTitle h2{font-size:22px;font-weight:700;letter-spacing:3px}
+.secNote{color:var(--ink60);font-size:13.5px;margin:0 0 26px 44px;max-width:760px;line-height:1.8}
+.row{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start}
+
+/* ===== 手機框 ===== */
+.phone{width:360px;background:var(--paper);border-radius:44px;border:10px solid #23283b;box-shadow:0 24px 48px rgba(28,36,64,.28);overflow:hidden;flex-shrink:0}
+.phone .status{height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.screen{padding:6px 18px 0;min-height:640px;display:flex;flex-direction:column}
+.phoneLabel{text-align:center;font-size:13px;color:var(--ink60);margin-top:12px;letter-spacing:1px}
+
+/* ===== 通用 app 元件 ===== */
+.appHead{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 10px}
+.appHead .seal{width:34px;height:34px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px rgba(246,239,226,.85), inset 0 0 0 3px var(--red)}
+.appHead .seal span{color:var(--paper);font-family:'Noto Serif TC',serif;font-weight:900;font-size:13px;writing-mode:vertical-rl;line-height:1}
+.appHead .hTitle{font-family:'Noto Serif TC',serif;font-weight:700;font-size:17px;letter-spacing:3px}
+.appHead .hIcon{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ink30);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink60)}
+.card{background:#fffdf7;border:1px solid var(--ink12);border-radius:16px;padding:16px;box-shadow:0 2px 6px rgba(28,36,64,.06)}
+.tabbar{margin-top:auto;display:flex;border-top:1px solid var(--ink12);background:rgba(255,253,247,.85);margin-left:-18px;margin-right:-18px;padding:10px 0 22px}
+.tabbar div{flex:1;text-align:center;font-size:11px;color:var(--ink60)}
+.tabbar div b{display:block;font-size:19px;margin-bottom:3px;font-weight:400}
+.tabbar div.on{color:var(--red);font-weight:700}
+.chipTag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:20px;letter-spacing:.5px}
+
+/* 圓環 */
+.ring{position:relative;display:flex;align-items:center;justify-content:center}
+.ring svg{transform:rotate(-90deg)}
+.ring .rIn{position:absolute;text-align:center}
+.ring .rNum{font-family:'Noto Serif TC',serif;font-weight:900;line-height:1}
+.ring .rLbl{font-size:10px;color:var(--ink60);letter-spacing:1px;margin-top:3px}
+
+/* 宜忌列 */
+.yjCols{display:flex;gap:12px;margin-top:12px}
+.yjCol{flex:1;border-radius:14px;padding:12px 14px}
+.yjCol.yi{background:rgba(63,125,110,.09);border:1px solid rgba(63,125,110,.25)}
+.yjCol.ji{background:rgba(178,58,58,.07);border:1px solid rgba(178,58,58,.22)}
+.yjCol h4{font-family:'Noto Serif TC',serif;font-size:15px;letter-spacing:2px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.yjCol.yi h4{color:var(--jade)}.yjCol.ji h4{color:var(--red)}
+.yjCol h4 .dot{width:20px;height:20px;border-radius:5px;color:#fffdf7;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.yjCol.yi .dot{background:var(--jade)}.yjCol.ji .dot{background:var(--red)}
+.yjCol ul{list-style:none;font-size:12.5px;line-height:2.05}
+.yjCol li{display:flex;justify-content:space-between;align-items:center}
+.yjCol li .pw{font-size:9.5px;color:var(--gold);letter-spacing:1px}
+
+/* 7日條 */
+.week7{display:flex;gap:6px;margin-top:12px}
+.w7d{flex:1;text-align:center;border-radius:10px;padding:7px 0 6px;font-size:10px;border:1px solid var(--ink12);background:#fffdf7}
+.w7d b{display:block;font-family:'Noto Serif TC',serif;font-size:13px;margin:2px 0}
+.w7d.g{background:rgba(63,125,110,.12);border-color:rgba(63,125,110,.3)}
+.w7d.g b{color:var(--jade)}
+.w7d.b{background:rgba(178,58,58,.09);border-color:rgba(178,58,58,.28)}
+.w7d.b b{color:var(--red)}
+.w7d.today{outline:2px solid var(--gold);outline-offset:1px}
+
+/* onboarding */
+.obTitle{font-family:'Noto Serif TC',serif;font-size:21px;font-weight:700;letter-spacing:2px;margin:14px 2px 4px}
+.obSub{font-size:12.5px;color:var(--ink60);margin:0 2px 16px;line-height:1.7}
+.fld{background:#fffdf7;border:1px solid var(--ink12);border-radius:12px;padding:12px 14px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center}
+.fld .fl{font-size:11px;color:var(--ink60);letter-spacing:1px;margin-bottom:3px}
+.fld .fv{font-family:'Noto Serif TC',serif;font-size:15.5px;font-weight:600}
+.fld .chev{color:var(--ink30);font-size:16px}
+.segs{display:flex;background:var(--paper2);border-radius:10px;padding:3px;margin-bottom:14px}
+.segs div{flex:1;text-align:center;font-size:12.5px;padding:7px 0;border-radius:8px;color:var(--ink60)}
+.segs div.on{background:#fffdf7;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(28,36,64,.12)}
+.btnMain{background:var(--ink);color:var(--paper);text-align:center;padding:14px;border-radius:14px;font-size:15px;letter-spacing:4px;font-family:'Noto Serif TC',serif;font-weight:600;margin-top:8px}
+.btnGhost{text-align:center;padding:12px;font-size:12.5px;color:var(--ink60);letter-spacing:1px}
+.toggleRow{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 14px;font-size:12.5px;color:var(--ink60)}
+.tgl{width:40px;height:23px;border-radius:20px;background:var(--jade);position:relative}
+.tgl::after{content:'';position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:3px;right:3px}
+
+/* 五行 bar */
+.wuxing{margin-top:12px}
+.wxRow{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
+.wxRow .wxName{font-family:'Noto Serif TC',serif;width:15px;font-weight:700}
+.wxBarBg{flex:1;height:9px;border-radius:6px;background:var(--paper2);overflow:hidden}
+.wxBar{height:100%;border-radius:6px}
+.wxRow .wxPct{width:34px;text-align:right;color:var(--ink60);font-size:10.5px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="docHead">
+  <div class="sealBig"><span>玄曆</span></div>
+  <h1>玄曆・設計稿</h1>
+  <p>國風玄學生活工具 ｜ v1 Design Preview ｜ 配色：米黃・藏藍・朱紅・金・玉綠 ｜ 字體：思源宋體/黑體</p>
+  <p style="margin-top:4px">示範用戶：阿玄 ｜ ISFP ｜ 乙木日主・水木旺 ｜ 紫微命宮：太陰 ｜ 示範日期：2026年7月11日（丙戌日・真實通勝數據）</p>
+</div>
+
+<!-- SECTION 1: ONBOARDING -->
+<div class="secTitle"><div class="no">壹</div><h2>Onboarding・首次開啟</h2></div>
+<p class="secNote">三步：出生資料 → MBTI → 命理檔案卡。出生日期可切換新曆／農曆輸入；時辰設「唔清楚」降級模式（用三柱計五行，紫微部分改用輕量文案，檔案完整度提示鼓勵日後補返）。</p>
+<div class="row" id="onboarding">
+
+  <!-- OB-1 出生資料 -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div style="display:flex;gap:5px;margin:6px 2px 2px">
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--gold)"></div>
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--ink12)"></div>
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--ink12)"></div>
+    </div>
+    <div class="obTitle">你嘅出生一刻</div>
+    <p class="obSub">八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。</p>
+    <div class="segs"><div class="on">新曆</div><div>農曆</div></div>
+    <div class="fld"><div><div class="fl">出生日期</div><div class="fv">1995 年 3 月 21 日</div></div><div class="chev">›</div></div>
+    <div class="fld"><div><div class="fl">出生時間</div><div class="fv">09:30（巳時）</div></div><div class="chev">›</div></div>
+    <div class="toggleRow"><span>我唔清楚出生時間<br><span style="font-size:10.5px;color:var(--ink30)">會改用簡易版推算，之後可以補返</span></span><div class="tgl" style="background:var(--ink30)"></div></div>
+    <div class="fld"><div><div class="fl">出生地點</div><div class="fv">香港</div></div><div class="chev">›</div></div>
+    <div class="btnMain">下一步</div>
+    <div class="tabbar" style="border:none;background:none"></div>
+  </div></div>
+  <div class="phoneLabel">① 出生資料（新曆/農曆切換・時辰可選）</div>
+  </div>
+
+  <!-- OB-2 MBTI -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div style="display:flex;gap:5px;margin:6px 2px 2px">
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--gold)"></div>
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--gold)"></div>
+      <div style="flex:1;height:3px;border-radius:2px;background:var(--ink12)"></div>
+    </div>
+    <div class="obTitle">你嘅性格底色</div>
+    <p class="obSub">MBTI 會影響我哋同你講嘢嘅方式，同埋活動建議嘅取向。</p>
+    <div class="segs"><div>我知我嘅類型</div><div class="on">快速測驗（8題）</div></div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:700">第 3 / 8 題</div>
+      <div class="serif" style="font-size:16.5px;font-weight:600;line-height:1.6;margin:8px 0 14px">放假嗰日，你會更想——</div>
+      <div style="border:1.5px solid var(--jade);background:rgba(63,125,110,.07);border-radius:12px;padding:12px 14px;font-size:13.5px;margin-bottom:9px">☘ 自己一個慢慢嘆，叉返電</div>
+      <div style="border:1px solid var(--ink12);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink60)">☀ 約朋友出去，愈熱鬧愈精神</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
+      <span class="chipTag" style="background:var(--paper2)">E/I</span><span class="chipTag" style="background:var(--paper2)">S/N</span><span class="chipTag" style="background:var(--paper2)">T/F</span><span class="chipTag" style="background:var(--paper2)">J/P</span>
+    </div>
+    <div class="btnMain" style="margin-top:16px">下一題</div>
+    <div class="tabbar" style="border:none;background:none"></div>
+  </div></div>
+  <div class="phoneLabel">② MBTI（直接揀 或 8 題快測）</div>
+  </div>
+
+  <!-- OB-3 命理檔案卡 -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div class="obTitle" style="text-align:center;margin-top:10px">你嘅命理檔案</div>
+    <p class="obSub" style="text-align:center">之後所有推薦，都跟呢張卡而行。</p>
+    <div class="card" style="background:linear-gradient(160deg,#1c2440,#28325a);color:var(--paper);padding:20px 18px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-18px;top:-18px;width:110px;height:110px;border:1px solid rgba(201,162,75,.35);border-radius:50%"></div>
+      <div style="position:absolute;right:2px;top:2px;width:70px;height:70px;border:1px solid rgba(201,162,75,.25);border-radius:50%"></div>
+      <div style="display:flex;gap:14px;align-items:center">
+        <div style="width:56px;height:56px;background:var(--red);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 2px rgba(246,239,226,.8),inset 0 0 0 4px var(--red)">
+          <span class="serif" style="font-weight:900;font-size:22px;color:var(--paper)">玄</span>
+        </div>
+        <div>
+          <div class="serif" style="font-size:19px;font-weight:700;letter-spacing:2px">阿玄</div>
+          <div style="margin-top:5px;display:flex;gap:6px">
+            <span class="chipTag" style="background:var(--gold);color:var(--ink);font-weight:700">ISFP</span>
+            <span class="chipTag" style="background:rgba(246,239,226,.16)">乙木日主</span>
+          </div>
+        </div>
+      </div>
+      <div class="wuxing">
+        <div class="wxRow"><span class="wxName" style="color:#8fd0a8">木</span><div class="wxBarBg" style="background:rgba(246,239,226,.14)"><div class="wxBar" style="width:30%;background:#6cae84"></div></div><span class="wxPct" style="color:rgba(246,239,226,.6)">30%</span></div>
+        <div class="wxRow"><span class="wxName" style="color:#e08484">火</span><div class="wxBarBg" style="background:rgba(246,239,226,.14)"><div class="wxBar" style="width:14%;background:#c96a6a"></div></div><span class="wxPct" style="color:rgba(246,239,226,.6)">14%</span></div>
+        <div class="wxRow"><span class="wxName" style="color:#d9b46a">土</span><div class="wxBarBg" style="background:rgba(246,239,226,.14)"><div class="wxBar" style="width:13%;background:#c9a24b"></div></div><span class="wxPct" style="color:rgba(246,239,226,.6)">13%</span></div>
+        <div class="wxRow"><span class="wxName" style="color:#cfd4de">金</span><div class="wxBarBg" style="background:rgba(246,239,226,.14)"><div class="wxBar" style="width:15%;background:#9aa3b8"></div></div><span class="wxPct" style="color:rgba(246,239,226,.6)">15%</span></div>
+        <div class="wxRow"><span class="wxName" style="color:#8fb6d9">水</span><div class="wxBarBg" style="background:rgba(246,239,226,.14)"><div class="wxBar" style="width:28%;background:#5f87ad"></div></div><span class="wxPct" style="color:rgba(246,239,226,.6)">28%</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;font-size:11.5px">
+        <div style="flex:1;background:rgba(246,239,226,.1);border-radius:10px;padding:8px 10px">喜用神<br><b class="serif" style="font-size:14px;color:#8fd0a8">水・木</b></div>
+        <div style="flex:1;background:rgba(246,239,226,.1);border-radius:10px;padding:8px 10px">忌神<br><b class="serif" style="font-size:14px;color:#e0a1a1">金・土</b></div>
+        <div style="flex:1;background:rgba(246,239,226,.1);border-radius:10px;padding:8px 10px">紫微命宮<br><b class="serif" style="font-size:14px;color:var(--gold)">太陰</b></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:rgba(246,239,226,.75);border-top:1px dashed rgba(246,239,226,.25);padding-top:9px">丙午流年：肖兔・本年平順，留意農曆五月人際變動 ｜ 檔案完整度 100%</div>
+    </div>
+    <div class="btnMain" style="margin-top:16px">開始睇今日</div>
+    <div class="btnGhost">僅供參考・不代替專業意見</div>
+    <div class="tabbar" style="border:none;background:none"></div>
+  </div></div>
+  <div class="phoneLabel">③ 命理檔案卡（頭像＋MBTI＋五行條＋紫微）</div>
+  </div>
+
+</div>
+
+<!-- SECTION 1B: 八字 × MBTI 組合 -->
+<div class="secTitle"><div class="no">貳</div><h2>命理 × MBTI 組合詳解</h2></div>
+<p class="secNote">由檔案卡撳入。10 個日主 × 16 個 MBTI ＝ 160 個組合模板，每個有專屬「組合名」+ 詳解文案（優勢/留意位/發力方式）。稀有度同分享卡係第二版，但版面預留咗位。</p>
+<div class="row" id="combo">
+
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div class="appHead">
+      <div class="hIcon">‹</div>
+      <div class="hTitle">我嘅組合</div>
+      <div class="hIcon">⇪</div>
+    </div>
+
+    <div class="card" style="text-align:center;padding:22px 18px;background:linear-gradient(170deg,#fffdf7,var(--paper2))">
+      <div style="display:flex;justify-content:center;gap:10px;align-items:center;margin-bottom:12px">
+        <span class="chipTag" style="background:rgba(63,125,110,.12);color:var(--jade);font-weight:700;font-size:12px;padding:5px 12px">乙木日主</span>
+        <span class="serif" style="color:var(--gold);font-size:15px">×</span>
+        <span class="chipTag" style="background:var(--gold);color:var(--ink);font-weight:700;font-size:12px;padding:5px 12px">ISFP</span>
+      </div>
+      <div class="serif" style="font-size:30px;font-weight:900;letter-spacing:10px;color:var(--ink)">林間清泉</div>
+      <div style="font-size:11px;color:var(--gold);letter-spacing:3px;margin-top:6px">柔 韌 有 光 ・ 靜 水 深 流</div>
+      <div style="font-size:12.5px;line-height:1.9;color:var(--ink60);margin-top:14px;text-align:left">乙木係藤蘿花草之木——柔韌、識轉彎、喺邊度都搵到生機；ISFP 係內斂嘅藝術家——用感受行先，唔多講，但眼光獨到。二者相遇，你係嗰種靜靜哋做、突然驚豔所有人嘅人。你嘅水旺再滋養乙木：直覺極準，只係你未必肯認。</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div class="card" style="flex:1;padding:13px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--jade);font-weight:700;margin-bottom:7px">✦ 你嘅優勢</div>
+        <div style="font-size:12px;line-height:1.95">審美同直覺俱佳<br>逆境適應力強<br>細節裡見真章</div>
+      </div>
+      <div class="card" style="flex:1;padding:13px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--red);font-weight:700;margin-bottom:7px">◈ 留意位</div>
+        <div style="font-size:12px;line-height:1.95">諗多過講，易錯過時機<br>金土日子易內耗<br>忌臨時改大計</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;padding:13px">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:7px">☾ 點樣發力（跟你嘅組合）</div>
+      <div style="font-size:12px;line-height:1.85">水木旺嘅日子（亥子寅卯）行動力最高——大事擺喺呢啲日；ISFP 唔使迫自己 present，一對一傾、用作品講嘢，勝算最大。紫微太陰坐命，夜晚諗嘢最清醒，重要決定留畀黃昏後。</div>
+    </div>
+
+    <div class="card" style="margin-top:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-style:dashed">
+      <div style="font-size:11.5px;color:var(--ink60)">乙木 × ISFP・全球約 <b class="serif" style="color:var(--red);font-size:14px">1.1%</b> 人擁有</div>
+      <span class="chipTag" style="background:var(--paper2);color:var(--ink30)">分享卡・第二版</span>
+    </div>
+
+    <div class="tabbar" style="border:none;background:none"></div>
+  </div></div>
+  <div class="phoneLabel">組合詳解頁（檔案卡撳入・160 組合模板）</div>
+  </div>
+
+</div>
+
+<!-- SECTION 2: TAB A -->
+<div class="secTitle"><div class="no">叁</div><h2>Tab A・今日宜忌</h2></div>
+<p class="secNote">雙環並列：「命理分」（八字五行×建除神煞×沖煞加權）+「狀態契合度」（MBTI×當日氣場）。宜忌清單按個人五行加權排序，金點標示「合你」項目。下方未來 7 日快覽。</p>
+<div class="row" id="tabA">
+
+  <!-- TAB A -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div class="appHead">
+      <div class="seal"><span>玄曆</span></div>
+      <div style="text-align:center">
+        <div class="hTitle">7月11日 星期六</div>
+        <div style="font-size:11px;color:var(--ink60);margin-top:2px;letter-spacing:1px">農曆五月廿七・丙戌日・沖龍煞北</div>
+      </div>
+      <div class="hIcon">☰</div>
+    </div>
+
+    <div class="card" style="display:flex;align-items:center;justify-content:space-around;padding:14px 8px">
+      <div class="ring">
+        <svg width="104" height="104"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--paper2)" stroke-width="9"/>
+        <circle cx="52" cy="52" r="44" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="round" stroke-dasharray="116 276"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:30px">42</div><div class="rLbl">命理分・平</div></div>
+      </div>
+      <div style="width:1px;height:76px;background:var(--ink12)"></div>
+      <div class="ring">
+        <svg width="104" height="104"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--paper2)" stroke-width="9"/>
+        <circle cx="52" cy="52" r="44" fill="none" stroke="var(--jade)" stroke-width="9" stroke-linecap="round" stroke-dasharray="210 276"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:30px">76</div><div class="rLbl">狀態契合・ISFP</div></div>
+      </div>
+    </div>
+
+    <div class="yjCols">
+      <div class="yjCol yi"><h4><span class="dot">宜</span>今日宜</h4>
+        <ul><li>祭祀祈福 <span class="pw">✦ 合你</span></li><li>整理靜修 <span class="pw">✦ 合你</span></li><li>解除舊約</li></ul>
+      </div>
+      <div class="yjCol ji"><h4><span class="dot">忌</span>今日忌</h4>
+        <ul><li>簽約大事</li><li>搬屋動土</li><li style="color:var(--ink30)">申時 15–17</li></ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;background:rgba(201,162,75,.08);border-color:rgba(201,162,75,.35)">
+      <div style="font-size:10.5px;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:6px">🔮 今日貼身建議</div>
+      <div class="serif" style="font-size:13.5px;line-height:1.85">丙戌平日，宜靜不宜動。你水木旺而火土弱，今日戌土偏燥，正好安定心神——ISFP 嘅你適合執靚一角、寫低心事，大計留返聽日發力。避開申時（15–17）落重要決定。</div>
+    </div>
+
+    <div style="font-size:11px;color:var(--ink60);letter-spacing:2px;margin:14px 2px 0">未來七日</div>
+    <div class="week7">
+      <div class="w7d today">六<b>11</b>平</div>
+      <div class="w7d g">日<b>12</b>吉</div>
+      <div class="w7d">一<b>13</b>平</div>
+      <div class="w7d b">二<b>14</b>忌</div>
+      <div class="w7d g">三<b>15</b>吉</div>
+      <div class="w7d g">四<b>16</b>吉</div>
+      <div class="w7d">五<b>17</b>平</div>
+    </div>
+
+    <div class="tabbar">
+      <div class="on"><b>☀</b>今日</div><div><b>✦</b>我想做</div><div><b>▦</b>月曆</div>
+    </div>
+  </div></div>
+  <div class="phoneLabel">Tab A・今日宜忌（雙環＋個人化宜忌＋7日快覽）</div>
+  </div>
+
+</div>
+
+<!-- SECTION 3: TAB B -->
+<div class="secTitle"><div class="no">肆</div><h2>Tab B・我想做…（反向擇日）</h2></div>
+<p class="secNote">活動 chips → 揀範圍（1週/1月/3月）→ 出最適合 3–5 日，每日附星級 + 🔮 個人化原因。敏感活動（睇醫生/投資）文案只講「邊日更順」，唔講忌。</p>
+<div class="row" id="tabB">
+
+  <!-- TAB B -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div class="appHead">
+      <div class="seal"><span>玄曆</span></div>
+      <div class="hTitle">我想做⋯</div>
+      <div class="hIcon">⌕</div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 12px">
+      <span class="chipTag" style="background:var(--ink);color:var(--paper);padding:7px 13px;font-size:12.5px">✂ 剪髮</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">搬屋</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">簽約</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">開業</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">表白約會</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">面試</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">出遊</span>
+      <span class="chipTag" style="background:#fffdf7;border:1px solid var(--ink12);padding:7px 13px;font-size:12.5px">＋ 更多</span>
+    </div>
+
+    <div class="segs" style="margin-bottom:12px"><div>未來一週</div><div class="on">未來一個月</div><div>三個月</div></div>
+
+    <div class="card" style="margin-bottom:10px;border-left:4px solid var(--jade)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div class="serif" style="font-size:16px;font-weight:700">7月16日（四）辛卯日</div>
+        <div style="color:var(--gold);font-size:13px;letter-spacing:1px">★★★★★</div>
+      </div>
+      <div style="font-size:11px;color:var(--ink60);margin:3px 0 7px">農曆六月初三・成日・沖雞煞西</div>
+      <div style="font-size:12.5px;line-height:1.75">🔮 成日主成就，卯木當令——你屬木，木氣最旺之日剪髮，去舊生新旺髮運，最啱 ISFP 換個新形象靜靜驚豔所有人。</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <div style="flex:1;text-align:center;font-size:11.5px;padding:8px;border-radius:10px;background:var(--ink);color:var(--paper);letter-spacing:1px">＋ 加入我嘅日曆</div>
+        <div style="flex:1;text-align:center;font-size:11.5px;padding:8px;border-radius:10px;border:1px solid var(--ink12);color:var(--ink60)">當日已有 1 個行程 ›</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:10px;border-left:4px solid var(--jade)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div class="serif" style="font-size:16px;font-weight:700">7月13日（一）戊子日</div>
+        <div style="color:var(--gold);font-size:13px;letter-spacing:1px">★★★★<span style="opacity:.25">★</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--ink60);margin:3px 0 7px">農曆五月廿九・執日・沖馬煞南</div>
+      <div style="font-size:12.5px;line-height:1.75">🔮 通勝明載「宜理髮」，子水滋養你嘅乙木——想快啲郁手，呢日係最近嘅好時機。</div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--ink30)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div class="serif" style="font-size:16px;font-weight:700">7月25日（六）庚子日</div>
+        <div style="color:var(--gold);font-size:13px;letter-spacing:1px">★★★★<span style="opacity:.25">★</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--ink60);margin:3px 0 7px">農曆六月十二・執日・沖馬煞南</div>
+      <div style="font-size:12.5px;line-height:1.75">🔮 週末之選：執日利修整，子水生木——約定 stylist 慢慢嘆都得。</div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--ink30);margin-top:10px">7月12日（丁亥）通勝忌理髮，已為你避開 ✓</div>
+
+    <div class="tabbar">
+      <div><b>☀</b>今日</div><div class="on"><b>✦</b>我想做</div><div><b>▦</b>月曆</div>
+    </div>
+  </div></div>
+  <div class="phoneLabel">Tab B・反向擇日（揀「剪髮」＋範圍一個月）</div>
+  </div>
+
+</div>
+
+<!-- SECTION 4: TAB C -->
+<div class="secTitle"><div class="no">伍</div><h2>Tab C・月曆</h2></div>
+<p class="secNote">月視圖以玉綠（吉）/ 朱紅（忌）/ 淡墨（平）標記個人化吉凶；<b>同步部機日曆（含 Google Calendar）</b>——有行程嘅日子格底顯示藏藍幼條，展開日卡見到當日行程同吉忌並列。撳任何一日展開當日卡（同 Tab A 格式）。數據為 2026 年 7 月真實干支 + 示範用戶加權分。</p>
+<div class="row" id="tabC">
+
+  <!-- TAB C -->
+  <div>
+  <div class="phone"><div class="status"><span>9:41</span><span>⛭ ⚡︎ ▮</span></div>
+  <div class="screen">
+    <div class="appHead">
+      <div class="hIcon">‹</div>
+      <div style="text-align:center">
+        <div class="hTitle">2026年7月</div>
+        <div style="font-size:11px;color:var(--ink60);margin-top:2px;letter-spacing:1px">丙午年・乙未月（小暑後）</div>
+      </div>
+      <div class="hIcon">›</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:10.5px;color:var(--ink60);text-align:center;margin-bottom:6px">
+      <span style="color:var(--red)">日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+    </div>
+    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+
+    <div style="display:flex;gap:14px;justify-content:center;font-size:10.5px;color:var(--ink60);margin-top:10px">
+      <span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--jade);margin-right:4px"></i>吉</span>
+      <span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--red);margin-right:4px"></i>忌</span>
+      <span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--ink30);margin-right:4px"></i>平</span>
+      <span><i style="display:inline-block;width:12px;height:3px;border-radius:2px;background:var(--ink60);margin-right:4px;vertical-align:middle"></i>有行程</span>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="serif" style="font-size:15.5px;font-weight:700">7月16日（四）・辛卯日 <span class="chipTag" style="background:rgba(63,125,110,.14);color:var(--jade);font-weight:700">吉 88</span></div>
+          <div style="font-size:11px;color:var(--ink60);margin-top:3px">六月初三・成日・井宿・沖雞煞西</div>
+        </div>
+        <div class="hIcon" style="border-color:var(--gold);color:var(--gold)">↗</div>
+      </div>
+      <div style="font-size:12px;line-height:1.7;margin-top:8px;border-top:1px dashed var(--ink12);padding-top:8px">
+        <span style="color:var(--jade);font-weight:700">宜</span> 嫁娶・祈福・剪髮・開展新事 <span style="color:var(--gold)">✦ 木旺日，你嘅大日子</span><br>
+        <span style="color:var(--red);font-weight:700">忌</span> 伐木・掘井
+      </div>
+      <div style="font-size:11.5px;margin-top:8px;border-top:1px dashed var(--ink12);padding-top:8px;color:var(--ink60)">
+        <span style="color:var(--ink);font-weight:700">📅 你嘅行程</span>（Google Calendar）<br>
+        <span style="display:inline-block;margin-top:4px;border-left:3px solid var(--ink);padding-left:8px">14:00　Team Sync<br>19:30　同 Kelly 食飯 <span style="color:var(--jade)">✦ 吉日，順便剪埋髮？</span></span>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <div><b>☀</b>今日</div><div><b>✦</b>我想做</div><div class="on"><b>▦</b>月曆</div>
+    </div>
+  </div></div>
+  <div class="phoneLabel">Tab C・月曆（個人化吉/忌/平＋展開日卡）</div>
+  </div>
+
+</div>
+<script>
+(function(){
+  const good=[3,9,12,15,16,18,22,24,27,28,30], bad=[1,6,7,14,19,26,31], evt=[2,6,13,16,20,24,28];
+  const lunar={1:'十七',2:'十八',3:'十九',4:'二十',5:'廿一',6:'廿二',7:'廿三',8:'廿四',9:'廿五',10:'廿六',11:'廿七',12:'廿八',13:'廿九',14:'六月',15:'初二',16:'初三',17:'初四',18:'初五',19:'初六',20:'初七',21:'初八',22:'初九',23:'初十',24:'十一',25:'十二',26:'十三',27:'十四',28:'十五',29:'十六',30:'十七',31:'十八'};
+  const g=document.getElementById('calGrid');
+  let html='';
+  for(let i=0;i<3;i++) html+='<div></div>';
+  for(let d=1;d<=31;d++){
+    const cls=good.includes(d)?'var(--jade)':bad.includes(d)?'var(--red)':'var(--ink30)';
+    const bg=good.includes(d)?'rgba(63,125,110,.10)':bad.includes(d)?'rgba(178,58,58,.08)':'#fffdf7';
+    const ring=d===11?'outline:2px solid var(--gold);outline-offset:1px;':'';
+    const sel=d===16?'box-shadow:0 0 0 2px var(--jade);':'';
+    html+='<div style="background:'+bg+';border:1px solid var(--ink12);border-radius:9px;text-align:center;padding:5px 0 4px;'+ring+sel+'">'
+      +'<div style="font-family:\'Noto Serif TC\',serif;font-weight:700;font-size:13px">'+d+'</div>'
+      +'<div style="font-size:8.5px;color:var(--ink60);transform:scale(.9)">'+lunar[d]+'</div>'
+      +'<div style="width:5px;height:5px;border-radius:50%;background:'+cls+';margin:3px auto 0"></div>'
+      +(evt.includes(d)?'<div style="width:14px;height:2.5px;border-radius:2px;background:var(--ink60);margin:2px auto 0"></div>':'<div style="height:4.5px"></div>')
+      +'</div>';
+  }
+  g.innerHTML=html;
+})();
+</script>
+
+<!-- SECTION 5: WIDGETS -->
+<div class="secTitle"><div class="no">陸</div><h2>主畫面 Widget・小/中（淺色+深色）</h2></div>
+<p class="secNote">iOS WidgetKit + Android App Widget。一次預生成未來 7 日 timeline，子夜自動轉日、每朝 7:00 刷新文案。撳 widget 直入 app 對應日子。</p>
+<div class="row" id="widgets" style="align-items:center">
+
+  <!-- small light -->
+  <div>
+    <div style="width:170px;height:170px;background:var(--paper);border-radius:28px;box-shadow:0 10px 24px rgba(28,36,64,.22);padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(28,36,64,.08)">
+      <div class="ring">
+        <svg width="92" height="92"><circle cx="46" cy="46" r="38" fill="none" stroke="var(--paper2)" stroke-width="8"/>
+        <circle cx="46" cy="46" r="38" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 239"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:26px">42</div></div>
+      </div>
+      <div class="serif" style="margin-top:8px;font-size:15px;font-weight:900;letter-spacing:6px;color:var(--ink)">平</div>
+    </div>
+    <div class="phoneLabel">小・淺色</div>
+  </div>
+
+  <!-- small dark -->
+  <div>
+    <div style="width:170px;height:170px;background:var(--d-card);border-radius:28px;box-shadow:0 10px 24px rgba(0,0,0,.35);padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div class="ring">
+        <svg width="92" height="92"><circle cx="46" cy="46" r="38" fill="none" stroke="rgba(233,223,201,.15)" stroke-width="8"/>
+        <circle cx="46" cy="46" r="38" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 239"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:26px;color:var(--d-paper)">42</div></div>
+      </div>
+      <div class="serif" style="margin-top:8px;font-size:15px;font-weight:900;letter-spacing:6px;color:var(--d-paper)">平</div>
+    </div>
+    <div class="phoneLabel">小・深色</div>
+  </div>
+
+  <!-- medium light -->
+  <div>
+    <div style="width:364px;height:170px;background:var(--paper);border-radius:28px;box-shadow:0 10px 24px rgba(28,36,64,.22);padding:18px 20px;display:flex;gap:16px;align-items:center;border:1px solid rgba(28,36,64,.08)">
+      <div class="ring" style="flex-shrink:0">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--paper2)" stroke-width="8"/>
+        <circle cx="48" cy="48" r="40" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round" stroke-dasharray="106 251"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:26px">42</div><div class="rLbl">平</div></div>
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div class="serif" style="font-size:15.5px;font-weight:700">7月11日 六</div>
+          <div style="font-size:10.5px;color:var(--ink60)">五月廿七・丙戌</div>
+        </div>
+        <div style="font-size:12px;line-height:1.9;margin-top:6px">
+          <span style="color:var(--jade);font-weight:700">宜</span> 祈福・靜修・解除<br>
+          <span style="color:var(--red);font-weight:700">忌</span> 簽約・動土
+        </div>
+        <div style="font-size:10px;color:var(--ink60);margin-top:5px;border-top:1px dashed var(--ink12);padding-top:5px">避開申時 15–17 落大決定</div>
+      </div>
+    </div>
+    <div class="phoneLabel">中・淺色（日期農曆＋運分＋宜3忌2）</div>
+  </div>
+
+  <!-- medium dark -->
+  <div>
+    <div style="width:364px;height:170px;background:var(--d-card);border-radius:28px;box-shadow:0 10px 24px rgba(0,0,0,.35);padding:18px 20px;display:flex;gap:16px;align-items:center;color:var(--d-paper)">
+      <div class="ring" style="flex-shrink:0">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(233,223,201,.15)" stroke-width="8"/>
+        <circle cx="48" cy="48" r="40" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round" stroke-dasharray="106 251"/></svg>
+        <div class="rIn"><div class="rNum" style="font-size:26px;color:var(--d-paper)">42</div><div class="rLbl" style="color:rgba(233,223,201,.6)">平</div></div>
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div class="serif" style="font-size:15.5px;font-weight:700">7月11日 六</div>
+          <div style="font-size:10.5px;color:rgba(233,223,201,.6)">五月廿七・丙戌</div>
+        </div>
+        <div style="font-size:12px;line-height:1.9;margin-top:6px">
+          <span style="color:#7fc0ab;font-weight:700">宜</span> 祈福・靜修・解除<br>
+          <span style="color:#e08484;font-weight:700">忌</span> 簽約・動土
+        </div>
+        <div style="font-size:10px;color:rgba(233,223,201,.6);margin-top:5px;border-top:1px dashed rgba(233,223,201,.2);padding-top:5px">避開申時 15–17 落大決定</div>
+      </div>
+    </div>
+    <div class="phoneLabel">中・深色</div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:72px;color:var(--ink60);font-size:12px;letter-spacing:2px">
+  玄曆 XuanLi ・ 設計稿 v1 ・ 僅供參考，不代替專業意見
+</div>
+</div>
+</body>
+</html>
