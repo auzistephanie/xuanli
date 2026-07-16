@@ -58,6 +58,8 @@ flutter build apk --release     # Android 交付（<40MB）
 - 唔好 commit：`build/`、`.dart_tool/`、`.env`、`.gh-token`、任何含出生資料嘅測試 dump
 
 ### Phase 1 開波時裝 auto-push（跟 stephanie-personal 做法，一次過）
+> 完整/最新裝機步驟正本 → `stephanie-personal/docs/PUSH-SETUP.md`（下面步驟係摘要，兩者有出入以正本為準）。
+
 Stephanie 用緊 registry-based 全局手動 push（雙擊 `push-now.command` 推曬所有 repo；launchd daemon 已於 2026-07-16 拆），唔想每個 session 問佢攞 GitHub token。喺 Phase 1 `flutter create` 完、有真 code 之後接入一次：
 1. `git init`；喺 GitHub 開空 repo 後 `git remote add origin <https url>`
 2. 複製 `~/Desktop/Stephanie-Google Drive/dev/stephanie-personal/scripts/github_push.py` 落 `scripts/github_push.py`
