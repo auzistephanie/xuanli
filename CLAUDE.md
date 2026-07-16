@@ -58,9 +58,9 @@ flutter build apk --release     # Android 交付（<40MB）
 - 唔好 commit：`build/`、`.dart_tool/`、`.env`、`.gh-token`、任何含出生資料嘅測試 dump
 
 ### Phase 1 開波時裝 auto-push（跟 stephanie-personal 做法，一次過）
-Stephanie 用緊一個 launchd auto-push daemon，唔想每個 session 問佢攞 GitHub token。喺 Phase 1 `flutter create` 完、有真 code 之後裝一次：
+Stephanie 用緊 registry-based 全局手動 push（雙擊 `push-now.command` 推曬所有 repo；launchd daemon 已於 2026-07-16 拆），唔想每個 session 問佢攞 GitHub token。喺 Phase 1 `flutter create` 完、有真 code 之後接入一次：
 1. `git init`；喺 GitHub 開空 repo 後 `git remote add origin <https url>`
 2. 複製 `~/Desktop/Stephanie-Google Drive/dev/stephanie-personal/scripts/github_push.py` 落 `scripts/github_push.py`
 3. `.env` 加 `GITHUB_TOKEN=<PAT>`（問 Stephanie 攞一次，或 copy 現有 repo 嘅）；確保 `.gitignore` 有 `.env` 同 `.gh-token`
 4. 喺 `~/Desktop/Stephanie-Google Drive/dev/stephanie-personal/scripts/autopush-registry.txt` 加一行本 repo 絕對路徑
-5. 之後現有 daemon（每 120s）+ `push-now.command` 自動涵蓋，idempotent；驗證：`python3 scripts/github_push.py "init xuanli"`
+5. 之後雙擊 `push-now.command` 就會連本 repo 一齊全局推，idempotent；驗證：`python3 scripts/github_push.py "init xuanli"`
