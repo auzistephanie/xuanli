@@ -2,11 +2,6 @@
 
 Flutter app：中國傳統擇日 × 八字五行 × 紫微 × MBTI 個人化宜忌。國風復古典雅，全繁體中文（廣東話語感）UI。
 
-## ⚙️ Standards（MANDATORY — 正本：`stephanie-personal/docs/ai-governance/06-STANDARDS.md`，改規則只改正本）
-
-Push（`github_push.py` 永不 git CLI・HTTPS・一次 run 一 commit）・寫入分流（改動記錄 → `CHANGELOG.md` **頂部**，唔准 append 落本檔；本檔上限 100 行/6KB）・清理 mv `_to_delete/`・改舊檔先 `.bak-YYYYMMDD`・方向性決定先 preview・改完以用家身份 run 一次先報完成・governance 00–05（派 subagent 先讀 01+03；報完成前過 02 §R2；冇 mount stephanie-personal → 叫 Stephanie 連埋）。詳文＋例外表 → 正本。
-⚠️ 本 repo 係 standards **例外**（真 git CLI＋feature branch＋英文 commit）— 見正本例外表＋下面 Git section。
-
 ## 必讀文件（順序）
 
 1. `XUANLI_SPEC.md` — 完整實施規格。**所有產品決策已鎖定（spec 第 2 節），唔好重新討論或自行更改**；發現 spec 有矛盾就停低問 Stephanie，唔好自己拍板。
@@ -48,12 +43,6 @@ flutter build apk --release     # Android 交付（<40MB）
 - 儲存：`shared_preferences`，profiles list 結構（MVP 只用 index 0，唔准 hardcode 單 profile）
 - Widget 數據流：app 開啟時預生成未來 7 日 DayReading JSON → `home_widget` → 原生讀
 
-## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → 02-JUDGMENT §R2）
-
-1. `dart test test/engine/` 全綠（Phase 1 起必跑）＋`flutter analyze && flutter test` 過，真跑貼 output
-2. UI 有改 → 肉眼查冇簡體字＋文案語氣對照 `design/design-preview.html`
-3. 每 phase 對照 spec §10 驗收標準全過先開下一個；完成 phase → 更新 Progress＋commit
-
 ## Progress
 
 - [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
@@ -68,6 +57,12 @@ flutter build apk --release     # Android 交付（<40MB）
 - Commit message 用英文、細粒度；phase 完成先 merge
 - 唔好 commit：`build/`、`.dart_tool/`、`.env`、`.gh-token`、任何含出生資料嘅測試 dump
 
-### Push kit（2026-07-18 已裝）
+### Phase 1 開波時裝 auto-push（跟 stephanie-personal 做法，一次過）
+> 完整/最新裝機步驟正本 → `stephanie-personal/docs/PUSH-SETUP.md`（下面步驟係摘要，兩者有出入以正本為準）。
 
-`scripts/github_push.py`＋`.env` token＋registry 行三樣齊（正本 `stephanie-personal/docs/PUSH-SETUP.md`）。首次真 push 留 Phase 1 有 code 先跑（`python3 scripts/github_push.py "<msg>"` 見 ✅ 先算通）。
+Stephanie 用緊 registry-based 全局手動 push（雙擊 `push-now.command` 推曬所有 repo；launchd daemon 已於 2026-07-16 拆），唔想每個 session 問佢攞 GitHub token。喺 Phase 1 `flutter create` 完、有真 code 之後接入一次：
+1. `git init`；喺 GitHub 開空 repo 後 `git remote add origin <https url>`
+2. 複製 `~/Desktop/Stephanie-Google Drive/dev/stephanie-personal/scripts/github_push.py` 落 `scripts/github_push.py`
+3. `.env` 加 `GITHUB_TOKEN=<PAT>`（問 Stephanie 攞一次，或 copy 現有 repo 嘅）；確保 `.gitignore` 有 `.env` 同 `.gh-token`
+4. 喺 `~/Desktop/Stephanie-Google Drive/dev/stephanie-personal/scripts/autopush-registry.txt` 加一行本 repo 絕對路徑
+5. 之後雙擊 `push-now.command` 就會連本 repo 一齊全局推，idempotent；驗證：`python3 scripts/github_push.py "init xuanli"`
