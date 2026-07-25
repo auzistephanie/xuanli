@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:lunar/lunar.dart';
 import 'wuxing_tables.dart';
+import '../models/day_reading.dart';
 
 /// `lunar` package 用嚟表示「呢日冇吉神／冇凶煞」嘅 placeholder 字串
 /// （`LunarUtil.getDayJiShen`／`getDayXiongSha` 喺搵唔到嘢嘅時候會塞呢個
@@ -77,4 +81,41 @@ class AlmanacDay {
 
   /// 日干（`ganzhiDay` 第一個字）
   String get dayGan => ganzhiDay.substring(0, 1);
+
+  /// 宜項目個人化排序：類別五行 ∈ [favorable] 嘅排前面，取頭 5（spec §6.5）。
+  List<YjItem> personalizedYi({required List<String> favorable}) {
+    return _personalize(yi, favorable: favorable, maxCount: 5);
+  }
+
+  /// 忌項目個人化排序：邏輯同 [personalizedYi]，取頭 4（spec §6.5）。
+  List<YjItem> personalizedJi({required List<String> favorable}) {
+    return _personalize(ji, favorable: favorable, maxCount: 4);
+  }
+
+  List<YjItem> _personalize(
+    List<String> items, {
+    required List<String> favorable,
+    required int maxCount,
+  }) {
+    final scored = items.map((label) {
+      final element = activityCategoryWuxing[label];
+      final matches = element != null && favorable.contains(element);
+      return YjItem(label: label, matchesUser: matches);
+    }).toList();
+    scored.sort((a, b) {
+      if (a.matchesUser == b.matchesUser) return 0;
+      return a.matchesUser ? -1 : 1;
+    });
+    final take = maxCount > scored.length ? scored.length : maxCount;
+    return scored.sublist(0, take);
+  }
+}
+
+/// 通勝關鍵字 → 五行親和，源自 `lib/data/activity_categories.json`（spec §7）。
+final Map<String, String> activityCategoryWuxing = _loadActivityCategories();
+
+Map<String, String> _loadActivityCategories() {
+  final file = File('lib/data/activity_categories.json');
+  final jsonMap = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+  return jsonMap.map((k, v) => MapEntry(k, v as String));
 }

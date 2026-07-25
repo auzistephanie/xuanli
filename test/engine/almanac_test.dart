@@ -89,6 +89,30 @@ void main() {
       expect(day.isYiVague, isFalse);
     });
   });
+
+  group('宜忌個人化排序', () {
+    test('personalizedYi 將 matchesUser 嘅項目排前面，並標記 matchesUser', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
+      final items = day.personalizedYi(favorable: const ['土']);
+      final matched = items.where((i) => i.matchesUser).toList();
+      expect(matched, isNotEmpty);
+      expect(items.indexOf(matched.first), lessThan(items.length - matched.length + 1));
+    });
+
+    test('personalizedJi 同樣邏輯', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
+      final items = day.personalizedJi(favorable: const ['木']);
+      expect(items.any((i) => i.label == '理髮' && i.matchesUser), isTrue);
+    });
+
+    test('宜取頭 3-5、忌取頭 2-4', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
+      final yi = day.personalizedYi(favorable: const []);
+      final ji = day.personalizedJi(favorable: const []);
+      expect(yi.length, inInclusiveRange(1, 5));
+      expect(ji.length, inInclusiveRange(1, 4));
+    });
+  });
 }
 
 class _Fixture {
