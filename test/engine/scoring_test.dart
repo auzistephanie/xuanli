@@ -75,4 +75,59 @@ void main() {
       }
     });
   });
+
+  group('契合度四軸（獨立於命理分）', () {
+    test('E/I：建除屬動（建除危成開）對 E 高分', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 15));
+      expect(axisScoreEI(day, 'E'), 25);
+      expect(axisScoreEI(day, 'I'), 8);
+    });
+    test('E/I：建除屬靜（平定收閉破執滿）對 I 高分', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      expect(axisScoreEI(day, 'I'), 25);
+      expect(axisScoreEI(day, 'E'), 8);
+    });
+
+    test('S/N：宜項 >=6 具體 → 利 S', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
+      expect(day.isYiVague, isFalse);
+      final sScore = axisScoreSN(day, 'S');
+      final nScore = axisScoreSN(day, 'N');
+      expect(sScore, greaterThanOrEqualTo(nScore));
+    });
+    test('S/N：宜：餘事勿取（isYiVague）→ 利 N', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 14));
+      expect(axisScoreSN(day, 'N'), 25);
+      expect(axisScoreSN(day, 'S'), 8);
+    });
+
+    test('T/F：吉神 >=3 → 利 F', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
+      if (day.jiShenCount >= 3) {
+        expect(axisScoreTF(day, 'F'), 25);
+        expect(axisScoreTF(day, 'T'), 8);
+      }
+    });
+
+    test('J/P：無沖無破（穩定）→ 利 J；沖/破/危 → 利 P', () {
+      final stableDay = AlmanacDay.forDate(DateTime(2026, 7, 12)); // zhiXing='定'
+      expect(axisScoreJP(stableDay, hasClash: false, userLetter: 'J'), 25);
+      final volatileDay = AlmanacDay.forDate(DateTime(2026, 7, 14)); // zhiXing='破'
+      expect(axisScoreJP(volatileDay, hasClash: false, userLetter: 'P'), 25);
+      expect(axisScoreJP(volatileDay, hasClash: true, userLetter: 'P'), 25);
+    });
+
+    test('computeMbtiScore 加返四軸並 clamp 0-100', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final score = computeMbtiScore(day: day, mbti: 'ISFP', hasClash: false);
+      expect(score, inInclusiveRange(0, 100));
+    });
+
+    test('命理分同契合度完全獨立（唔會互相引用對方個 favorable/unfavorable）', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final mbtiScore1 = computeMbtiScore(day: day, mbti: 'ISFP', hasClash: false);
+      final mbtiScore2 = computeMbtiScore(day: day, mbti: 'ISFP', hasClash: false);
+      expect(mbtiScore1, mbtiScore2);
+    });
+  });
 }

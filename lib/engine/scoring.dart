@@ -79,3 +79,72 @@ String computeAvoidHour(String userDayZhi) {
   final clashingZhi = zhiClash[userDayZhi]!;
   return '$clashingZhi時 ${_zhiHourRange[clashingZhi]}';
 }
+
+/// 建除十二神：屬「動」嘅六神（利 E）。
+/// 建除十二神已窮盡分做動／靜兩組，冇灰色地帶 → E/I 呢軸冇 ambiguous 狀態。
+const _dongZhiXing = {'建', '除', '危', '成', '開'};
+
+/// 建除十二神：屬「靜」嘅六神（利 I）。判斷邏輯只需查 [_dongZhiXing]
+/// （唔屬動即屬靜），但保留呢個 set 用嚟喺 [axisScoreEI] 斷言窮盡分組冇漏項。
+const _jingZhiXing = {'平', '定', '收', '閉', '破', '執', '滿'};
+
+/// E/I 軸（spec §6.3）：建除屬動 → 利 E；屬靜 → 利 I。
+/// 十二建除已窮盡兩分，呢軸冇 ambiguous（15 分）狀態，只有 25 / 8。
+int axisScoreEI(AlmanacDay day, String userLetter) {
+  final dayLeansE = _dongZhiXing.contains(day.zhiXing);
+  assert(
+    dayLeansE || _jingZhiXing.contains(day.zhiXing),
+    'Unknown zhiXing "${day.zhiXing}" — not covered by _dongZhiXing/_jingZhiXing exhaustive split',
+  );
+  final matches = (dayLeansE && userLetter == 'E') || (!dayLeansE && userLetter == 'I');
+  return matches ? 25 : 8;
+}
+
+/// S/N 軸（spec §6.3）：宜項含糊（諸事不宜／餘事勿取）→ 利 N；
+/// 宜項 >=6 具體 → 利 S；其餘（宜項 1–5 項、唔含糊）→ ambiguous（15）。
+int axisScoreSN(AlmanacDay day, String userLetter) {
+  if (day.isYiVague) {
+    return userLetter == 'N' ? 25 : 8;
+  }
+  if (day.yi.length >= 6) {
+    return userLetter == 'S' ? 25 : 8;
+  }
+  return 15;
+}
+
+/// T/F 軸（spec §6.3）：吉神 >=3 → 利 F；凶煞多過吉神 → 利 T；其餘 ambiguous（15）。
+int axisScoreTF(AlmanacDay day, String userLetter) {
+  if (day.jiShenCount >= 3) {
+    return userLetter == 'F' ? 25 : 8;
+  }
+  if (day.xiongShaCount > day.jiShenCount) {
+    return userLetter == 'T' ? 25 : 8;
+  }
+  return 15;
+}
+
+/// J/P 軸（spec §6.3）：有沖／建除屬破危（動盪）→ 利 P；
+/// 無沖且建除屬定成收（穩定）→ 利 J；其餘 ambiguous（15）。
+int axisScoreJP(AlmanacDay day, {required bool hasClash, required String userLetter}) {
+  final isVolatile = hasClash || day.zhiXing == '破' || day.zhiXing == '危';
+  if (isVolatile) {
+    return userLetter == 'P' ? 25 : 8;
+  }
+  final isStable = !hasClash && (day.zhiXing == '定' || day.zhiXing == '成' || day.zhiXing == '收');
+  if (isStable) {
+    return userLetter == 'J' ? 25 : 8;
+  }
+  return 15;
+}
+
+/// 計算 [day] 對指定 [mbti]（四字母，例如 "ISFP"）嘅契合度分（spec §6.3）。
+/// 完全獨立於 [computeFortuneScore]：唔會讀取 favorable/unfavorable，
+/// 淨係取 [day]／MBTI 字母／[hasClash]。
+int computeMbtiScore({required AlmanacDay day, required String mbti, required bool hasClash}) {
+  final letters = mbti.split('');
+  final score = axisScoreEI(day, letters[0]) +
+      axisScoreSN(day, letters[1]) +
+      axisScoreTF(day, letters[2]) +
+      axisScoreJP(day, hasClash: hasClash, userLetter: letters[3]);
+  return score.clamp(0, 100);
+}
