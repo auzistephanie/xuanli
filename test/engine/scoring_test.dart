@@ -102,11 +102,29 @@ void main() {
     });
 
     test('T/F：吉神 >=3 → 利 F', () {
+      // 2026-07-12 已驗證 jiShenCount=6（>=3），斷言必定執行，唔會 vacuous pass。
       final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
-      if (day.jiShenCount >= 3) {
-        expect(axisScoreTF(day, 'F'), 25);
-        expect(axisScoreTF(day, 'T'), 8);
-      }
+      expect(day.jiShenCount, greaterThanOrEqualTo(3));
+      expect(axisScoreTF(day, 'F'), 25);
+      expect(axisScoreTF(day, 'T'), 8);
+    });
+
+    test('S/N：ambiguous（宜項 1-5 項具體、唔含糊）→ 兩邊都係 15 分', () {
+      // 2026-08-04 已驗證：isYiVague=false，yi=[祭祀, 修饰垣墙, 平治道涂]（len=3 < 6）。
+      final day = AlmanacDay.forDate(DateTime(2026, 8, 4));
+      expect(day.isYiVague, isFalse);
+      expect(day.yi.length, lessThan(6));
+      expect(axisScoreSN(day, 'S'), 15);
+      expect(axisScoreSN(day, 'N'), 15);
+    });
+
+    test('T/F：ambiguous（吉神 <3 且凶煞唔多過吉神）→ 兩邊都係 15 分', () {
+      // 2026-07-17 已驗證：jiShenCount=0, xiongShaCount=0（0<3 且 0<=0）。
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 17));
+      expect(day.jiShenCount, lessThan(3));
+      expect(day.xiongShaCount, lessThanOrEqualTo(day.jiShenCount));
+      expect(axisScoreTF(day, 'T'), 15);
+      expect(axisScoreTF(day, 'F'), 15);
     });
 
     test('J/P：無沖無破（穩定）→ 利 J；沖/破/危 → 利 P', () {
@@ -115,6 +133,14 @@ void main() {
       final volatileDay = AlmanacDay.forDate(DateTime(2026, 7, 14)); // zhiXing='破'
       expect(axisScoreJP(volatileDay, hasClash: false, userLetter: 'P'), 25);
       expect(axisScoreJP(volatileDay, hasClash: true, userLetter: 'P'), 25);
+    });
+
+    test('J/P：ambiguous（無沖，建除唔屬定成收，亦唔屬破危）→ 兩邊都係 15 分', () {
+      // 2026-07-11 已驗證：zhiXing='平'，唔屬 {定,成,收} 亦唔屬 {破,危}。
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      expect(day.zhiXing, '平');
+      expect(axisScoreJP(day, hasClash: false, userLetter: 'J'), 15);
+      expect(axisScoreJP(day, hasClash: false, userLetter: 'P'), 15);
     });
 
     test('computeMbtiScore 加返四軸並 clamp 0-100', () {

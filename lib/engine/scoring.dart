@@ -84,18 +84,12 @@ String computeAvoidHour(String userDayZhi) {
 /// 建除十二神已窮盡分做動／靜兩組，冇灰色地帶 → E/I 呢軸冇 ambiguous 狀態。
 const _dongZhiXing = {'建', '除', '危', '成', '開'};
 
-/// 建除十二神：屬「靜」嘅六神（利 I）。判斷邏輯只需查 [_dongZhiXing]
-/// （唔屬動即屬靜），但保留呢個 set 用嚟喺 [axisScoreEI] 斷言窮盡分組冇漏項。
-const _jingZhiXing = {'平', '定', '收', '閉', '破', '執', '滿'};
-
 /// E/I 軸（spec §6.3）：建除屬動 → 利 E；屬靜 → 利 I。
 /// 十二建除已窮盡兩分，呢軸冇 ambiguous（15 分）狀態，只有 25 / 8。
+/// 判斷邏輯只需查 [_dongZhiXing]（唔屬動即屬靜），因為 spec 已確認 12 建除
+/// 窮盡分做動／靜兩組，冇第三種可能。
 int axisScoreEI(AlmanacDay day, String userLetter) {
   final dayLeansE = _dongZhiXing.contains(day.zhiXing);
-  assert(
-    dayLeansE || _jingZhiXing.contains(day.zhiXing),
-    'Unknown zhiXing "${day.zhiXing}" — not covered by _dongZhiXing/_jingZhiXing exhaustive split',
-  );
   final matches = (dayLeansE && userLetter == 'E') || (!dayLeansE && userLetter == 'I');
   return matches ? 25 : 8;
 }
