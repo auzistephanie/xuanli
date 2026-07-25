@@ -49,6 +49,28 @@ void main() {
     });
   });
 
+  group('jiShenCount / xiongShaCount', () {
+    test('2026-07-15（`lunar` package 原始 getDayJiShen/getDayXiongSha 回傳 [\'无\']）jiShenCount = 0, xiongShaCount = 0', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 15));
+      expect(day.jiShenCount, 0, reason: '「无」係 placeholder，唔應該計做 1');
+      expect(day.xiongShaCount, 0, reason: '「无」係 placeholder，唔應該計做 1');
+    });
+
+    test('2026-07-11（`lunar` package 有真實吉神/凶煞資料）jiShenCount / xiongShaCount > 0', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      expect(day.jiShenCount, 2, reason: '原始 getDayJiShen() = [要安, 青龙]');
+      expect(day.xiongShaCount, 6, reason: '原始 getDayXiongSha() 有 6 項');
+    });
+  });
+
+  group('dayGan / dayZhi', () {
+    test('2026-07-11（ganzhiDay = 丙戌）dayGan = 丙, dayZhi = 戌', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      expect(day.dayGan, '丙');
+      expect(day.dayZhi, '戌');
+    });
+  });
+
   group('isJiSevere / isYiVague', () {
     test('2026-07-11（忌：諸事不宜）isJiSevere = true', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
