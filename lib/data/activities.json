@@ -1,0 +1,16 @@
+[
+  {"name": "剪髮", "hitKeywords": ["理髮"], "goodZhiXing": ["除", "執"], "element": "木", "avoidKeywords": ["理髮"]},
+  {"name": "搬屋", "hitKeywords": ["移徙", "入宅"], "goodZhiXing": ["定", "成", "開"], "element": "土", "avoidKeywords": ["移徙", "入宅"]},
+  {"name": "簽約", "hitKeywords": ["立券", "交易", "訂盟"], "goodZhiXing": ["定", "成"], "element": "金", "avoidKeywords": ["立券", "交易"]},
+  {"name": "開業", "hitKeywords": ["開市", "開業"], "goodZhiXing": ["開", "成"], "element": "火", "avoidKeywords": ["開市"]},
+  {"name": "求財投資", "hitKeywords": ["納財", "開市", "交易"], "goodZhiXing": ["成", "開", "收"], "element": "金", "avoidKeywords": ["納財"]},
+  {"name": "表白約會", "hitKeywords": ["嫁娶", "納采", "會親友"], "goodZhiXing": ["定", "成", "開"], "element": "火", "avoidKeywords": ["嫁娶"]},
+  {"name": "睇醫生", "hitKeywords": ["求醫", "治病"], "goodZhiXing": ["除", "破"], "element": "水", "avoidKeywords": []},
+  {"name": "出遊", "hitKeywords": ["出行"], "goodZhiXing": ["開", "建"], "element": "火", "avoidKeywords": ["出行"]},
+  {"name": "裝修動土", "hitKeywords": ["修造", "動土"], "goodZhiXing": ["建", "定"], "element": "土", "avoidKeywords": ["動土", "修造"]},
+  {"name": "買車", "hitKeywords": ["納財", "交車"], "goodZhiXing": ["滿", "成"], "element": "金", "avoidKeywords": ["納財"]},
+  {"name": "面試", "hitKeywords": ["求職", "出行", "會親友"], "goodZhiXing": ["成", "開"], "element": "火", "avoidKeywords": []},
+  {"name": "考試", "hitKeywords": ["入學", "求學"], "goodZhiXing": ["成", "開"], "element": "水", "avoidKeywords": []},
+  {"name": "擺酒", "hitKeywords": ["嫁娶", "開市", "會親友"], "goodZhiXing": ["定", "成"], "element": "火", "avoidKeywords": ["嫁娶"]},
+  {"name": "拜神", "hitKeywords": ["祭祀", "祈福"], "goodZhiXing": ["除", "定", "開"], "element": "土", "avoidKeywords": ["祭祀", "祈福"]}
+]
