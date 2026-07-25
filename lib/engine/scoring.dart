@@ -65,3 +65,17 @@ FortuneScoreResult computeFortuneScore({
 
   return FortuneScoreResult(score: score, band: bandFor(score), clashWarning: clashWarning);
 }
+
+/// 地支 → 對應鐘點範圍（十二時辰）。
+const Map<String, String> _zhiHourRange = {
+  '子': '23–1', '丑': '1–3', '寅': '3–5', '卯': '5–7',
+  '辰': '7–9', '巳': '9–11', '午': '11–13', '未': '13–15',
+  '申': '15–17', '酉': '17–19', '戌': '19–21', '亥': '21–23',
+};
+
+/// 用戶日支 [userDayZhi] → 沖佢嘅時辰標籤（例如「申時 15–17」）。
+/// 十二地支必定有對沖時辰，唔會有 null case。
+String computeAvoidHour(String userDayZhi) {
+  final clashingZhi = zhiClash[userDayZhi]!;
+  return '$clashingZhi時 ${_zhiHourRange[clashingZhi]}';
+}

@@ -61,4 +61,18 @@ void main() {
       expect(bandFor(0), '忌');
     });
   });
+
+  group('避開時辰', () {
+    test('用戶日支寅，申時（15-17）沖寅 → avoidHour = "申時 15–17"', () {
+      expect(computeAvoidHour('寅'), '申時 15–17');
+    });
+    test('用戶日支申，寅時（3-5）沖申', () {
+      expect(computeAvoidHour('申'), '寅時 3–5');
+    });
+    test('每個地支都有對應沖時辰（冇 null case）', () {
+      for (final zhi in ['子', '丑', '卯', '辰', '巳', '午', '未', '酉', '戌', '亥']) {
+        expect(computeAvoidHour(zhi), isNotNull);
+      }
+    });
+  });
 }
