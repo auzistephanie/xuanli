@@ -1,6 +1,18 @@
 import 'package:lunar/lunar.dart';
 import 'wuxing_tables.dart';
 
+/// 農曆年月日（+閏月 flag）轉公曆 DateTime，畀 onboarding 農曆輸入用。
+DateTime lunarToSolarDate({
+  required int year,
+  required int month,
+  required int day,
+  required bool isLeapMonth,
+}) {
+  final lunar = Lunar.fromYmd(year, isLeapMonth ? -month : month, day);
+  final solar = lunar.getSolar();
+  return DateTime(solar.getYear(), solar.getMonth(), solar.getDay());
+}
+
 /// 八字四柱、五行分佈、喜用神計算結果（spec §6.1）。
 class BaziResult {
   final List<String> pillars; // 4 個（缺時辰得 3 個），["己卯","癸酉","乙亥","辛巳"]
