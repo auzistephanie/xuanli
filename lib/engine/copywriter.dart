@@ -1,0 +1,63 @@
+import 'dart:convert';
+import 'dart:io';
+import 'almanac.dart';
+
+Map<String, List<String>>? _toneCache;
+
+Map<String, List<String>> _loadMbtiTones() {
+  if (_toneCache != null) return _toneCache!;
+  final file = File('lib/data/mbti_tones.json');
+  final jsonMap = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+  _toneCache = jsonMap.map((k, v) => MapEntry(k, List<String>.from(v as List)));
+  return _toneCache!;
+}
+
+/// 命理段：日干支 × 用戶喜忌關係。
+String _fortuneSegment(AlmanacDay day, List<String> favorable, List<String> unfavorable) {
+  final leaning = favorable.isNotEmpty ? '你${favorable.join('')}旺而${unfavorable.join('')}弱' : '';
+  return '${day.ganzhiDay}${day.zhiXing}日，$leaning。'.replaceAll('，。', '。');
+}
+
+/// MBTI 段：由 mbti_tones.json 攞句，用 dayOfYear % length 輪換（deterministic）。
+/// 如果 [mbti] 喺 mbti_tones.json 未有內容（Phase 1 淨係填咗 ISFP/ISFJ 兩型示範），
+/// 就返回一句 fallback，唔會 crash——其餘 14 型內容係另外嘅文案工作。
+String _mbtiSegment(AlmanacDay day, String mbti) {
+  final tones = _loadMbtiTones();
+  final lines = tones[mbti];
+  if (lines == null || lines.isEmpty) {
+    return '$mbti 嘅你，跟住今日嘅節奏行就得。';
+  }
+  final dayOfYear = _dayOfYear(day.date);
+  final index = dayOfYear % lines.length;
+  return lines[index];
+}
+
+int _dayOfYear(DateTime date) {
+  return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+}
+
+/// 紫微段：14 主星輕量提示，[ziweiStar] 為 null 就省略呢一段。
+String _ziweiSegment(String? ziweiStar) {
+  if (ziweiStar == null) return '';
+  return '$ziweiStar 坐命嘅你，今日順住個星氣行就啱。';
+}
+
+/// 建構今日貼身建議：命理段 + MBTI 段 + 紫微段（可省略）+ 避時提示（可省略）。
+/// 全部 deterministic（用 [day.date] 做 dayOfYear seed，唔用 Random/DateTime.now()）。
+String buildAdvice({
+  required AlmanacDay day,
+  required List<String> favorable,
+  required List<String> unfavorable,
+  required String mbti,
+  required String? ziweiStar,
+  required String? avoidHour,
+}) {
+  final segments = <String>[
+    _fortuneSegment(day, favorable, unfavorable),
+    _mbtiSegment(day, mbti),
+  ];
+  final ziwei = _ziweiSegment(ziweiStar);
+  if (ziwei.isNotEmpty) segments.add(ziwei);
+  if (avoidHour != null) segments.add('避開$avoidHour落重要決定。');
+  return segments.where((s) => s.isNotEmpty).join('');
+}
