@@ -102,12 +102,14 @@ class AlmanacDay {
       final matches = element != null && favorable.contains(element);
       return YjItem(label: label, matchesUser: matches);
     }).toList();
-    scored.sort((a, b) {
-      if (a.matchesUser == b.matchesUser) return 0;
-      return a.matchesUser ? -1 : 1;
-    });
-    final take = maxCount > scored.length ? scored.length : maxCount;
-    return scored.sublist(0, take);
+    // 用顯式 stable partition 代替 sort：List.sort 淨係喺細過 32 個元素先用
+    // insertion sort（stable），大過就轉用非 stable 演算法，唔可以靠呢個
+    // undocumented 行為嚟保住 matched/unmatched 兩組入面嘅原本次序。
+    final matched = scored.where((item) => item.matchesUser).toList();
+    final unmatched = scored.where((item) => !item.matchesUser).toList();
+    final ordered = [...matched, ...unmatched];
+    final take = maxCount > ordered.length ? ordered.length : maxCount;
+    return ordered.sublist(0, take);
   }
 }
 
