@@ -2,6 +2,13 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+## 2026-07-25 Phase 1 引擎完成（TDD，全綠）
+
+- 裝好 Flutter SDK（`brew install --cask flutter`，之前部 Mac 冇裝過）。
+- `lib/engine/` 九個純 Dart 模組全部起好：wuxing_tables／almanac／bazi／scoring／activity／ziwei／copywriter／day_reading_engine，`test/engine/` 全綠，`dart run tool/demo.dart` 可行。
+- 範圍決定（已同 Stephanie 確認）：ziwei.dart 全模式同降級模式共用簡化日支對照表，唔做真紫微排盤（v2 先做深度文案）。
+- 未完成：`lib/data/mbti_tones.json` 淨係 ISFP/ISFJ 兩型有真實內容，其餘 14 型文案要喺 Phase 2 UI 接之前補齊。
+
 ## 2026-07-25 `_to_delete/` 冇入 .gitignore → 回收筒檔案推咗上 GitHub（修）
 
 - **問題**：全局規則係「清理檔案一律 mv 去 `_to_delete/`」，但本 repo `.gitignore` 冇 `_to_delete/` 一行。`github_push.py` 嘅 `working_files()` 用 `git ls-files -c -o --exclude-standard`，`--exclude-standard` 只擋 .gitignore 有列嘅嘢——冇列就當普通未追蹤檔照上傳。GitHub Git Trees API 核實 remote `main`：**實際有 1 個（`_to_delete/CLAUDE.md.bak-20260718`）**。

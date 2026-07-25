@@ -57,7 +57,7 @@ flutter build apk --release     # Android 交付（<40MB）
 ## Progress
 
 - [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
-- [ ] Phase 1 引擎（TDD，fixtures spec §11）
+- [x] Phase 1 引擎（TDD，fixtures spec §11；`dart test test/engine/` 全綠，`dart run tool/demo.dart` 可行）
 - [ ] Phase 2 App UI（onboarding + 組合頁 + 3 tabs + 日曆整合）
 - [ ] Phase 3 Widget（iOS/Android 小+中）+ 每日通知
 - [ ] Phase 4 交付（APK + install_ios.sh）

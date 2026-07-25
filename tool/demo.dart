@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:xuanli/engine/bazi.dart';
 import 'package:xuanli/engine/day_reading_engine.dart';
 import 'package:xuanli/engine/ziwei.dart';
@@ -8,7 +9,7 @@ const _zhiToZodiac = {
   '午': '馬', '未': '羊', '申': '猴', '酉': '雞', '戌': '狗', '亥': '豬',
 };
 
-/// Usage: dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>
+/// Usage: `dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>`
 void main(List<String> args) {
   if (args.length < 2) {
     print('Usage: dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>');
