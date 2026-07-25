@@ -1,0 +1,64 @@
+import 'package:test/test.dart';
+import 'package:xuanli/engine/almanac.dart';
+import 'package:xuanli/engine/scoring.dart';
+
+void main() {
+  // 阿玄：喜水木、忌金土
+  const favorable = ['水', '木'];
+  const unfavorable = ['金', '土'];
+
+  group('fortuneScore smoke tests', () {
+    test('2026-07-14（破日 + 諸事不宜）分數 <=40 帶「忌」', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 14));
+      final result = computeFortuneScore(
+        day: day, favorable: favorable, unfavorable: unfavorable, userYearZhi: '寅');
+      expect(result.score, lessThanOrEqualTo(40));
+      expect(result.band, '忌');
+    });
+
+    test('2026-07-16 對喜木用戶 >=70 帶「吉」', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 16));
+      // 2026-07-16 = 辛卯（日干辛=金，日支卯=木）。用呢個用戶淨係試「喜木」對日支嘅加分路徑。
+      final result = computeFortuneScore(
+        day: day, favorable: const ['木'], unfavorable: const ['土'], userYearZhi: '寅');
+      expect(result.score, greaterThanOrEqualTo(70));
+      expect(result.band, '吉');
+    });
+
+    test('同 input 行 100 次結果 identical（deterministic）', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 15));
+      final scores = List.generate(
+        100,
+        (_) => computeFortuneScore(
+            day: day, favorable: favorable, unfavorable: unfavorable, userYearZhi: '子').score,
+      );
+      expect(scores.toSet().length, 1);
+    });
+  });
+
+  group('沖生肖', () {
+    test('肖龍用戶喺 2026-07-11（沖龍）clashWarning 非空且 -20 已計入', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      // 用戶生肖龍 → 年支辰
+      final withClash = computeFortuneScore(
+          day: day, favorable: favorable, unfavorable: unfavorable, userYearZhi: '辰');
+      final withoutClash = computeFortuneScore(
+          day: day, favorable: favorable, unfavorable: unfavorable, userYearZhi: '子');
+      expect(withClash.clashWarning, isNotNull);
+      expect(withClash.clashWarning, contains('龍'));
+      expect(withoutClash.clashWarning, isNull);
+      expect(withClash.score, lessThanOrEqualTo(withoutClash.score - 20));
+    });
+  });
+
+  group('band 分帶', () {
+    test('>=70 吉，40-69 平，<=39 忌', () {
+      expect(bandFor(70), '吉');
+      expect(bandFor(100), '吉');
+      expect(bandFor(69), '平');
+      expect(bandFor(40), '平');
+      expect(bandFor(39), '忌');
+      expect(bandFor(0), '忌');
+    });
+  });
+}
