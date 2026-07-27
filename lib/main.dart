@@ -1,122 +1,132 @@
 import 'package:flutter/material.dart';
 
+import 'models/profile.dart';
+import 'services/data_loader.dart';
+import 'services/storage_service.dart';
+import 'theme/xuanli_theme.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const XuanLiApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class XuanLiApp extends StatelessWidget {
+  const XuanLiApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: '玄曆',
+      debugShowCheckedModeBanner: false,
+      theme: XuanLiTheme.light(),
+      darkTheme: XuanLiTheme.dark(),
+      home: const _AppBootstrap(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+/// 啟動時做兩件事先顯示正式畫面：(1) 由 assets 讀 JSON 落 engine 嘅
+/// init*() cache（[loadEngineData]）；(2) 睇下本機有冇已存 profile，
+/// 決定跳去 onboarding 定係主 tab shell。
+class _AppBootstrap extends StatefulWidget {
+  const _AppBootstrap();
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<_AppBootstrap> createState() => _AppBootstrapState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AppBootstrapState extends State<_AppBootstrap> {
+  late final Future<Profile?> _bootstrap = _run();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  Future<Profile?> _run() async {
+    await loadEngineData();
+    return StorageService().loadPrimaryProfile();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    return FutureBuilder<Profile?>(
+      future: _bootstrap,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('載入失敗：${snapshot.error}')),
+          );
+        }
+        final profile = snapshot.data;
+        if (profile == null) {
+          return const _OnboardingPlaceholder();
+        }
+        return const TabShell();
+      },
+    );
+  }
+}
+
+/// 2b 先起真正嘅 onboarding 三步流程（出生資料/MBTI/檔案卡）；
+/// 呢度暫時得個殼，證明「冇 profile → 跳 onboarding」路由行得通。
+class _OnboardingPlaceholder extends StatelessWidget {
+  const _OnboardingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: Text('Onboarding — 2b 起')),
+    );
+  }
+}
+
+/// 主畫面：底部三個 tab（今日／我想做／月曆），2c/2d/2e 逐個補真內容。
+/// Tabbar 視覺（跟 design html 精確配色/字體）留返 2c 開始起真 Tab A 嗰陣
+/// 一併做——依家用 Material NavigationBar 佔位，證明路由/切換行得通。
+class TabShell extends StatefulWidget {
+  const TabShell({super.key});
+
+  @override
+  State<TabShell> createState() => _TabShellState();
+}
+
+class _TabShellState extends State<TabShell> {
+  int _index = 0;
+
+  static const _tabs = [
+    _TabInfo(icon: '☀', label: '今日', placeholder: 'Tab A — 2c 起'),
+    _TabInfo(icon: '✦', label: '我想做', placeholder: 'Tab B — 2d 起'),
+    _TabInfo(icon: '▦', label: '月曆', placeholder: 'Tab C — 2e 起'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: IndexedStack(
+        index: _index,
+        children: [
+          for (final tab in _tabs) Center(child: Text(tab.placeholder)),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: [
+          for (final tab in _tabs)
+            NavigationDestination(icon: Text(tab.icon), label: tab.label),
+        ],
       ),
     );
   }
+}
+
+class _TabInfo {
+  final String icon;
+  final String label;
+  final String placeholder;
+  const _TabInfo({
+    required this.icon,
+    required this.label,
+    required this.placeholder,
+  });
 }
