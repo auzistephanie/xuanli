@@ -1,15 +1,23 @@
 import 'dart:convert';
-import 'dart:io';
 import 'almanac.dart';
 
 Map<String, List<String>>? _toneCache;
 
-Map<String, List<String>> _loadMbtiTones() {
-  if (_toneCache != null) return _toneCache!;
-  final file = File('lib/data/mbti_tones.json');
-  final jsonMap = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+void initMbtiTones(String jsonStr) {
+  final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
   _toneCache = jsonMap.map((k, v) => MapEntry(k, List<String>.from(v as List)));
-  return _toneCache!;
+}
+
+Map<String, List<String>> _loadMbtiTones() {
+  final cache = _toneCache;
+  if (cache == null) {
+    throw StateError(
+      'initMbtiTones() must be called before building advice — call it '
+      'once at app startup (or in test setUpAll) with '
+      'lib/data/mbti_tones.json\'s contents.',
+    );
+  }
+  return cache;
 }
 
 /// 命理段：日干支 × 用戶喜忌關係。

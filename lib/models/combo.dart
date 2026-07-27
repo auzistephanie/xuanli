@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 class Combo {
   final String name;
@@ -30,13 +29,22 @@ class Combo {
 
 Map<String, Combo>? _cache;
 
-/// 載入 lib/data/combos.json（160 個組合，key = "日主天干_MBTI"）。
-Map<String, Combo> loadCombos() {
-  if (_cache != null) return _cache!;
-  final file = File('lib/data/combos.json');
-  final jsonMap = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+void initCombos(String jsonStr) {
+  final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
   _cache = jsonMap.map((k, v) => MapEntry(k, Combo.fromJson(v as Map<String, dynamic>)));
-  return _cache!;
+}
+
+/// 載入 lib/data/combos.json（160 個組合，key = "日主天干_MBTI"）。
+/// 要喺 app 啟動時 call 過 [initCombos] 先可以用。
+Map<String, Combo> loadCombos() {
+  final cache = _cache;
+  if (cache == null) {
+    throw StateError(
+      'initCombos() must be called before loadCombos() — call it once at '
+      'app startup (or in test setUpAll) with lib/data/combos.json\'s contents.',
+    );
+  }
+  return cache;
 }
 
 Combo getCombo({required String dayGan, required String mbti}) {

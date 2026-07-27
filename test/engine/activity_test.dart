@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/almanac.dart';
 
 void main() {
+  setUpAll(() {
+    initActivities(File('lib/data/activities.json').readAsStringSync());
+  });
+
   group('反向擇日', () {
     test('14 個活動全部載入到', () {
       expect(loadActivities().length, 14);

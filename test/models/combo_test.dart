@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:xuanli/models/combo.dart';
 
 void main() {
+  setUpAll(() {
+    initCombos(File('lib/data/combos.json').readAsStringSync());
+  });
+
   group('160 組合 loader', () {
     test('全部 160 個 key 齊全（10 日主 × 16 MBTI）', () {
       final combos = loadCombos();

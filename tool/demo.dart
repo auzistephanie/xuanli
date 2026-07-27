@@ -1,5 +1,9 @@
 // ignore_for_file: avoid_print
+import 'dart:io';
+
+import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/bazi.dart';
+import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/day_reading_engine.dart';
 import 'package:xuanli/engine/ziwei.dart';
 import 'package:xuanli/models/profile.dart';
@@ -11,6 +15,11 @@ const _zhiToZodiac = {
 
 /// Usage: `dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>`
 void main(List<String> args) {
+  initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+  initActivityCategories(
+    File('lib/data/activity_categories.json').readAsStringSync(),
+  );
+
   if (args.length < 2) {
     print('Usage: dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>');
     return;

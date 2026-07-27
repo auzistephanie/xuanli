@@ -1,7 +1,15 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:xuanli/engine/almanac.dart';
 
 void main() {
+  setUpAll(() {
+    initActivityCategories(
+      File('lib/data/activity_categories.json').readAsStringSync(),
+    );
+  });
+
   group('AlmanacDay golden fixtures (2026-07)', () {
     final fixtures = [
       _Fixture(2026, 7, 11, lunarLabel: '五月廿七', ganzhiDay: '丙戌', zhiXing: '平', chong: '沖龍煞北'),

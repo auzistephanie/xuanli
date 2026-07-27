@@ -1,9 +1,20 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
+import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/bazi.dart';
+import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/day_reading_engine.dart';
 import 'package:xuanli/models/profile.dart';
 
 void main() {
+  setUpAll(() {
+    initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+    initActivityCategories(
+      File('lib/data/activity_categories.json').readAsStringSync(),
+    );
+  });
+
   test('buildDayReading(阿玄, 2026-07-11) 產出完整 DayReading', () {
     final bazi = computeBazi(birthDate: DateTime(1999, 9, 20), birthHour: 9, birthMinute: 30);
     final profile = Profile(

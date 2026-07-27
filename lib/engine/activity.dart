@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'almanac.dart';
 
 class Activity {
@@ -33,10 +32,24 @@ class ActivityDayResult {
   ActivityDayResult({required this.date, required this.score, required this.stars});
 }
 
+List<Activity>? _activitiesCache;
+
+void initActivities(String jsonStr) {
+  final list = json.decode(jsonStr) as List;
+  _activitiesCache =
+      list.map((e) => Activity.fromJson(e as Map<String, dynamic>)).toList();
+}
+
 List<Activity> loadActivities() {
-  final file = File('lib/data/activities.json');
-  final list = json.decode(file.readAsStringSync()) as List;
-  return list.map((e) => Activity.fromJson(e as Map<String, dynamic>)).toList();
+  final cache = _activitiesCache;
+  if (cache == null) {
+    throw StateError(
+      'initActivities() must be called before loadActivities() — call it '
+      'once at app startup (or in test setUpAll) with '
+      'lib/data/activities.json\'s contents.',
+    );
+  }
+  return cache;
 }
 
 /// 評分 = 活動分（關鍵字+建除命中）40% + 命理分 40% + 五行親和 20%。

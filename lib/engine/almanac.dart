@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:lunar/lunar.dart';
 import 'wuxing_tables.dart';
@@ -115,11 +114,24 @@ class AlmanacDay {
   }
 }
 
-/// 通勝關鍵字 → 五行親和，源自 `lib/data/activity_categories.json`（spec §7）。
-final Map<String, String> activityCategoryWuxing = _loadActivityCategories();
+Map<String, String>? _activityCategoryWuxing;
 
-Map<String, String> _loadActivityCategories() {
-  final file = File('lib/data/activity_categories.json');
-  final jsonMap = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
-  return jsonMap.map((k, v) => MapEntry(k, v as String));
+/// 通勝關鍵字 → 五行親和，源自 `lib/data/activity_categories.json`（spec §7）。
+/// 要喺 app 啟動時 call 過 [initActivityCategories] 先可以用
+/// （見 `lib/services/data_loader.dart`；test 就喺 `setUpAll` 度 call）。
+Map<String, String> get activityCategoryWuxing {
+  final cache = _activityCategoryWuxing;
+  if (cache == null) {
+    throw StateError(
+      'initActivityCategories() must be called before using '
+      'activityCategoryWuxing — call it once at app startup '
+      '(or in test setUpAll) with lib/data/activity_categories.json\'s contents.',
+    );
+  }
+  return cache;
+}
+
+void initActivityCategories(String jsonStr) {
+  final jsonMap = json.decode(jsonStr) as Map<String, dynamic>;
+  _activityCategoryWuxing = jsonMap.map((k, v) => MapEntry(k, v as String));
 }

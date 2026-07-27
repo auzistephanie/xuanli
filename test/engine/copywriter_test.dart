@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/copywriter.dart';
 
 void main() {
+  setUpAll(() {
+    initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+  });
+
   group('今日貼身建議模板引擎', () {
     test('拼接命理段 + MBTI 段（有紫微段可省略）', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
