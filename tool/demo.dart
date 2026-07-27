@@ -2,16 +2,9 @@
 import 'dart:io';
 
 import 'package:xuanli/engine/almanac.dart';
-import 'package:xuanli/engine/bazi.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/day_reading_engine.dart';
-import 'package:xuanli/engine/ziwei.dart';
-import 'package:xuanli/models/profile.dart';
-
-const _zhiToZodiac = {
-  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔', '辰': '龍', '巳': '蛇',
-  '午': '馬', '未': '羊', '申': '猴', '酉': '雞', '戌': '狗', '亥': '豬',
-};
+import 'package:xuanli/engine/profile_builder.dart';
 
 /// Usage: `dart run tool/demo.dart <YYYY-MM-DD> [HH:MM] <MBTI>`
 void main(List<String> args) {
@@ -40,33 +33,23 @@ void main(List<String> args) {
     mbti = args[1];
   }
 
-  final bazi = computeBazi(birthDate: birthDate, birthHour: birthHour, birthMinute: birthMinute);
-  final userYearZhi = bazi.pillars[0].substring(1);
-  final userDayZhi = bazi.pillars[2].substring(1);
-
-  final profile = Profile(
+  final profile = buildProfile(
     id: 'demo',
     name: '我',
     birthDate: birthDate,
     birthHour: birthHour,
+    birthMinute: birthMinute,
     birthPlace: '香港',
     mbti: mbti,
-    pillars: bazi.pillars,
-    wuxing: bazi.wuxing,
-    favorable: bazi.favorable,
-    unfavorable: bazi.unfavorable,
-    dayMaster: bazi.dayMaster,
-    ziweiStar: ziweiStarForDayZhi(userDayZhi),
-    zodiac: _zhiToZodiac[userYearZhi]!,
   );
 
   final today = DateTime.now();
   final reading = buildDayReading(profile: profile, date: DateTime(today.year, today.month, today.day));
 
   print('=== 玄曆 Demo ===');
-  print('四柱：${bazi.pillars.join(' ')}');
-  print('日主：${bazi.dayMaster}　肖：${profile.zodiac}　完整度：${profile.completeness}%');
-  print('喜：${bazi.favorable.join('')}　忌：${bazi.unfavorable.join('')}');
+  print('四柱：${profile.pillars.join(' ')}');
+  print('日主：${profile.dayMaster}　肖：${profile.zodiac}　完整度：${profile.completeness}%');
+  print('喜：${profile.favorable.join('')}　忌：${profile.unfavorable.join('')}');
   print('---');
   print('${reading.lunarLabel}　${reading.ganzhiDay}　${reading.zhiXing}日　${reading.chong}');
   print('命理分：${reading.fortuneScore}（${reading.band}）　契合度：${reading.mbtiScore}');
