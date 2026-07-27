@@ -88,6 +88,12 @@ void main() {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 12));
       expect(day.isYiVague, isFalse);
     });
+    test('「无」placeholder（`lunar` 原始 getDayYi() = [\'无\']）唔會漏入 yi，isYiVague = true', () {
+      // 2024-04-06（清明）：原始 getDayYi() 淨係得 ['无']（冇任何宜項）。
+      final day = AlmanacDay.forDate(DateTime(2024, 4, 6));
+      expect(day.yi, isEmpty, reason: '「无」placeholder 應該喺 traditionalize 之前撇除，唔應該變成 [\'無\']');
+      expect(day.isYiVague, isTrue);
+    });
   });
 
   group('宜忌個人化排序', () {
@@ -168,6 +174,11 @@ void _regressionSweep() {
         _assertNoSimplifiedLeak(day.ji, d);
         _assertNoSimplifiedLeak([day.chong], d);
         _assertNoSimplifiedLeak([day.zhiXing], d);
+        expect(day.yi.contains('無'), isFalse, reason: '$d：「无」placeholder 唔應該漏入 yi');
+        expect(day.ji.contains('無'), isFalse, reason: '$d：「无」placeholder 唔應該漏入 ji');
+        if (day.yi.isEmpty) {
+          expect(day.isYiVague, isTrue, reason: '$d：yi 空列表應該令 isYiVague = true');
+        }
         checked++;
         d = d.add(const Duration(days: 1));
       }
