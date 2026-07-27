@@ -5,9 +5,11 @@ import 'package:lunar/lunar.dart';
 import 'wuxing_tables.dart';
 import '../models/day_reading.dart';
 
-/// `lunar` package 用嚟表示「呢日冇吉神／冇凶煞」嘅 placeholder 字串
-/// （`LunarUtil.getDayJiShen`／`getDayXiongSha` 喺搵唔到嘢嘅時候會塞呢個
-/// 入去，唔係代表真係有一個叫「无」嘅神煞）。計數要撇除佢。
+/// `lunar` package 用嚟表示「呢日冇吉神／凶煞／宜／忌」嘅 placeholder 字串
+/// （`LunarUtil.getDayJiShen`／`getDayXiongSha`／`getDayYi`／`getDayJi` 喺
+/// 搵唔到嘢嘅時候會塞呢個入去，唔係代表真係有一個叫「无」嘅神煞或宜忌項
+/// 目）。要喺 traditionalize 之前撇除佢，否則會變成「無」漏入 `yi`/`ji`
+/// 列表，令 `isYiVague` 判斷錯，亦會喺 UI 顯示「宜：無」。
 const _kNone = '无';
 
 /// 一日嘅通勝資料，全部已經繁體化、deterministic（純 [date] 做 input）。
@@ -51,8 +53,8 @@ class AlmanacDay {
     final sha = traditionalize(lunar.getDaySha());
     final chong = '沖$chongAnimal煞$sha';
 
-    final yi = lunar.getDayYi().map(traditionalize).toList();
-    final ji = lunar.getDayJi().map(traditionalize).toList();
+    final yi = lunar.getDayYi().where((e) => e != _kNone).map(traditionalize).toList();
+    final ji = lunar.getDayJi().where((e) => e != _kNone).map(traditionalize).toList();
 
     final jiShenRaw = lunar.getDayJiShen();
     final xiongShaRaw = lunar.getDayXiongSha();
