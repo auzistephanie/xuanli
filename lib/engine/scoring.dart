@@ -15,12 +15,6 @@ const Map<String, int> _zhiXingBase = {
   '破': 20, '危': 50, '成': 70, '收': 50, '開': 65, '閉': 35,
 };
 
-/// 地支 → 生肖（用於 clashWarning 文案）。
-const Map<String, String> _zhiToZodiac = {
-  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔', '辰': '龍', '巳': '蛇',
-  '午': '馬', '未': '羊', '申': '猴', '酉': '雞', '戌': '狗', '亥': '豬',
-};
-
 /// [score] 分帶：≥70 吉 ｜ 40–69 平 ｜ ≤39 忌。
 String bandFor(int score) {
   if (score >= 70) return '吉';
@@ -53,7 +47,7 @@ FortuneScoreResult computeFortuneScore({
   String? clashWarning;
   if (zhiClash[day.dayZhi] == userYearZhi) {
     score -= 20;
-    clashWarning = '今日沖你生肖（${_zhiToZodiac[userYearZhi]}）';
+    clashWarning = '今日沖你生肖（${zhiToZodiac[userYearZhi]}）';
   }
 
   // 通勝「忌：諸事不宜」→ 分數封頂 40。

@@ -24,6 +24,12 @@ const Map<String, String> zhiClash = {
   '巳': '亥', '亥': '巳',
 };
 
+/// 地支 → 生肖。
+const Map<String, String> zhiToZodiac = {
+  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔', '辰': '龍', '巳': '蛇',
+  '午': '馬', '未': '羊', '申': '猴', '酉': '雞', '戌': '狗', '亥': '豬',
+};
+
 const Map<String, String> _generates = {
   '木': '火', '火': '土', '土': '金', '金': '水', '水': '木',
 };
