@@ -62,7 +62,8 @@ void main() {
     await tester.tap(find.text('月曆'));
     await tester.pump();
 
-    expect(find.text('Tab C — 2e 起'), findsOneWidget);
+    expect(find.text('日'), findsWidgets); // CalendarScreen 嘅 weekday header
+    expect(find.text('Tab C — 2e 起'), findsNothing); // placeholder 已經真係冧咗
   });
 
   testWidgets('揀中嘅 tab 用朱紅色+粗體，未揀中嘅用淡墨色', (tester) async {

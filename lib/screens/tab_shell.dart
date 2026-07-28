@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/profile.dart';
 import '../theme/xuanli_theme.dart';
 import 'activity/activity_screen.dart';
+import 'calendar/calendar_screen.dart';
 import 'today/today_screen.dart';
 
 /// 主畫面：底部三個 tab（今日／我想做／月曆）。Tabbar 樣式跟
@@ -21,9 +22,9 @@ class _TabShellState extends State<TabShell> {
   int _index = 0;
 
   static const _tabs = [
-    _TabInfo(icon: '☀', label: '今日', placeholder: 'Tab A — 2c 起'),
-    _TabInfo(icon: '✦', label: '我想做', placeholder: 'Tab B — 2d 起'),
-    _TabInfo(icon: '▦', label: '月曆', placeholder: 'Tab C — 2e 起'),
+    _TabInfo(icon: '☀', label: '今日'),
+    _TabInfo(icon: '✦', label: '我想做'),
+    _TabInfo(icon: '▦', label: '月曆'),
   ];
 
   @override
@@ -34,7 +35,7 @@ class _TabShellState extends State<TabShell> {
         children: [
           TodayScreen(profile: widget.profile),
           ActivityScreen(profile: widget.profile),
-          for (final tab in _tabs.skip(2)) Center(child: Text(tab.placeholder)),
+          CalendarScreen(profile: widget.profile),
         ],
       ),
       bottomNavigationBar: _TabBar(
@@ -119,10 +120,8 @@ class _TabBar extends StatelessWidget {
 class _TabInfo {
   final String icon;
   final String label;
-  final String placeholder;
   const _TabInfo({
     required this.icon,
     required this.label,
-    required this.placeholder,
   });
 }
