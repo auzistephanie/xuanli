@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xuanli/engine/copywriter.dart';
+import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/models/profile.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
@@ -21,6 +25,18 @@ Profile _sampleProfile() => Profile(
     );
 
 void main() {
+  // TabShell 現時 index 0 掛真嘅 TodayScreen（Task 5 起），佢會
+  // call buildDayReading() → buildAdvice()/personalizedYi()，兩者
+  // 都需要呢兩個 JSON-backed cache 已初始化，否則一 build 就 throw
+  // StateError（見 today_screen_test.dart / today_widgets_test.dart
+  // 用緊嘅同一套 setUpAll pattern）。
+  setUpAll(() {
+    initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+    initActivityCategories(
+      File('lib/data/activity_categories.json').readAsStringSync(),
+    );
+  });
+
   Widget wrap(Widget child) =>
       MaterialApp(theme: XuanLiTheme.light(), home: child);
 

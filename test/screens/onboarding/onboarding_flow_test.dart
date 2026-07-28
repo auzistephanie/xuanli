@@ -1,12 +1,27 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xuanli/engine/copywriter.dart';
+import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // 行完呢個 flow 會落地喺 TabShell，佢 index 0 現時掛真嘅
+  // TodayScreen（Task 5 起）——同 tab_shell_test.dart 一樣要提前
+  // 初始化呢兩個 JSON-backed cache，否則最後一步 build TodayScreen
+  // 就會 throw StateError。
+  setUpAll(() {
+    initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+    initActivityCategories(
+      File('lib/data/activity_categories.json').readAsStringSync(),
+    );
+  });
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
