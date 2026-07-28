@@ -157,25 +157,35 @@ class OnboardingPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
     final enabled = onPressed != null;
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: enabled ? colors.ink : colors.ink30,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: XuanLiFonts.serif,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 4,
-            color: colors.paper,
+    // GestureDetector (not ElevatedButton/TextButton) is deliberate here —
+    // it's the only way to get this exact custom look (deep-ink fill,
+    // serif letter-spaced label, no Material ripple) design-preview.html
+    // calls for. That means screen readers get none of Material's built-in
+    // button semantics for free, so Semantics() adds them back explicitly.
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: enabled ? colors.ink : colors.ink30,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: XuanLiFonts.serif,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 4,
+              color: colors.paper,
+            ),
           ),
         ),
       ),
