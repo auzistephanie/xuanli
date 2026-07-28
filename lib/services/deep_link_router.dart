@@ -41,6 +41,12 @@ class DeepLinkRouter {
   }
 }
 
+/// [CalendarScreen] 自己嘅月曆導航範圍（`_minMonth`／`_maxMonth`）——
+/// 呢度要同佢保持一致，唔可以放行呢個範圍以外嘅年份。見底下
+/// `_parseStrictDate` 入面點解要喺呢一層攔截嘅解釋。
+const _minValidYear = 1900;
+const _maxValidYear = 2100;
+
 /// 嚴格解析 "YYYY-MM-DD"。[DateTime.parse] 對超出範圍嘅月/日會自動
 /// 進位而唔係拋 [FormatException]——例如 `"2026-13-45"` 會變成
 /// `2027-02-14`，`"2026-02-30"` 會變成 `2026-03-02`——所以淨係 catch
@@ -49,6 +55,22 @@ class DeepLinkRouter {
 /// 嘅 year/month/day 砌返一次 "YYYY-MM-DD" 字串，要同原字串完全一樣
 /// ——如果唔一樣，即係話原字串本身已經進位咗，要當 malformed input
 /// 處理，返 null，唔可以靜靜噉返個「啱啱好搭夠嘅錯日期」出去。
+///
+/// 仲有第三步：年份範圍檢查。上面 regex `^\d{4}-\d{2}-\d{2}$` 淨係
+/// 保證「四位數字」，任何 0000-9999 嘅年都會 match——但
+/// [CalendarScreen] 個月曆導航（`_changeMonth`）淨係接受
+/// `[1900-01, 2100-12]` 呢個範圍，出咗呢個範圍就企硬唔畀再撳（兩個
+/// 方向都係），變相係一條單程路：`initState()` 淨係用呢個 router
+/// 嘅結果去 seed `_displayedMonth`，冇再做多一次範圍檢查。如果呢度
+/// 冇攔截，一個 `xuanli://day/9999-01-01` 就會令個月曆一開波就停喺
+/// 9999 年、然後兩邊都撳唔返出嚟——成個 app 裝住嗰段時間，月曆 tab
+/// 永久壞咗，冇任何辦法喺 app 入面自己救返。呢個風險特別要喺呢一層
+/// （而唔止响 [CalendarScreen] 度）攔截，係因為呢個 commit 將
+/// `xuanli://` scheme 註冊咗做全機層面（`AndroidManifest.xml`／
+/// `Info.plist`）——即係話唔止我哋自己嘅 widget 會發呢種 link，機
+/// 入面隨便邊個第三方 app 都可以send一個呢種 URI 過嚟，呢個唔再係
+/// 一個「內部自己控制得晒嘅 data source」，所以喺入口呢一層做嚴格
+/// 防禦（而唔淨係靠 CalendarScreen 嗰邊嘅 UI 導航限制）先合理。
 DateTime? _parseStrictDate(String input) {
   if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(input)) return null;
 
@@ -63,6 +85,8 @@ DateTime? _parseStrictDate(String input) {
       '${parsed.month.toString().padLeft(2, '0')}-'
       '${parsed.day.toString().padLeft(2, '0')}';
   if (reconstructed != input) return null;
+
+  if (parsed.year < _minValidYear || parsed.year > _maxValidYear) return null;
 
   return parsed;
 }

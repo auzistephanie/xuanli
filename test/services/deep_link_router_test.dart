@@ -86,6 +86,34 @@ void main() {
       final router = DeepLinkRouter();
       expect(await router.getInitialDayLink(), isNull);
     });
+
+    test('年份超出 CalendarScreen 導航範圍（例如 9999 年）→ null，唔會撳爆個月曆', () async {
+      // regex 本身淨係要求「四位數字」，0000-9999 都會 match——但
+      // CalendarScreen 個 _changeMonth 淨係接受 [1900-01, 2100-12]，
+      // 出咗呢個範圍就兩邊都撳唔到。呢個 test 證明 router 呢一層有
+      // 攔截 9999 年呢種語法啱、但範圍離晒譜嘅 input，唔會將個「有效
+      // 但荒謬」嘅日期交俾 CalendarScreen 去 seed initState，令個月曆
+      // tab 永久卡死。
+      AppLinksPlatform.instance =
+          _FakeAppLinksPlatform(Uri.parse('xuanli://day/9999-01-01'));
+      final router = DeepLinkRouter();
+      expect(await router.getInitialDayLink(), isNull);
+    });
+
+    test('年份剛好喺範圍邊界（1900 同 2100）→ 照樣解析成功', () async {
+      // 邊界值本身唔應該被誤殺——確認新加嘅範圍檢查用嘅係 inclusive
+      // 嘅 [1900, 2100]，同 CalendarScreen 嘅 _minMonth/_maxMonth
+      // 完全對得上。
+      AppLinksPlatform.instance =
+          _FakeAppLinksPlatform(Uri.parse('xuanli://day/1900-01-01'));
+      final router1900 = DeepLinkRouter();
+      expect(await router1900.getInitialDayLink(), DateTime(1900, 1, 1));
+
+      AppLinksPlatform.instance =
+          _FakeAppLinksPlatform(Uri.parse('xuanli://day/2100-12-31'));
+      final router2100 = DeepLinkRouter();
+      expect(await router2100.getInitialDayLink(), DateTime(2100, 12, 31));
+    });
   });
 
   group('DeepLinkRouter.getInitialDayLink — 冇 platform channel implementation（呢部 Mac 嘅真實情況）', () {
