@@ -170,5 +170,28 @@ void main() {
 
       expect(text, '今日丙戌日・命理分50・宜A、B，忌無。');
     });
+
+    test('yi 同 ji 都冇 → 兩邊都寫「無」', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final reading = DayReading(
+        date: day.date,
+        ganzhiDay: day.ganzhiDay,
+        lunarLabel: day.lunarLabel,
+        zhiXing: day.zhiXing,
+        chong: day.chong,
+        fortuneScore: 50,
+        mbtiScore: 60,
+        band: '平',
+        yi: const [],
+        ji: const [],
+        advice: '（唔用於呢個 test）',
+        clashWarning: null,
+        avoidHour: null,
+      );
+
+      final text = buildNotificationText(reading);
+
+      expect(text, '今日丙戌日・命理分50・宜無，忌無。');
+    });
   });
 }

@@ -115,6 +115,9 @@ String buildActivityReason({
 /// deterministic（純 [reading] 做 input，冇 Random/DateTime.now()）。
 /// 畀 widget「中」size 同（之後先起嘅）通知排程共用。
 String buildNotificationText(DayReading reading) {
+  // .take(2) 假設 yi/ji 已經 matchesUser-first 排好（見 almanac.dart 嘅
+  // _personalize，經 day_reading_engine.dart 嘅 personalizedYi/personalizedJi
+  // 傳落嚟）——呢個 function 只負責截頭 2 個，唔會自己再排一次。
   final yiPart = reading.yi.isEmpty
       ? '無'
       : reading.yi.take(2).map((e) => e.label).join('、');
