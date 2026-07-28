@@ -10,7 +10,7 @@ class CalendarCellData {
   final String lunarLabel;
   final String band; // "吉"|"平"|"忌"
   final bool isToday;
-  final bool hasEvents; // 永遠 false（stub，行事曆整合留返之後 sub-plan）
+  final bool hasEvents; // 嗰日有冇日曆 event（冇權限，或者未查完，一律 false）
 
   const CalendarCellData({
     required this.day,
@@ -156,6 +156,8 @@ class DayCard extends StatelessWidget {
   final String subtitleLine;
   final String yiLine;
   final String jiLine;
+  final bool calendarAvailable; // false＝日曆權限未批（或者未查完）：成個行程 section 靜默隱藏（spec §9.9）
+  final List<String> eventLines; // 已格式化 "HH:mm 標題"，最多 5 條，calendarAvailable=false 時唔會用到
 
   const DayCard({
     super.key,
@@ -165,6 +167,8 @@ class DayCard extends StatelessWidget {
     required this.subtitleLine,
     required this.yiLine,
     required this.jiLine,
+    this.calendarAvailable = false,
+    this.eventLines = const [],
   });
 
   @override
@@ -236,15 +240,30 @@ class DayCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            padding: const EdgeInsets.only(top: 8),
-            decoration: BoxDecoration(border: Border(top: BorderSide(color: colors.ink12))),
-            child: Text(
-              '📅 你嘅行程 — 行事曆整合之後 sub-plan 起',
-              style: TextStyle(fontSize: 11.5, color: colors.ink60),
+          if (calendarAvailable)
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: 8),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: colors.ink12))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '📅 你嘅行程',
+                    style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colors.ink60),
+                  ),
+                  const SizedBox(height: 3),
+                  if (eventLines.isEmpty)
+                    Text('今日冇行程', style: TextStyle(fontSize: 11.5, color: colors.ink30))
+                  else
+                    for (final line in eventLines.take(5))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(line, style: TextStyle(fontSize: 11.5, color: colors.ink)),
+                      ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

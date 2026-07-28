@@ -134,7 +134,7 @@ void main() {
   });
 
   group('DayCard', () {
-    testWidgets('顯示日期/分數/副標題/宜忌，冇行程就顯示 stub 提示', (tester) async {
+    testWidgets('顯示日期/分數/副標題/宜忌，calendarAvailable 預設 false 就完全唔顯示行程 section', (tester) async {
       await tester.pumpWidget(wrap(const DayCard(
         dateLabel: '7月16日（四）辛卯日',
         band: '吉',
@@ -149,7 +149,42 @@ void main() {
       expect(find.textContaining('88'), findsOneWidget);
       expect(find.textContaining('嫁娶'), findsOneWidget);
       expect(find.textContaining('伐木'), findsOneWidget);
-      expect(find.textContaining('行事曆整合'), findsOneWidget);
+      // 冇日曆權限（或者未查）：成個「你嘅行程」section 靜默隱藏，
+      // 唔會顯示任何行程相關文字。
+      expect(find.textContaining('你嘅行程'), findsNothing);
+    });
+
+    testWidgets('calendarAvailable=true、eventLines 空 → 顯示「今日冇行程」', (tester) async {
+      await tester.pumpWidget(wrap(const DayCard(
+        dateLabel: '7月16日（四）辛卯日',
+        band: '吉',
+        score: 88,
+        subtitleLine: '六月初三・成日・沖雞煞西',
+        yiLine: '嫁娶・祈福・剪髮',
+        jiLine: '伐木・掘井',
+        calendarAvailable: true,
+        eventLines: [],
+      )));
+
+      expect(find.textContaining('你嘅行程'), findsOneWidget);
+      expect(find.text('今日冇行程'), findsOneWidget);
+    });
+
+    testWidgets('calendarAvailable=true、有 eventLines → 逐條顯示（最多 5 條）', (tester) async {
+      await tester.pumpWidget(wrap(const DayCard(
+        dateLabel: '7月16日（四）辛卯日',
+        band: '吉',
+        score: 88,
+        subtitleLine: '六月初三・成日・沖雞煞西',
+        yiLine: '嫁娶・祈福・剪髮',
+        jiLine: '伐木・掘井',
+        calendarAvailable: true,
+        eventLines: ['09:00 早會', '14:30 剪髮'],
+      )));
+
+      expect(find.text('09:00 早會'), findsOneWidget);
+      expect(find.text('14:30 剪髮'), findsOneWidget);
+      expect(find.text('今日冇行程'), findsNothing);
     });
 
     testWidgets('band 忌 嘅分數 chip 用 red，同 吉 唔同色', (tester) async {

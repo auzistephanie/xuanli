@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/engine/almanac.dart';
@@ -129,5 +131,72 @@ void main() {
 
     expect(find.textContaining('7月16日'), findsOneWidget);
     expect(find.textContaining('辛卯'), findsWidgets);
+  });
+
+  group('CalendarScreen — device_calendar 整合（mocked platform channel）', () {
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(DeviceCalendarPlugin.channel, null);
+    });
+
+    testWidgets('有權限＋7月16日有 event：格仔顯示行程橫條，撳開日卡顯示行程列表', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
+        switch (call.method) {
+          case 'hasPermissions':
+          case 'requestPermissions':
+            return true;
+          case 'retrieveCalendars':
+            return json.encode([
+              {'id': 'cal1', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+            ]);
+          case 'retrieveEvents':
+            return json.encode([
+              {
+                'eventId': 'e1',
+                'calendarId': 'cal1',
+                'eventTitle': '午餐會議',
+                'eventStartDate':
+                    DateTime.utc(2026, 7, 16, 14, 30).millisecondsSinceEpoch,
+                'eventEndDate':
+                    DateTime.utc(2026, 7, 16, 15, 30).millisecondsSinceEpoch,
+                'eventAllDay': false,
+              },
+            ]);
+          default:
+            return null;
+        }
+      });
+
+      await tester.pumpWidget(wrap(CalendarScreen(
+        profile: profile,
+        today: DateTime(2026, 7, 11),
+      )));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('16'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('你嘅行程'), findsOneWidget);
+      expect(find.text('14:30 午餐會議'), findsOneWidget);
+    });
+
+    testWidgets('冇日曆權限：日卡完全冇「你嘅行程」section（同冇 mock 嘅預設情況一致）', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
+        if (call.method == 'hasPermissions' || call.method == 'requestPermissions') {
+          return false;
+        }
+        return null;
+      });
+
+      await tester.pumpWidget(wrap(CalendarScreen(
+        profile: profile,
+        today: DateTime(2026, 7, 11),
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('你嘅行程'), findsNothing);
+    });
   });
 }

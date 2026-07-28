@@ -5,6 +5,7 @@ import '../../engine/annual_outlook.dart';
 import '../../engine/day_reading_engine.dart';
 import '../../engine/scoring.dart';
 import '../../models/profile.dart';
+import '../../services/calendar_sync.dart';
 import '../../theme/xuanli_theme.dart';
 import 'calendar_widgets.dart';
 
@@ -25,8 +26,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   static final _minMonth = DateTime(1900, 1);
   static final _maxMonth = DateTime(2100, 12);
 
+  final _calendarSync = CalendarSyncService();
+
   late DateTime _displayedMonth;
   int? _selectedDay;
+  bool _calendarAvailable = false;
+  Set<int> _daysWithEventsInDisplayedMonth = {};
+  List<CalendarSyncEvent> _selectedDayEvents = [];
 
   DateTime get _today {
     final t = widget.today;
@@ -41,6 +47,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final today = _today;
     _displayedMonth = DateTime(today.year, today.month);
     _selectedDay = today.day;
+    _initCalendarSync();
+  }
+
+  /// spec §9.9：「首次入 Tab C 先問權限」。呢個先係整個畫面入面
+  /// 唯一一次真係彈權限對話框嘅地方——之後 [_loadMonthEvents]／
+  /// [_loadSelectedDayEvents] 淨係讀，唔會再問。
+  Future<void> _initCalendarSync() async {
+    final granted = await _calendarSync.requestPermission();
+    if (!mounted) return;
+    setState(() => _calendarAvailable = granted);
+    if (!granted) return;
+    await _loadMonthEvents();
+    await _loadSelectedDayEvents();
+  }
+
+  Future<void> _loadMonthEvents() async {
+    final monthStart = DateTime(_displayedMonth.year, _displayedMonth.month, 1);
+    final monthEnd = DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
+    final events = await _calendarSync.eventsInRange(start: monthStart, end: monthEnd);
+    if (!mounted) return;
+    setState(() {
+      _daysWithEventsInDisplayedMonth = events.map((e) => e.start.day).toSet();
+    });
+  }
+
+  Future<void> _loadSelectedDayEvents() async {
+    final day = _selectedDay;
+    if (day == null) {
+      setState(() => _selectedDayEvents = []);
+      return;
+    }
+    final date = DateTime(_displayedMonth.year, _displayedMonth.month, day);
+    final events = await _calendarSync.eventsOnDay(date);
+    if (!mounted) return;
+    setState(() => _selectedDayEvents = events);
   }
 
   bool get _showsToday =>
@@ -52,7 +93,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() {
       _displayedMonth = next;
       _selectedDay = null;
+      _daysWithEventsInDisplayedMonth = {};
+      _selectedDayEvents = [];
     });
+    if (_calendarAvailable) _loadMonthEvents();
   }
 
   @override
@@ -137,7 +181,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               leadingBlanks: leadingBlanks,
               days: cells,
               selectedDay: _selectedDay,
-              onSelectDay: (d) => setState(() => _selectedDay = d),
+              onSelectDay: (d) {
+                setState(() => _selectedDay = d);
+                if (_calendarAvailable) _loadSelectedDayEvents();
+              },
             ),
             if (_selectedDay != null) _buildDayCard(colors, DateTime(year, month, _selectedDay!)),
           ],
@@ -159,6 +206,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       lunarLabel: day.lunarLabel,
       band: band,
       isToday: isToday,
+      hasEvents: _daysWithEventsInDisplayedMonth.contains(date.day),
     );
   }
 
@@ -175,6 +223,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
       subtitleLine: subtitleLine,
       yiLine: reading.yi.map((e) => e.label).join('・'),
       jiLine: reading.ji.map((e) => e.label).join('・'),
+      calendarAvailable: _calendarAvailable,
+      eventLines: [
+        for (final e in _selectedDayEvents.take(5))
+          '${_twoDigits(e.start.hour)}:${_twoDigits(e.start.minute)} ${e.title}',
+      ],
     );
   }
+
+  static String _twoDigits(int n) => n.toString().padLeft(2, '0');
 }
