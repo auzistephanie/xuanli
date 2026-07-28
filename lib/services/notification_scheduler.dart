@@ -71,6 +71,16 @@ class NotificationScheduler {
     await _plugin.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),
     );
+
+    // Android 13+ 需要 runtime permission 先俾出通知——`initialize()`
+    // 本身唔會自動問，一定要額外 call 呢個先會出到用戶許可對話框（同
+    // `CalendarSyncService.requestPermission()` 一樣嘅「主動問權限」
+    // pattern，唔同嘅係呢個 API 淨係 Android 先有——
+    // `resolvePlatformSpecificImplementation` 喺 non-Android platform
+    // 會返 null，`?.` 令呢度喺 iOS/其他平台自然 no-op）。
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
   }
 
   /// [today] 得意 test 用嚟固定「而家」係邊一日——冇畀就用返
