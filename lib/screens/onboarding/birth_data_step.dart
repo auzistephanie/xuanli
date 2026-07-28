@@ -145,112 +145,93 @@ class BirthDataStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // `context.xuanliColors` (used here and by every widget from
-    // onboarding_widgets.dart this screen composes) hard-requires
-    // `Theme.of(context).extension<XuanLiColors>()` to be non-null, which
-    // only holds when the ancestor MaterialApp is built with
-    // `theme: XuanLiTheme.light()/.dark()` (as main.dart does). Isolated
-    // widget tests that just do `MaterialApp(home: Scaffold(...))` without
-    // that theme don't provide the extension, so wrap the subtree in a
-    // local Theme that guarantees it's present — falling back to
-    // XuanLiColors.light only when the ambient theme doesn't already have
-    // one. In the real app the ambient theme already carries it, so this
-    // is a no-op there.
-    final ambientTheme = Theme.of(context);
-    final effectiveTheme = ambientTheme.extension<XuanLiColors>() == null
-        ? ambientTheme.copyWith(extensions: [...ambientTheme.extensions.values, XuanLiColors.light])
-        : ambientTheme;
-    final colors = effectiveTheme.extension<XuanLiColors>()!;
-
+    final colors = context.xuanliColors;
     final dateLabel = '${birthDate.year} 年 ${birthDate.month} 月 ${birthDate.day} 日';
     final timeLabel = birthHour == null
         ? '未設定'
         : '${birthHour!.toString().padLeft(2, '0')}:'
             '${birthMinute.toString().padLeft(2, '0')}（${shiChenName(birthHour!)}）';
 
-    return Theme(
-      data: effectiveTheme,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const OnboardingProgressDots(currentStep: 0, totalSteps: 3),
-            const SizedBox(height: 14),
-            Text(
-              '你嘅出生一刻',
-              style: TextStyle(
-                fontFamily: XuanLiFonts.serif,
-                fontSize: 21,
-                fontWeight: FontWeight.w700,
-                color: colors.ink,
-                letterSpacing: 2,
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const OnboardingProgressDots(currentStep: 0, totalSteps: 3),
+          const SizedBox(height: 14),
+          Text(
+            '你嘅出生一刻',
+            style: TextStyle(
+              fontFamily: XuanLiFonts.serif,
+              fontSize: 21,
+              fontWeight: FontWeight.w700,
+              color: colors.ink,
+              letterSpacing: 2,
             ),
-            const SizedBox(height: 4),
-            Text(
-              '八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。',
-              style: TextStyle(fontSize: 12.5, color: colors.ink60, height: 1.7),
-            ),
-            const SizedBox(height: 16),
-            OnboardingSegmentedToggle(
-              options: const ['新曆', '農曆'],
-              selectedIndex: isLunar ? 1 : 0,
-              onChanged: (i) => onChanged(_state.copyWith(isLunar: i == 1)),
-            ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。',
+            style: TextStyle(fontSize: 12.5, color: colors.ink60, height: 1.7),
+          ),
+          const SizedBox(height: 16),
+          OnboardingSegmentedToggle(
+            options: const ['新曆', '農曆'],
+            selectedIndex: isLunar ? 1 : 0,
+            onChanged: (i) => onChanged(_state.copyWith(isLunar: i == 1)),
+          ),
+          const SizedBox(height: 14),
+          OnboardingFieldRow(
+            label: '出生日期',
+            value: dateLabel,
+            onTap: () => _pickDate(context),
+          ),
+          if (!birthTimeUnknown)
             OnboardingFieldRow(
-              label: '出生日期',
-              value: dateLabel,
-              onTap: () => _pickDate(context),
+              label: '出生時間',
+              value: timeLabel,
+              onTap: () => _pickTime(context),
             ),
-            if (!birthTimeUnknown)
-              OnboardingFieldRow(
-                label: '出生時間',
-                value: timeLabel,
-                onTap: () => _pickTime(context),
-              ),
-            // 成行都撳得中——文字標籤本身唔會回應 tap，所以用 GestureDetector
-            // 包起成行（連 Switch 埋一齊），等撳標籤文字都可以觸發同一個
-            // toggle，等 tap target 大啲、體驗更符合預期（常見 UX pattern）。
-            GestureDetector(
-              onTap: () => _toggleTimeUnknown(!birthTimeUnknown),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('我唔清楚出生時間', style: TextStyle(fontSize: 12.5, color: colors.ink60)),
-                          Text(
-                            '會改用簡易版推算，之後可以補返',
-                            style: TextStyle(fontSize: 10.5, color: colors.ink30),
-                          ),
-                        ],
-                      ),
+          // 成行都撳得中——文字標籤本身唔會回應 tap，所以用 GestureDetector
+          // 包起成行（連 Switch 埋一齊），等撳標籤文字都可以觸發同一個
+          // toggle，等 tap target 大啲、體驗更符合預期（常見 UX pattern）。
+          GestureDetector(
+            onTap: () => _toggleTimeUnknown(!birthTimeUnknown),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('我唔清楚出生時間', style: TextStyle(fontSize: 12.5, color: colors.ink60)),
+                        Text(
+                          '會改用簡易版推算，之後可以補返',
+                          style: TextStyle(fontSize: 10.5, color: colors.ink30),
+                        ),
+                      ],
                     ),
-                    Switch(
-                      value: birthTimeUnknown,
-                      onChanged: _toggleTimeUnknown,
-                      activeThumbColor: colors.jade,
-                    ),
-                  ],
-                ),
+                  ),
+                  Switch(
+                    value: birthTimeUnknown,
+                    onChanged: _toggleTimeUnknown,
+                    activeThumbColor: colors.jade,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            OnboardingFieldRow(
-              label: '出生地點',
-              value: birthPlace,
-              onTap: () => _editPlace(context),
-            ),
-            OnboardingPrimaryButton(label: '下一步', onPressed: onNext),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          OnboardingFieldRow(
+            label: '出生地點',
+            value: birthPlace,
+            onTap: () => _editPlace(context),
+          ),
+          OnboardingPrimaryButton(label: '下一步', onPressed: onNext),
+        ],
       ),
     );
   }

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/screens/onboarding/birth_data_step.dart';
+import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
+  // `theme:` matters here, not just cosmetics — every onboarding widget
+  // reads `context.xuanliColors`, which requires XuanLiTheme's
+  // ThemeExtension to be present on the ambient theme (same as main.dart
+  // always provides it). Without this, the very first themed widget
+  // throws a null-check failure before any test assertion runs.
+  Widget wrap(Widget child) =>
+      MaterialApp(theme: XuanLiTheme.light(), home: Scaffold(body: child));
 
   testWidgets('顯示標題、預設地點「香港」，下一步預設可撳', (tester) async {
     var nextCalled = false;

@@ -613,9 +613,16 @@ Create `test/screens/onboarding/birth_data_step_test.dart`:
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/screens/onboarding/birth_data_step.dart';
+import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
+  // `theme:` matters here, not just cosmetics — every onboarding widget
+  // reads `context.xuanliColors`, which requires XuanLiTheme's
+  // ThemeExtension to be present on the ambient theme (same as main.dart
+  // always provides it). Without this, the first themed widget throws a
+  // null-check failure before any test assertion runs.
+  Widget wrap(Widget child) =>
+      MaterialApp(theme: XuanLiTheme.light(), home: Scaffold(body: child));
 
   testWidgets('顯示標題、預設地點「香港」，下一步預設可撳', (tester) async {
     var nextCalled = false;
@@ -949,9 +956,13 @@ Create `test/screens/onboarding/mbti_step_test.dart`:
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/screens/onboarding/mbti_step.dart';
+import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
+  // See birth_data_step_test.dart's wrap() for why `theme:` is required
+  // here, not optional — context.xuanliColors needs it present.
+  Widget wrap(Widget child) =>
+      MaterialApp(theme: XuanLiTheme.light(), home: Scaffold(body: child));
 
   testWidgets('16 宮格模式：撳一個型別再撳下一步，callback 攞返嗰個型別', (tester) async {
     String? result;
@@ -1228,6 +1239,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/screens/onboarding/profile_card_step.dart';
+import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1236,7 +1248,10 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
+  // See birth_data_step_test.dart's wrap() for why `theme:` is required
+  // here, not optional — context.xuanliColors needs it present.
+  Widget wrap(Widget child) =>
+      MaterialApp(theme: XuanLiTheme.light(), home: Scaffold(body: child));
 
   testWidgets('用阿玄嘅出生資料起檔案卡：顯示日主/MBTI/五行/完整度', (tester) async {
     await tester.pumpWidget(wrap(ProfileCardStep(
@@ -1640,6 +1655,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/tab_shell.dart';
+import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1649,7 +1665,9 @@ void main() {
   });
 
   testWidgets('行完 3 步（用預設出生資料 + 16 宮格揀 ISFP）會跳去 TabShell', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: OnboardingFlow()));
+    // `theme:` required — see birth_data_step_test.dart's wrap() note;
+    // every step OnboardingFlow renders needs context.xuanliColors present.
+    await tester.pumpWidget(MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()));
 
     // Step 1: 出生資料，用晒預設值直接下一步。
     expect(find.text('你嘅出生一刻'), findsOneWidget);
