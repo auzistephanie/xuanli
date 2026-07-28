@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/models/profile.dart';
+import 'package:xuanli/models/settings.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/settings/settings_screen.dart';
 import 'package:xuanli/services/storage_service.dart';
@@ -147,20 +148,48 @@ void main() {
   });
 
   testWidgets('撳「推送時間」揀返個時間會存落 storage', (tester) async {
-    await tester.pumpWidget(wrap(const SettingsScreen()));
+    // Seed storage with the default (07:30) so the picker's initialTime is
+    // the default. If `_pickNotificationTime()` never called `_save(...)`,
+    // storage would stay at this seeded default forever — so the test must
+    // confirm a *different* time via the picker and assert storage moved to
+    // that new value, not the seeded/default one, to actually prove the
+    // save path ran.
+    await StorageService().saveSettings(AppSettings.defaults);
+
+    // Force 24-hour format so the keyboard-entry time picker (below)
+    // accepts a plain "14" hour without needing an AM/PM toggle.
+    await tester.pumpWidget(MaterialApp(
+      theme: XuanLiTheme.light(),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+      home: const SettingsScreen(),
+    ));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('推送時間'));
     await tester.pumpAndSettle();
 
-    // Confirm the TimePickerDialog with its initial time (07:30 default).
+    // Switch the TimePickerDialog from dial mode to keyboard text-entry
+    // mode so we can type a time distinct from the 07:30 default/seed.
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+
+    final textFields = find.byType(TextFormField);
+    expect(textFields, findsNWidgets(2));
+
+    await tester.enterText(textFields.at(0), '14');
+    await tester.enterText(textFields.at(1), '45');
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
     final saved = await StorageService().loadSettings();
-    expect(saved.notificationHour, 7);
-    expect(saved.notificationMinute, 30);
-    expect(find.text('07:30'), findsOneWidget);
+    expect(saved.notificationHour, 14);
+    expect(saved.notificationMinute, 45);
+    expect(find.text('14:45'), findsOneWidget);
   });
 
   testWidgets('撳返頭嘅 ‹ 會 pop 返上一頁', (tester) async {
