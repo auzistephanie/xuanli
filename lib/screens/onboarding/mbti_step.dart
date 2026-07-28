@@ -19,6 +19,25 @@ class _MbtiStepState extends State<MbtiStep> {
   int _quizIndex = 0;
   final List<String> _quizAnswers = [];
 
+  // 呢兩個 flag 係防「一 frame 入面連撳兩下」嘅 debounce guard：
+  // GestureDetector.onTap 嘅 closure 喺 build() 嗰陣就閂咗當時嘅
+  // question/_quizIndex，但 setState 觸發嘅 rebuild 要等落一個 frame
+  // 先真正執行 build()，所以撳完第一下之後、嗰個 rebuild 未發生之前，
+  // 舊 closure 仲喺度、仲會 fire。第二下撳落去會攞住嗰個已經過時嘅
+  // question/_quizIndex 再行多次 _answerQuiz，令 _quizAnswers 同題目
+  // 對唔上（甚至喺最後一題撳兩下會令 length 衝過
+  // mbtiQuizQuestions.length，落一個 build 攞
+  // mbtiQuizQuestions[_quizIndex] 就會 RangeError）。
+  //
+  // 注意：setState(callback) 嘅 callback 本身係*同步*即刻執行㗎（淨係
+  // 話「呢個 widget 要 rebuild」畀落一個 frame），唔係等到真正
+  // rebuild 嗰刻先行——所以想喺「新 question/_quizIndex 真正生效」
+  // 嗰刻先解鎖 guard，唔可以喺 setState callback 入面自己重設，一定
+  // 要用 addPostFrameCallback，等成個 frame（包括 build()）行完先
+  // reset，先至真係擋到同一 frame 入面嘅第二下撳。
+  bool _answering = false;
+  bool _finishing = false;
+
   void _setQuizMode(bool quizMode) {
     setState(() {
       _quizMode = quizMode;
@@ -28,10 +47,13 @@ class _MbtiStepState extends State<MbtiStep> {
       _selectedGridType = null;
       _quizIndex = 0;
       _quizAnswers.clear();
+      _answering = false;
     });
   }
 
   void _answerQuiz(String letter) {
+    if (_answering) return;
+    _answering = true;
     setState(() {
       _quizAnswers.add(letter);
       if (_quizAnswers.length == mbtiQuizQuestions.length) {
@@ -39,6 +61,23 @@ class _MbtiStepState extends State<MbtiStep> {
       } else {
         _quizIndex++;
       }
+    });
+    // 等呢個 frame（連 build() 都行埋）真正完成咗先解鎖，先至可以
+    // 擋到同一 frame 入面、rebuild 未發生之前嘅第二下撳。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _answering = false;
+    });
+  }
+
+  void _finishGrid() {
+    if (_finishing) return;
+    _finishing = true;
+    final type = _selectedGridType;
+    if (type != null) {
+      widget.onDone(type);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _finishing = false;
     });
   }
 
@@ -119,9 +158,7 @@ class _MbtiStepState extends State<MbtiStep> {
         ),
         OnboardingPrimaryButton(
           label: '下一步',
-          onPressed: _selectedGridType == null
-              ? null
-              : () => widget.onDone(_selectedGridType!),
+          onPressed: _selectedGridType == null ? null : _finishGrid,
         ),
       ],
     );
