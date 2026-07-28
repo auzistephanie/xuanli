@@ -146,5 +146,56 @@ void main() {
       expect(find.byType(ComboDetailScreen), findsOneWidget);
       expect(find.text('林間清泉'), findsOneWidget);
     });
+
+    testWidgets('連續快速撳兩下檔案卡，淨係 push 一次 ComboDetailScreen', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          ProfileCardStep(
+            name: '阿玄',
+            birthDate: DateTime(1999, 9, 20),
+            birthHour: 9,
+            birthMinute: 30,
+            birthPlace: '香港',
+            mbti: 'ISFP',
+            onSaved: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 兩下 tap 之間冇 pump()，模擬第二下撳發生喺 push 動畫真正完成之前。
+      await tester.tap(find.text('阿玄'));
+      await tester.tap(find.text('阿玄'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ComboDetailScreen), findsOneWidget);
+
+      // ComboDetailScreen 用自己畫嘅 '‹' 返回鍵，唔係標準 AppBar back
+      // button，所以直接撳嗰個 widget（唔用 tester.pageBack()）。
+      await tester.tap(find.text('‹'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ComboDetailScreen), findsNothing);
+      expect(find.text('阿玄'), findsOneWidget);
+    });
+
+    testWidgets('檔案卡有提示用戶可以撳入組合詳解頁嘅文字', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          ProfileCardStep(
+            name: '阿玄',
+            birthDate: DateTime(1999, 9, 20),
+            birthHour: 9,
+            birthMinute: 30,
+            birthPlace: '香港',
+            mbti: 'ISFP',
+            onSaved: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('組合詳解'), findsOneWidget);
+    });
   });
 }

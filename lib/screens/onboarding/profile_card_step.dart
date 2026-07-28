@@ -63,6 +63,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
   );
 
   bool _saving = false;
+  bool _navigatingToCombo = false;
 
   Future<void> _save() async {
     // 同 mbti_step.dart 嗰個 double-tap race 一樣嘅隱患：撳掣之後個 button
@@ -120,197 +121,226 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
             style: TextStyle(fontSize: 12.5, color: colors.ink60),
           ),
           const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ComboDetailScreen(profile: _profile),
-              ),
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1C2440), Color(0xFF28325A)],
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(XuanLiRadii.card),
+              onTap: () {
+                // 同 _save() 嗰個 _saving guard 一樣嘅 double-tap 隱患：撳落去到
+                // 個新畫面真正 push 咗中間有一個 frame 嘅空隙，快手撳兩下會 push
+                // 兩次。呢度唔使 setState（呢個 flag 冇喺 build() 用到，淨係一個
+                // 同步嘅 re-entrancy guard），撳完轉頭返嚟（pop）先重設。
+                if (_navigatingToCombo) return;
+                _navigatingToCombo = true;
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (_) => ComboDetailScreen(profile: _profile),
+                      ),
+                    )
+                    .then((_) => _navigatingToCombo = false);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF1C2440), Color(0xFF28325A)],
+                  ),
+                  borderRadius: BorderRadius.circular(XuanLiRadii.card),
                 ),
-                borderRadius: BorderRadius.circular(XuanLiRadii.card),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: colors.red,
-                          borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: colors.red,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            avatarInitial,
+                            style: TextStyle(
+                              fontFamily: XuanLiFonts.serif,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 22,
+                              color: colors.paper,
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          avatarInitial,
-                          style: TextStyle(
-                            fontFamily: XuanLiFonts.serif,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 22,
-                            color: colors.paper,
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _profile.name,
+                              style: TextStyle(
+                                fontFamily: XuanLiFonts.serif,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: colors.paper,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.gold,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    _profile.mbti,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.ink,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.paper.withValues(alpha: 0.16),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '${_profile.dayMaster}日主',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: colors.paper,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    for (final element in _wuxingOrder)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 7),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 15,
+                              child: Text(
+                                element,
+                                style: TextStyle(
+                                  fontFamily: XuanLiFonts.serif,
+                                  fontWeight: FontWeight.w700,
+                                  color: _wuxingLabelColors[element],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: LinearProgressIndicator(
+                                  value: (_profile.wuxing[element] ?? 0) / 100,
+                                  minHeight: 9,
+                                  backgroundColor: colors.paper.withValues(
+                                    alpha: 0.14,
+                                  ),
+                                  valueColor: AlwaysStoppedAnimation(
+                                    _wuxingBarColors[element],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 34,
+                              child: Text(
+                                '${_profile.wuxing[element] ?? 0}%',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: colors.paper.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _profileStatBox(
+                          colors,
+                          '喜用神',
+                          _profile.favorable.join('・'),
+                          _wuxingLabelColors['木']!, // design html: 喜用神 值用淺翠綠 #8fd0a8
+                        ),
+                        const SizedBox(width: 8),
+                        _profileStatBox(
+                          colors,
+                          '忌神',
+                          _profile.unfavorable.join('・'),
+                          const Color(
+                            0xFFE0A1A1,
+                          ), // design html: 忌神 值用淺紅 #e0a1a1
+                        ),
+                        const SizedBox(width: 8),
+                        _profileStatBox(
+                          colors,
+                          '紫微命宮',
+                          _profile.ziweiStar,
+                          colors.gold,
+                        ),
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.only(top: 9),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: colors.paper.withValues(alpha: 0.25),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 14),
-                      Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _profile.name,
+                            '肖${_profile.zodiac}・${outlook.summary} ｜ 檔案完整度 ${_profile.completeness}%',
                             style: TextStyle(
-                              fontFamily: XuanLiFonts.serif,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: colors.paper,
-                              letterSpacing: 2,
+                              fontSize: 11,
+                              color: colors.paper.withValues(alpha: 0.75),
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.gold,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  _profile.mbti,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.ink,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.paper.withValues(alpha: 0.16),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  '${_profile.dayMaster}日主',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: colors.paper,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  for (final element in _wuxingOrder)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 7),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 15,
-                            child: Text(
-                              element,
-                              style: TextStyle(
-                                fontFamily: XuanLiFonts.serif,
-                                fontWeight: FontWeight.w700,
-                                color: _wuxingLabelColors[element],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: (_profile.wuxing[element] ?? 0) / 100,
-                                minHeight: 9,
-                                backgroundColor: colors.paper.withValues(
-                                  alpha: 0.14,
-                                ),
-                                valueColor: AlwaysStoppedAnimation(
-                                  _wuxingBarColors[element],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          SizedBox(
-                            width: 34,
-                            child: Text(
-                              '${_profile.wuxing[element] ?? 0}%',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: colors.paper.withValues(alpha: 0.6),
-                              ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '撳呢張卡睇你嘅組合詳解 ›',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: colors.paper.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      _profileStatBox(
-                        colors,
-                        '喜用神',
-                        _profile.favorable.join('・'),
-                        _wuxingLabelColors['木']!, // design html: 喜用神 值用淺翠綠 #8fd0a8
-                      ),
-                      const SizedBox(width: 8),
-                      _profileStatBox(
-                        colors,
-                        '忌神',
-                        _profile.unfavorable.join('・'),
-                        const Color(0xFFE0A1A1), // design html: 忌神 值用淺紅 #e0a1a1
-                      ),
-                      const SizedBox(width: 8),
-                      _profileStatBox(
-                        colors,
-                        '紫微命宮',
-                        _profile.ziweiStar,
-                        colors.gold,
-                      ),
-                    ],
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    padding: const EdgeInsets.only(top: 9),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: colors.paper.withValues(alpha: 0.25),
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      '肖${_profile.zodiac}・${outlook.summary} ｜ 檔案完整度 ${_profile.completeness}%',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.paper.withValues(alpha: 0.75),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
