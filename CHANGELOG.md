@@ -2,6 +2,14 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+## 2026-07-29 Phase 3c Deep Link Routing 完成（冷啟動 `xuanli://day/...` 接返 Calendar tab）
+
+- **新增 `DeepLinkRouter`**（`lib/services/deep_link_router.dart`）：包裝新加嘅 `app_links` package，解析 `xuanli://day/YYYY-MM-DD` 嘅冷啟動 launch URI（spec §9.6）。已接入 `TabShell`／`CalendarScreen`（新加 `deepLinkDate`／`initialSelectedDate` 兩個參數——同本身已有嘅 `today` 參數分開，`today` 淨係控制月格仔嘅 `isToday` highlight，唔受影響）同 `main.dart` 嘅 bootstrap（呢個係**要 await** 嘅，唔似 widget／notification 嗰兩個 fire-and-forget refresh，因為要喺 `TabShell` build 之前就知道應該開邊個 tab／揀邊一日）。
+- **新加 dependency：`app_links`**（證實有需要——冇現存 package 識解析 incoming launch URI）。佢個 `AppLinksPlatform.instance` 係一個 settable static field，俾到一個比 Phase 2h／3a／3b 嗰種 `MethodChannel` mock 更乾淨嘅 direct-fake-injection test seam。
+- **新增 native URI scheme registration**：`AndroidManifest.xml` 喺 `MainActivity` 加咗 `<intent-filter>` 撳 `xuanli://day/...`；`Info.plist` 加咗 `CFBundleURLTypes`。兩個都 XML／plist 驗證過，但同 Phase 2h 之後每一次 native config 改動一樣，冇真機／simulator 驗證唔到 end-to-end。
+- **範圍邊界講明**：呢個 plan 淨係做冷啟動——app 已經開緊嗰陣先收到嘅 deep link（`AppLinks().uriLinkStream`）未做，呢個係一個要諗 navigation-stack 嘅獨立設計問題，留返做獨立 follow-up。而且而家都仲未有真正會送 link 嘅 native widget（Phase 3a 個 data bridge 寫嘅 JSON 而家冇嘢讀），所以呢個缺口而家冇實際影響。
+- **Review 過程執到三個真問題，值得記低**：(1) `DeepLinkRouter` 個 native platform call 一開始冇 guard——喺呢部冇 simulator／裝置嘅 dev 環境會擲 `MissingPluginException`，Task 2 接落去嗰刻會累到 4 個本身已經過嘅 bootstrap test 一齊爆——跟返 sibling service 個 pattern 加咗 try/catch 修好；(2) 發現 `DateTime.parse` 會靜靜將 out-of-range 日期 roll over（例如 `"2026-13-45"` 變咗 `2027-02-14`）而唔係拒絕佢——用 strict-format + round-trip 重組 check 修好；(3) 將個 router 接入 bootstrap 嗰陣，發現同一個 task 加嘅 OS-wide `xuanli://` scheme registration，令一個 out-of-range 年份（例如 `9999-01-01`）可以 seed `CalendarScreen` 個初始月份去到超出自己 navigation 邊界，令個日曆 tab 永久卡死、app 入面完全冇得救返——加上而家個 scheme 唔淨係 XuanLi 自己（未來嘅）widget 先叫得，係部機任何 app 都 reachable，所以呢個係修咗而唔係延後：`DeepLinkRouter` 拒絕 `[1900, 2100]` 以外嘅年份。
+
 ## 2026-07-29 Phase 3b 通知排程完成（淨係 Dart 端排程，未起 native widget）
 
 - **新增 `NotificationScheduler`**（`lib/services/notification_scheduler.dart`）：包裝本身已經喺 `pubspec.yaml` 但一直未用過嘅 `flutter_local_notifications`，用 `zonedSchedule` 排未來 7 日嘅每朝通知——內容用 `buildNotificationText()`（Phase 3a 加嘅短版文案），時間/開關用 `AppSettings.notificationHour`/`notificationMinute`/`notificationsEnabled`（Phase 2g）。已接入 `main.dart` 嘅 app 開啟 bootstrap，同 `WidgetDataBridge`（Phase 3a）並排、一樣用 `unawaited()` 完全 fire-and-forget。
