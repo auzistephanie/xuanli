@@ -66,7 +66,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final userYearZhi = widget.profile.pillars[0].substring(1);
     final cells = [
       for (var d = 1; d <= daysInMonth; d++)
-        _cellFor(DateTime(year, month, d), isToday: _showsToday && d == _today.day),
+        _cellFor(
+          DateTime(year, month, d),
+          userYearZhi: userYearZhi,
+          isToday: _showsToday && d == _today.day,
+        ),
     ];
 
     final yearGanZhi = computeAnnualOutlook(
@@ -142,9 +146,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  CalendarCellData _cellFor(DateTime date, {required bool isToday}) {
+  CalendarCellData _cellFor(DateTime date, {required String userYearZhi, required bool isToday}) {
     final day = AlmanacDay.forDate(date);
-    final userYearZhi = widget.profile.pillars[0].substring(1);
     final band = computeFortuneScore(
       day: day,
       favorable: widget.profile.favorable,

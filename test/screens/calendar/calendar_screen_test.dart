@@ -6,6 +6,7 @@ import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/screens/calendar/calendar_screen.dart';
+import 'package:xuanli/screens/calendar/calendar_widgets.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
@@ -52,6 +53,69 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('2026年8月'), findsOneWidget);
+    // 選日狀態要 reset：舊日卡（7月11日）唔應該再存在，成個 DayCard 都冇。
+    expect(find.textContaining('7月11日'), findsNothing);
+    expect(find.byType(DayCard), findsNothing);
+  });
+
+  testWidgets('12月撳「›」去1月，年份要進位', (tester) async {
+    await tester.pumpWidget(wrap(CalendarScreen(
+      profile: profile,
+      today: DateTime(2026, 12, 1),
+    )));
+
+    await tester.tap(find.text('›'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('2027年1月'), findsOneWidget);
+  });
+
+  testWidgets('1900年1月撳「‹」冇反應（clamp）', (tester) async {
+    await tester.pumpWidget(wrap(CalendarScreen(
+      profile: profile,
+      today: DateTime(1900, 1, 15),
+    )));
+
+    expect(find.textContaining('1900年1月'), findsOneWidget);
+
+    await tester.tap(find.text('‹'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('1900年1月'), findsOneWidget);
+  });
+
+  testWidgets('2100年12月撳「›」冇反應（clamp）', (tester) async {
+    await tester.pumpWidget(wrap(CalendarScreen(
+      profile: profile,
+      today: DateTime(2100, 12, 15),
+    )));
+
+    expect(find.textContaining('2100年12月'), findsOneWidget);
+
+    await tester.tap(find.text('›'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('2100年12月'), findsOneWidget);
+  });
+
+  testWidgets('揀 31 號之後跳去短月份（2月），唔會 crash 亦冇殘留舊選擇', (tester) async {
+    await tester.pumpWidget(wrap(CalendarScreen(
+      profile: profile,
+      today: DateTime(2026, 1, 11),
+    )));
+
+    await tester.tap(find.text('31'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('1月31日'), findsOneWidget);
+
+    await tester.tap(find.text('›'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.textContaining('2026年2月'), findsOneWidget);
+    expect(find.textContaining('1月31日'), findsNothing);
+    expect(find.byType(DayCard), findsNothing);
   });
 
   testWidgets('撳月曆入面第 16 日（7月16日），日卡轉去嗰日', (tester) async {
