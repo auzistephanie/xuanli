@@ -67,4 +67,48 @@ void main() {
     expect(changed, isNotNull);
     expect(changed!.birthTimeUnknown, isTrue);
   });
+
+  testWidgets('撳「農曆」segmented toggle 會通知 onChanged(isLunar: true)', (tester) async {
+    BirthDataState? changed;
+    await tester.pumpWidget(wrap(BirthDataStep(
+      isLunar: false,
+      birthDate: DateTime(1999, 9, 20),
+      birthHour: 9,
+      birthMinute: 30,
+      birthTimeUnknown: false,
+      birthPlace: '香港',
+      onChanged: (s) => changed = s,
+      onNext: () {},
+    )));
+
+    await tester.tap(find.text('農曆'));
+    await tester.pump();
+
+    expect(changed, isNotNull);
+    expect(changed!.isLunar, isTrue);
+  });
+
+  testWidgets('撳出生地點 -> 對話框輸入新地點 -> 確定 會通知 onChanged(birthPlace: 新值)', (tester) async {
+    BirthDataState? changed;
+    await tester.pumpWidget(wrap(BirthDataStep(
+      isLunar: false,
+      birthDate: DateTime(1999, 9, 20),
+      birthHour: 9,
+      birthMinute: 30,
+      birthTimeUnknown: false,
+      birthPlace: '香港',
+      onChanged: (s) => changed = s,
+      onNext: () {},
+    )));
+
+    await tester.tap(find.text('香港'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '台北');
+    await tester.tap(find.text('確定'));
+    await tester.pumpAndSettle();
+
+    expect(changed, isNotNull);
+    expect(changed!.birthPlace, '台北');
+  });
 }

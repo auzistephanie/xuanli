@@ -117,19 +117,16 @@ class BirthDataStep extends StatelessWidget {
   }
 
   Future<void> _editPlace(BuildContext context) async {
-    final controller = TextEditingController(text: birthPlace);
+    // 特登用獨立 StatefulWidget（_PlaceEditDialog）包住個
+    // TextEditingController，唔喺呢度直接 new 咗佢再喺 showDialog
+    // await 完即刻 dispose——嗰種寫法會同 dialog 嘅退場動畫撞期
+    // （route 嘅 Future 一 pop 就 resolve，但 TextField 呢陣時可能
+    // 仲喺度做 fade-out，都仲會用緊個 controller），觸發
+    // 「used after disposed」。交畀 State.dispose() 處理就保證啱啱好
+    // 喺 framework 真正 unmount 嗰刻先 dispose，冇呢個 race。
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('出生地點'),
-        content: TextField(controller: controller, autofocus: true),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('確定'),
-          ),
-        ],
-      ),
+      builder: (context) => _PlaceEditDialog(initialText: birthPlace),
     );
     if (result != null && result.trim().isNotEmpty) {
       onChanged(_state.copyWith(birthPlace: result.trim()));
@@ -233,6 +230,44 @@ class BirthDataStep extends StatelessWidget {
           OnboardingPrimaryButton(label: '下一步', onPressed: onNext),
         ],
       ),
+    );
+  }
+}
+
+/// 出生地點編輯對話框，獨立成 [StatefulWidget] 純粹為咗令
+/// [TextEditingController] 嘅生命週期同呢個 widget 自己綁死——由
+/// [State.dispose] 負責清理，保證唔會喺 dialog 退場動畫播緊嗰陣被
+/// 外面提早 dispose 咗（見 [BirthDataStep._editPlace] 嘅註解）。
+class _PlaceEditDialog extends StatefulWidget {
+  final String initialText;
+
+  const _PlaceEditDialog({required this.initialText});
+
+  @override
+  State<_PlaceEditDialog> createState() => _PlaceEditDialogState();
+}
+
+class _PlaceEditDialogState extends State<_PlaceEditDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialText);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('出生地點'),
+      content: TextField(controller: _controller, autofocus: true),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: const Text('確定'),
+        ),
+      ],
     );
   }
 }
