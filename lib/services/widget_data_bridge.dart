@@ -49,10 +49,16 @@ class WidgetDayPayload {
 
 /// 橋接 engine 同原生 home-screen widget（spec §9.6）。用 [HomeWidget]
 /// package 寫入未來 7 日 [WidgetDayPayload] JSON。設計原則同
-/// `CalendarSyncService`（Phase 2h）一致：淨係 best-effort background
-/// refresh，就算 platform channel 冇註冊 implementation（呢個 plan
-/// 未起native widget extension，本身就係而家嘅現實）都唔會 throw，
+/// `CalendarSyncService`（Phase 2h）一致：只有 platform-channel 寫入
+/// 呢步先係 best-effort——就算冇註冊 native implementation（呢個 plan
+/// 未起 native widget extension，本身就係而家嘅現實）都唔會 throw，
 /// 唔應該因為呢個背景刷新失敗而累到成個 app 開唔到。
+///
+/// 7 日份嘅 payload 計算（`_payloadFor` 個 loop + JSON encode）本身
+/// 純 Dart、食已驗證嘅 [Profile]，預期一定成功——冇被呢個 try/catch
+/// 包住，如果呢部分出錯屬於真 bug（例如 `buildDayReading` 簽名將來
+/// 改咗、null-check 爆），應該原樣爆出嚟，唔應該同「native widget
+/// 未存在」呢種預期之內嘅失敗一齊被靜靜吞咗。
 class WidgetDataBridge {
   static const _dataKey = 'xuanli_week_readings';
 
@@ -63,14 +69,14 @@ class WidgetDataBridge {
   static const _androidWidgetName = 'XuanLiWidgetProvider';
 
   Future<void> refreshNext7Days(Profile profile, {DateTime? today}) async {
-    try {
-      final start = today ?? DateTime.now();
-      final startDate = DateTime(start.year, start.month, start.day);
-      final payloads = [
-        for (var i = 0; i < 7; i++) _payloadFor(profile, startDate.add(Duration(days: i))),
-      ];
-      final jsonStr = json.encode(payloads.map((p) => p.toJson()).toList());
+    final start = today ?? DateTime.now();
+    final startDate = DateTime(start.year, start.month, start.day);
+    final payloads = [
+      for (var i = 0; i < 7; i++) _payloadFor(profile, startDate.add(Duration(days: i))),
+    ];
+    final jsonStr = json.encode(payloads.map((p) => p.toJson()).toList());
 
+    try {
       await HomeWidget.saveWidgetData<String>(_dataKey, jsonStr);
       await HomeWidget.updateWidget(
         iOSName: _iOSWidgetName,

@@ -83,8 +83,14 @@ void main() {
       expect(first['ganzhiDay'], '丙戌');
       expect(first['band'], isA<String>());
       expect(first['fortuneScore'], isA<int>());
-      expect((first['yi'] as List).length, lessThanOrEqualTo(3));
-      expect((first['ji'] as List).length, lessThanOrEqualTo(2));
+
+      // 2026-07-11（first）真實 yi/ji 數量本身已經 ≤ cap，唔夠力證
+      // 明真係有 truncate 咗；2026-07-12（decoded[1]）真實數量係
+      // yi=5／ji=4，確實超過 take(3)/take(2) 個 cap，用呢日先可以
+      // 真正驗到 truncation 發生咗（唔係「啱啱好喺 cap 之下」）。
+      final second = decoded[1] as Map<String, dynamic>;
+      expect(second['yi'] as List, hasLength(3));
+      expect(second['ji'] as List, hasLength(2));
 
       final last = decoded.last as Map<String, dynamic>;
       expect(last['date'], '2026-07-17'); // today + 6 days
