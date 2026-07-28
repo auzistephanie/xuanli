@@ -86,7 +86,11 @@ String buildActivityReason({
 
   final clauses = <String>[];
   if (keywordHit) {
-    clauses.add('通勝明載「宜${activity.hitKeywords.first}」');
+    // .firstWhere（唔用 .first）：日後如果某個活動加多個
+    // hitKeyword，要確保引用嘅的確係「通勝入面真係中咗」嗰個字，
+    // 唔係淨係嗰個活動嘅第一個字（可能同 [day.yi] 完全冇關）。
+    final matchedKeyword = activity.hitKeywords.firstWhere((k) => day.yi.contains(k));
+    clauses.add('通勝明載「宜$matchedKeyword」');
   }
   if (zhiXingHit) {
     clauses.add('${day.zhiXing}日利成事');
@@ -95,8 +99,10 @@ String buildActivityReason({
     clauses.add('${activity.element}氣旺，同你相親');
   }
 
+  // 3 個信號全冧唔中通常代表呢日對呢個活動嚟講其實普通（甚至偏忌），
+  // 唔應該講「平順」呢類正面字眼誤導用戶——改用中性講法。
   final body = clauses.isEmpty
-      ? '今日整體平順，適合${activity.name}'
+      ? '今日冇特別命中，${activity.name}僅供參考'
       : clauses.join('，');
 
   return '🔮 $body。';
