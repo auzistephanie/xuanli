@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -198,5 +199,187 @@ void main() {
 
       expect(find.textContaining('你嘅行程'), findsNothing);
     });
+
+    testWidgets(
+      '快速撳日 5 就撳日 10（日 5 個 request 仲未返到嚟就撳咗日 10）：'
+      '就算日 5 個 response 遲過日 10 至返到（out-of-order），都唔應該'
+      '用嚟蓋走已經顯示緊嘅日 10 行程（generation-counter guard）',
+      (tester) async {
+        // day 5／day 10 各自一個 completer，畀測試自己揸主幾時完成，
+        // 模擬 platform-channel round-trip 遲返、而且遲到嘅係較舊嗰個
+        // request。其他 query（初次 mount 嘅月/日 load）即刻返，唔
+        // 阻住 pumpAndSettle。
+        final dayCompleters = <int, Completer<String>>{};
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
+          switch (call.method) {
+            case 'hasPermissions':
+            case 'requestPermissions':
+              return true;
+            case 'retrieveCalendars':
+              return json.encode([
+                {'id': 'cal1', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+              ]);
+            case 'retrieveEvents':
+              final args = Map<String, dynamic>.from(call.arguments as Map);
+              final startMs = args['startDate'] as int;
+              final endMs = args['endDate'] as int;
+              final isDayQuery =
+                  endMs - startMs <= const Duration(days: 1).inMilliseconds;
+              // 用系統 local time 解碼返（唔好用 isUtc:true）：production
+              // code 起 query range 個陣用嘅係普通 `DateTime(y,m,d)`
+              // （wall-clock/local），唔係 UTC，所以要用返同一種方式先
+              // 解碼得返正確嘅 day（例如喺 UTC+8 機度，用 isUtc:true 讀
+              // 會俾差一日）。
+              final day = DateTime.fromMillisecondsSinceEpoch(startMs).day;
+              if (isDayQuery && (day == 5 || day == 10)) {
+                final completer = Completer<String>();
+                dayCompleters[day] = completer;
+                return completer.future;
+              }
+              return json.encode([]);
+            default:
+              return null;
+          }
+        });
+
+        await tester.pumpWidget(wrap(CalendarScreen(
+          profile: profile,
+          today: DateTime(2026, 7, 20),
+        )));
+        await tester.pumpAndSettle();
+
+        // 撳日 5：request 出發，但都未完成（completer 仲未 complete）。
+        // hasPermission()／retrieveCalendars() 中間都各自有一層 await，
+        // 所以要 pump 多幾次先真正行到 retrieveEvents 嗰步、將個
+        // completer 記落 map（單一次 pump 唔夠 flush 晒啲 microtask）。
+        await tester.tap(find.text('5'));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        expect(dayCompleters.containsKey(5), isTrue,
+            reason: '日 5 個 retrieveEvents request 應該已經出發、但仲未完成');
+
+        // 日 5 個 response 都仲未返，用戶又快手撳咗日 10：又出發多一個
+        // request，呢個時候兩個都仲 in-flight。
+        await tester.tap(find.text('10'));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        expect(dayCompleters.containsKey(10), isTrue,
+            reason: '日 10 個 retrieveEvents request 應該已經出發、但仲未完成');
+
+        // Out-of-order：後出發嘅日 10 request 先完成……
+        dayCompleters[10]!.complete(json.encode([
+          {
+            'eventId': 'e10',
+            'calendarId': 'cal1',
+            'eventTitle': '十號會議',
+            'eventStartDate':
+                DateTime.utc(2026, 7, 10, 10, 0).millisecondsSinceEpoch,
+            'eventEndDate':
+                DateTime.utc(2026, 7, 10, 11, 0).millisecondsSinceEpoch,
+            'eventAllDay': false,
+          },
+        ]));
+        await tester.pump();
+
+        // ……先出發嘅日 5 request 遲啲至完成（先出發、遲返嘅典型
+        // race scenario）。
+        dayCompleters[5]!.complete(json.encode([
+          {
+            'eventId': 'e5',
+            'calendarId': 'cal1',
+            'eventTitle': '五號會議',
+            'eventStartDate':
+                DateTime.utc(2026, 7, 5, 14, 0).millisecondsSinceEpoch,
+            'eventEndDate':
+                DateTime.utc(2026, 7, 5, 15, 0).millisecondsSinceEpoch,
+            'eventAllDay': false,
+          },
+        ]));
+        await tester.pumpAndSettle();
+
+        // 用戶最後撳嗰個係日 10，顯示緊嘅日卡／行程都應該係日 10 嗰單
+        // ——唔應該畀遲返到嘅日 5 response 蓋走。
+        expect(find.textContaining('7月10日'), findsOneWidget);
+        expect(find.text('10:00 十號會議'), findsOneWidget);
+        expect(find.text('14:00 五號會議'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      '揀第二個月（8月）入面有 event 嗰日：真係經 CalendarScreen → '
+      'CalendarSyncService → CalendarGrid 成條路查，grid 格仔會顯示行程橫條'
+      '（唔係 widgets-only test 嗰種 hand-construct CalendarCellData）',
+      (tester) async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
+          switch (call.method) {
+            case 'hasPermissions':
+            case 'requestPermissions':
+              return true;
+            case 'retrieveCalendars':
+              return json.encode([
+                {'id': 'cal1', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+              ]);
+            case 'retrieveEvents':
+              final args = Map<String, dynamic>.from(call.arguments as Map);
+              final startMs = args['startDate'] as int;
+              final endMs = args['endDate'] as int;
+              final start = DateTime.fromMillisecondsSinceEpoch(startMs, isUtc: true);
+              final end = DateTime.fromMillisecondsSinceEpoch(endMs, isUtc: true);
+              final eventStart = DateTime.utc(2026, 8, 5, 10, 0);
+              if (!eventStart.isBefore(start) && eventStart.isBefore(end)) {
+                return json.encode([
+                  {
+                    'eventId': 'e-aug5',
+                    'calendarId': 'cal1',
+                    'eventTitle': '八月五號活動',
+                    'eventStartDate': eventStart.millisecondsSinceEpoch,
+                    'eventEndDate':
+                        DateTime.utc(2026, 8, 5, 11, 0).millisecondsSinceEpoch,
+                    'eventAllDay': false,
+                  },
+                ]);
+              }
+              return json.encode([]);
+            default:
+              return null;
+          }
+        });
+
+        await tester.pumpWidget(wrap(CalendarScreen(
+          profile: profile,
+          today: DateTime(2026, 7, 11),
+        )));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('›'));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('2026年8月'), findsOneWidget);
+
+        final colors = XuanLiTheme.light().extension<XuanLiColors>()!;
+        final eventBarFinder = find.byWidgetPredicate((w) =>
+            w is Container &&
+            w.constraints?.maxHeight == 2.5 &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).color == colors.ink60);
+
+        final day5Cell = find.ancestor(
+          of: find.text('5'),
+          matching: find.byType(GestureDetector),
+        );
+        final day6Cell = find.ancestor(
+          of: find.text('6'),
+          matching: find.byType(GestureDetector),
+        );
+
+        expect(find.descendant(of: day5Cell, matching: eventBarFinder), findsOneWidget);
+        expect(find.descendant(of: day6Cell, matching: eventBarFinder), findsNothing);
+      },
+    );
   });
 }

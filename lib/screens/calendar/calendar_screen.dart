@@ -28,6 +28,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   final _calendarSync = CalendarSyncService();
 
+  /// 單一共用計數器，畀 [_loadMonthEvents]／[_loadSelectedDayEvents] 兩個
+  /// async load method 一齊用——防止「撳快幾下、後嗰個 request 先返
+  /// 嚟、之前嗰個先返嚟」out-of-order 情況覆蓋咗新嘅結果（例如撳日 5
+  /// 未等到就撳日 10，如果日 5 個 response 遲過日 10 先返到，唔應該
+  /// 用日 5 個結果去蓋走已經顯示緊嘅日 10 資料）。每次開始一個新
+  /// load 就加一；個 load 完成、準備 setState 之前，再檢查吓個計數器
+  /// 係咪仲係自己出發嗰陣嘅數值——唔係就代表中途有更新嘅 load 出發
+  /// 咗，呢個已經過時，靜靜咁 return 唔好 setState。兩個 method 共用
+  /// 一個計數器（而唔係各自一個）：邏輯上簡單啲，亦都啱——一個 load
+  /// 出發即代表之前任何一個仲未完成嘅 load（無論邊個 method 出發）都
+  /// 已經過時，寧可保守啲多捨棄幾次都好過漏咗。
+  int _loadGeneration = 0;
+
   late DateTime _displayedMonth;
   int? _selectedDay;
   bool _calendarAvailable = false;
@@ -63,16 +76,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadMonthEvents() async {
+    final generation = ++_loadGeneration;
     final monthStart = DateTime(_displayedMonth.year, _displayedMonth.month, 1);
     final monthEnd = DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
     final events = await _calendarSync.eventsInRange(start: monthStart, end: monthEnd);
     if (!mounted) return;
+    if (generation != _loadGeneration) return; // 過時 response，已經有新 load 出發咗
     setState(() {
       _daysWithEventsInDisplayedMonth = events.map((e) => e.start.day).toSet();
     });
   }
 
   Future<void> _loadSelectedDayEvents() async {
+    final generation = ++_loadGeneration;
     final day = _selectedDay;
     if (day == null) {
       setState(() => _selectedDayEvents = []);
@@ -81,6 +97,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final date = DateTime(_displayedMonth.year, _displayedMonth.month, day);
     final events = await _calendarSync.eventsOnDay(date);
     if (!mounted) return;
+    if (generation != _loadGeneration) return; // 過時 response，已經有新 load 出發咗
     setState(() => _selectedDayEvents = events);
   }
 

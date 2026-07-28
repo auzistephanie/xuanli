@@ -148,7 +148,10 @@ class CalendarGrid extends StatelessWidget {
 }
 
 /// 展開日卡（design html 撳日展開嗰張卡）。宜/忌用一行精簡列表顯示
-/// （唔係 Tab A `YjColumn` 嗰種盒仔），行程部分係 stub。
+/// （唔係 Tab A `YjColumn` 嗰種盒仔）；行程部分已經係真資料——由
+/// [CalendarScreen] 經 `CalendarSyncService` 讀返嚟，經 [calendarAvailable]
+/// gate 住（冇權限或者未查完就成個 section 隱藏），呢個 widget 本身
+/// 淨係負責顯示 [eventLines]，唔做任何 event 讀取／篩選。
 class DayCard extends StatelessWidget {
   final String dateLabel;
   final String band;
@@ -157,7 +160,7 @@ class DayCard extends StatelessWidget {
   final String yiLine;
   final String jiLine;
   final bool calendarAvailable; // false＝日曆權限未批（或者未查完）：成個行程 section 靜默隱藏（spec §9.9）
-  final List<String> eventLines; // 已格式化 "HH:mm 標題"，最多 5 條，calendarAvailable=false 時唔會用到
+  final List<String> eventLines; // 已格式化 "HH:mm 標題"；「最多 5 條」由 CalendarScreen 揸主（呢個 widget 淨係畀咩就顯示咩，唔做 cap），calendarAvailable=false 時唔會用到
 
   const DayCard({
     super.key,
@@ -256,7 +259,7 @@ class DayCard extends StatelessWidget {
                   if (eventLines.isEmpty)
                     Text('今日冇行程', style: TextStyle(fontSize: 11.5, color: colors.ink30))
                   else
-                    for (final line in eventLines.take(5))
+                    for (final line in eventLines)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(line, style: TextStyle(fontSize: 11.5, color: colors.ink)),
