@@ -89,6 +89,12 @@ void main() {
     expect(themeModeController.value, ThemeMode.dark);
   });
 
+  // 呢個 test 名講「唔會等佢完先顯示 TabShell」，但 pumpAndSettle() 會
+  // drain 埋成個 fire-and-forget call 先至去到 assertion，所以實際上
+  // 冇證明到「唔阻住」呢個 timing claim——淨係證明咗 bootstrap 期間
+  // saveWidgetData 真係會被 call 到。真正嘅「唔阻住」保證嚟自
+  // main.dart 冇 await 呢個 call（睇 _run() 嗰句 unawaited(...)），
+  // 唔係嚟自呢個 test。
   testWidgets(
       'XuanLiApp：有已存 profile 時，bootstrap 會觸發一次 widget data refresh（唔會等佢完先顯示 TabShell）',
       (tester) async {
