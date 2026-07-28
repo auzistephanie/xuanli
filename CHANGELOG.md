@@ -2,6 +2,17 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+## 2026-07-28 Phase 2h 日曆整合完成 — Tab B/C 接返真 device_calendar，Phase 2 App UI 收尾
+
+- **新增 `CalendarSyncService`**（`lib/services/calendar_sync.dart`）：包裝 `device_calendar` 嘅權限/讀/寫（`hasPermission`/`requestPermission`/`addAllDayEvent`/`eventsInRange`/`eventsOnDay`），冇 throw、一律靜靜返 `false`/`[]`。`device_calendar: ^4.3.0` 本身已經喺 `pubspec.yaml`（之前裝咗冇用過），今次冇加新 package。
+- **Tab C（`CalendarScreen`）**：月格仔嘅行程幼條、日卡「📅 你嘅行程」section，由之前永遠 `false` 嘅 `hasEvents` stub，接返真實讀取（首次入 Tab 問一次權限，拒絕就成個行程 section 靜默隱藏）。
+- **Tab B（`ActivityScreen`）**：「＋ 加入我嘅日曆」（建全日 event）、「當日行程 ›」（讀當日 events，AlertDialog 顯示）由之前嘅 stub SnackBar，接返真實寫入/讀取。
+- ⚠️ **未驗證項**：呢個 phase 淨係用 mocked platform channel（`flutter test` 全部 mock，冇真機/simulator）驗證過所有可達 code path；真實裝置上嘅權限對話框行為、寫入實際日曆 app 後嘅顯示效果，都未喺呢部 Mac 上測試過，上線前要搵真機/simulator 補測。
+- **Review 過程執到兩個假線索**（記低畀之後嘅人唔使再行多次）：
+  1. 一開始以為 `addAllDayEvent` 嘅全日事件有 timezone bug，加咗個 `_hostFixedOffsetLocation()` 想修——後來證實唔使：`TZDateTime.from` 係 instant-preserving，`device_calendar` 自己嗰套「用 host local time 重新歸位」邏輯喺真機上（app 同日曆共用同一個系統 timezone）本身已經自洽，呢個「修法」刪返走。
+  2. `CalendarScreen` 讀月/日 events 屬於 async，需要防止「慢嗰個 response 遲到、蓋走快嗰個嘅新結果」（request-ordering）——第一版用一個共用嘅 generation counter，review 發現呢個共用版會俾一個唔相關嘅撳日動作，靜靜蓋走緊 in-flight 嘅月讀取結果，於是拆做兩個獨立 counter（`_monthLoadGeneration`／`_dayLoadGeneration`）。
+- **已知、刻意延後嘅跟進項**（Task 3 review 提出，唔急）：Tab B「＋ 加入我嘅日曆」冇防重複撳保護——如果權限已批（冇彈系統對話框卡住），連撳兩下會建到兩個重複 event，因為 `addAllDayEvent` 一律建新、唔會更新舊嘅。呢個係 plan 本身冇考慮到嘅缺口，已經照 spec 原樣做齊，值得起個小 follow-up（撳落之後 disable 個掣，等自己嗰次寫完先放返）但唔急。
+
 ## 2026-07-25 `.active-session.lock*` 冇入 .gitignore → session 鎖檔一直推上 GitHub
 
 - **問題**：`session-lock.sh` 喺每個 repo 根寫 `.active-session.lock`；release 嗰陣 Drive mount `rm` 唔到（device bridge 冇 rm 權限），會 fallback 改名做 `.active-session.lock.DELETE-ME-<epoch>`。兩種檔全部 repo 都**冇入 `.gitignore`**，所以 `github_push.py` 照推——最舊一個殘留檔 timestamp 係 **2026-07-14**，即係呢個洩漏行咗成十日。
