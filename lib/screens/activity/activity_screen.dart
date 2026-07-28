@@ -195,12 +195,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
   /// 淘汰邏輯本身已經喺 [scoreActivityForDay] 度，呢度淨係用返公開
   /// 嘅 engine function 掃一次搵嚟做「已為你避開」信任文案，冇重複
   /// 邏輯）。搵唔到就 null（例如「睇醫生」冇 avoidKeywords，永遠搵唔到）。
+  /// 淨係喺頭 [_avoidedDayScanWindow] 日度搵例子，唔會掃成個
+  /// 已揀範圍（三個月＝90日）——「已為你避開 XX」呢句淨係想畀用戶
+  /// 一個具體例子建立信心，唔使窮盡成個範圍先搵到；一個貼近今日
+  /// 嘅例子對用戶仲更相關。呢個上限本身亦順便解決咗一個真實嘅
+  /// performance 問題：`rankActivities()` 本身已經行過一次
+  /// `AlmanacDay.forDate`/`scoreActivityForDay`，冇上限嘅版本會
+  /// 喺三個月範圍度成 90 日行多一次，量度過喺 rebuild 度會逼近甚至
+  /// 超過一個 frame budget。
+  static const _avoidedDayScanWindow = 14;
+
   (DateTime, String)? _findFirstAvoidedDay({
     required Activity activity,
     required List<DateTime> dates,
   }) {
     if (activity.avoidKeywords.isEmpty) return null;
-    for (final date in dates) {
+    for (final date in dates.take(_avoidedDayScanWindow)) {
       final day = AlmanacDay.forDate(date);
       final score = scoreActivityForDay(
         activity: activity,

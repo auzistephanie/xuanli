@@ -72,4 +72,29 @@ void main() {
 
     expect(find.textContaining('★'), findsWidgets);
   });
+
+  testWidgets('撳「三個月」範圍，個殼仲喺度，唔會爆嘢或者卡住', (tester) async {
+    await tester.pumpWidget(wrap(ActivityScreen(
+      profile: profile,
+      today: DateTime(2026, 7, 11),
+    )));
+
+    await tester.tap(find.text('三個月'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('我想做⋯'), findsOneWidget);
+    expect(find.textContaining('★'), findsWidgets);
+  });
+
+  testWidgets('預設「剪髮」+ 未來一個月：2026-07-12（丁亥）忌理髮，顯示「已為你避開」', (tester) async {
+    await tester.pumpWidget(wrap(ActivityScreen(
+      profile: profile,
+      today: DateTime(2026, 7, 11),
+    )));
+
+    // 剪髮嘅 avoidKeywords=[理髮]；2026-07-12（丁亥定日）通勝忌理髮，
+    // 啱啱好喺 today+1，喺任何掃描窗口入面都應該搵到。
+    expect(find.textContaining('已為你避開'), findsOneWidget);
+    expect(find.textContaining('7月12日'), findsOneWidget);
+  });
 }
