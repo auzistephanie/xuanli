@@ -41,7 +41,12 @@ class NotificationScheduler {
   /// event write——嗰度 plain UTC 已經啱，係因為 device_calendar 自己
   /// 內部有一步 host-local 重新解讀邏輯；呢度冇類似機制，錯咗
   /// timezone 就真係會響錯鐘）。偵測唔到就維持 package 預設
-  /// （UTC）——好過成個通知功能因為呢一步失敗而全部攞唔到。
+  /// （UTC）——呢個唔係「好過冇」嘅選擇：響錯鐘（例如香港用戶
+  /// 07:30 嘅提示變咗 15:30 先響，其他 timezone 甚至可能更誇張）
+  /// 客觀嚟講比完全冇響更差。維持 UTC 純粹係因為有更高優先嘅原則
+  /// 要守——「platform-channel 失敗絕對唔可以累到成個 background
+  /// refresh 爆晒」（同 Phase 3a 定嘅設計原則一致）——先揀呢個
+  /// imperfect-but-running 嘅妥協，唔係話呢個 tradeoff 本身係好嘢。
   Future<void> _ensureTimezone() async {
     if (_timezoneReady) return;
     tzdata.initializeTimeZones();
@@ -57,6 +62,10 @@ class NotificationScheduler {
 
   Future<void> _ensureInitialized() async {
     await _ensureTimezone();
+    // TODO(phase3b, 上真機前一定要換): Android 通知小圖示淨係睇 alpha
+    // channel，`ic_launcher` 呢個全彩、冇透明度嘅 app icon 唔啱用（好
+    // 大機會顯示做一嚿白色方塊），真機測試前一定要換做一個淨色剪影嘅
+    // 專用 notification icon asset。
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     await _plugin.initialize(
