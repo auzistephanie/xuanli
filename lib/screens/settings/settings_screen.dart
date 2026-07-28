@@ -91,21 +91,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showDisclaimer() {
+  void _infoDialog(String title, Widget content) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('免責聲明'),
-        content: const SingleChildScrollView(
-          child: Text(
-            '玄曆所有推薦內容（包括命理分、宜忌、活動建議、行事曆提示等）都係基於傳統曆法同你嘅個人命理'
-            '資料自動生成，僅供參考、帶少少玄學生活趣味，並唔代表任何形式嘅專業意見。\n\n'
-            '健康、法律、財務等重要決定，請以專業人士（醫生、律師、持牌顧問等）意見為準——玄曆嘅健康'
-            '相關內容只會話你邊一日狀態較順，唔會亦唔應該被理解為「唔好睇醫生」嘅建議；財務／投資相關'
-            '內容亦只提供宜忌方向，唔構成具體買賣建議。\n\n'
-            '你嘅出生資料同命理檔案全部只存喺你部機度，玄曆唔會上傳、分享或者用嚟做任何其他用途。',
-          ),
-        ),
+        title: Text(title),
+        content: content,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -116,21 +107,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showAbout() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('關於玄曆'),
-        content: const Text(
-          '玄曆 XuanLi\n版本 1.0.0\n\n'
-          '中國傳統擇日 × 個人八字五行 × 紫微 × MBTI，全離線運作，你嘅出生資料唔會離開部機。',
+  void _showDisclaimer() {
+    _infoDialog(
+      '免責聲明',
+      const SingleChildScrollView(
+        child: Text(
+          '玄曆所有推薦內容（包括命理分、宜忌、活動建議、行事曆提示等）都係基於傳統曆法同你嘅個人命理'
+          '資料自動生成，僅供參考、帶少少玄學生活趣味，並唔代表任何形式嘅專業意見。\n\n'
+          '健康、法律、財務等重要決定，請以專業人士（醫生、律師、持牌顧問等）意見為準——玄曆嘅健康'
+          '相關內容只會話你邊一日狀態較順，唔會亦唔應該被理解為「唔好睇醫生」嘅建議；財務／投資相關'
+          '內容亦只提供宜忌方向，唔構成具體買賣建議。\n\n'
+          '你嘅出生資料同命理檔案全部只存喺你部機度，玄曆唔會上傳、分享或者用嚟做任何其他用途。',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('知道喇'),
-          ),
-        ],
+      ),
+    );
+  }
+
+  void _showAbout() {
+    _infoDialog(
+      '關於玄曆',
+      const Text(
+        '玄曆 XuanLi\n版本 1.0.0\n\n'
+        '中國傳統擇日 × 個人八字五行 × 紫微 × MBTI，全離線運作，你嘅出生資料唔會離開部機。',
       ),
     );
   }

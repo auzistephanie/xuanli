@@ -146,6 +146,23 @@ void main() {
     expect(find.textContaining('版本'), findsNothing);
   });
 
+  testWidgets('撳「推送時間」揀返個時間會存落 storage', (tester) async {
+    await tester.pumpWidget(wrap(const SettingsScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('推送時間'));
+    await tester.pumpAndSettle();
+
+    // Confirm the TimePickerDialog with its initial time (07:30 default).
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    final saved = await StorageService().loadSettings();
+    expect(saved.notificationHour, 7);
+    expect(saved.notificationMinute, 30);
+    expect(find.text('07:30'), findsOneWidget);
+  });
+
   testWidgets('撳返頭嘅 ‹ 會 pop 返上一頁', (tester) async {
     await tester.pumpWidget(wrap(Builder(builder: (context) {
       return Scaffold(
