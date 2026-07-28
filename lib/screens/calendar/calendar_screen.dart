@@ -28,18 +28,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   final _calendarSync = CalendarSyncService();
 
-  /// 單一共用計數器，畀 [_loadMonthEvents]／[_loadSelectedDayEvents] 兩個
-  /// async load method 一齊用——防止「撳快幾下、後嗰個 request 先返
-  /// 嚟、之前嗰個先返嚟」out-of-order 情況覆蓋咗新嘅結果（例如撳日 5
-  /// 未等到就撳日 10，如果日 5 個 response 遲過日 10 先返到，唔應該
-  /// 用日 5 個結果去蓋走已經顯示緊嘅日 10 資料）。每次開始一個新
-  /// load 就加一；個 load 完成、準備 setState 之前，再檢查吓個計數器
-  /// 係咪仲係自己出發嗰陣嘅數值——唔係就代表中途有更新嘅 load 出發
-  /// 咗，呢個已經過時，靜靜咁 return 唔好 setState。兩個 method 共用
-  /// 一個計數器（而唔係各自一個）：邏輯上簡單啲，亦都啱——一個 load
-  /// 出發即代表之前任何一個仲未完成嘅 load（無論邊個 method 出發）都
-  /// 已經過時，寧可保守啲多捨棄幾次都好過漏咗。
-  int _loadGeneration = 0;
+  /// [_loadMonthEvents] 專用嘅計數器，防止「撳快幾下（例如連續切換月
+  /// 份）、後嗰個 request 先返嚟、之前嗰個先返嚟」out-of-order 情況
+  /// 覆蓋咗新嘅結果。每次開始一個新 load 就加一；個 load 完成、準備
+  /// setState 之前，再檢查吓個計數器係咪仲係自己出發嗰陣嘅數值——唔
+  /// 係就代表中途有更新嘅月曆 load 出發咗，呢個已經過時，靜靜咁
+  /// return 唔好 setState。同 [_dayLoadGeneration] 分開兩個獨立計數器
+  /// （而唔係共用一個）：兩個 load method 寫嘅係完全唔相關嘅 state
+  /// （呢個寫 [_daysWithEventsInDisplayedMonth]，另一個寫
+  /// [_selectedDayEvents]），撳日只應該令舊嘅「撳日」request 過時，
+  /// 唔應該連帶累到一個完全唔相關、仲 in-flight 嘅月曆 load 都被當
+  /// 做過時（曾經用共用計數器試過，會令撳日之後、月曆 response 先返
+  /// 到嗰種情況，個月嘅 event dots 靜靜咁唔顯示——見 code review）。
+  int _monthLoadGeneration = 0;
+
+  /// [_loadSelectedDayEvents] 專用嘅計數器，同 [_monthLoadGeneration]
+  /// 分開嘅原因見嗰邊嘅註解——呢個淨係防止「連撳幾個唔同日」out-of-
+  /// order 情況（撳日 5 未等到就撳日 10，日 5 個 response 遲過日 10
+  /// 先返到，唔應該用日 5 個結果去蓋走已經顯示緊嘅日 10 資料），唔會
+  /// 理會月曆 load 嗰邊出唔出發新 request。
+  int _dayLoadGeneration = 0;
 
   late DateTime _displayedMonth;
   int? _selectedDay;
@@ -76,19 +84,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadMonthEvents() async {
-    final generation = ++_loadGeneration;
+    final generation = ++_monthLoadGeneration;
     final monthStart = DateTime(_displayedMonth.year, _displayedMonth.month, 1);
     final monthEnd = DateTime(_displayedMonth.year, _displayedMonth.month + 1, 1);
     final events = await _calendarSync.eventsInRange(start: monthStart, end: monthEnd);
     if (!mounted) return;
-    if (generation != _loadGeneration) return; // 過時 response，已經有新 load 出發咗
+    if (generation != _monthLoadGeneration) return; // 過時 response，已經有新月曆 load 出發咗
     setState(() {
       _daysWithEventsInDisplayedMonth = events.map((e) => e.start.day).toSet();
     });
   }
 
   Future<void> _loadSelectedDayEvents() async {
-    final generation = ++_loadGeneration;
+    final generation = ++_dayLoadGeneration;
     final day = _selectedDay;
     if (day == null) {
       setState(() => _selectedDayEvents = []);
@@ -97,7 +105,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final date = DateTime(_displayedMonth.year, _displayedMonth.month, day);
     final events = await _calendarSync.eventsOnDay(date);
     if (!mounted) return;
-    if (generation != _loadGeneration) return; // 過時 response，已經有新 load 出發咗
+    if (generation != _dayLoadGeneration) return; // 過時 response，已經有新日 load 出發咗
     setState(() => _selectedDayEvents = events);
   }
 

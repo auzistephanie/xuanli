@@ -310,6 +310,102 @@ void main() {
     );
 
     testWidgets(
+      '跨月份未返到嚟嗰陣撳日（cross-method）：月曆 query（8月）仲未有'
+      'response、用戶就撳咗日（呢個日 query 即刻返、完成咗），跟住月曆'
+      '嗰個遲來但係啱嘅 response 先返到——唔應該畀個日 load 誤傷咗、'
+      '個月嘅 event dots 一定要顯示出嚟（regression test：月同日兩個'
+      'load method 唔應該共用同一個 generation counter，各自嘅 in-flight'
+      'request 淨係應該畀自己 method 嘅新 request 蓋過，唔應該畀另一個'
+      'method 嘅 request 玩死）',
+      (tester) async {
+        final monthCompleter = Completer<String>();
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
+          switch (call.method) {
+            case 'hasPermissions':
+            case 'requestPermissions':
+              return true;
+            case 'retrieveCalendars':
+              return json.encode([
+                {'id': 'cal1', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+              ]);
+            case 'retrieveEvents':
+              final args = Map<String, dynamic>.from(call.arguments as Map);
+              final startMs = args['startDate'] as int;
+              final endMs = args['endDate'] as int;
+              final isDayQuery =
+                  endMs - startMs <= const Duration(days: 1).inMilliseconds;
+              final start = DateTime.fromMillisecondsSinceEpoch(startMs);
+              // 淨係 8月嘅月曆 query（非日 query）先延遲；其他一律即刻
+              // 返（包括初次 mount 嘅 7月月曆／7月11日 day query，同埋
+              // 之後撳 16 號嗰個 day query）。
+              if (!isDayQuery && start.year == 2026 && start.month == 8) {
+                return monthCompleter.future;
+              }
+              return json.encode([]);
+            default:
+              return null;
+          }
+        });
+
+        await tester.pumpWidget(wrap(CalendarScreen(
+          profile: profile,
+          today: DateTime(2026, 7, 11),
+        )));
+        await tester.pumpAndSettle();
+
+        // 撳「›」去 8月：觸發 _loadMonthEvents()，個 request 出發咗但
+        // 未完成（畀 monthCompleter 揸住）。同上面 day5/day10 個 test
+        // 一樣，中間隔咗 hasPermission()／retrieveCalendars() 幾層
+        // await，要 pump 幾次先真正行到 retrieveEvents。
+        await tester.tap(find.text('›'));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        expect(monthCompleter.isCompleted, isFalse,
+            reason: '8月個月曆 request 應該已經出發、但仲未完成');
+
+        // 月曆 response 仲未返，用戶手快撳咗日 16：觸發
+        // _loadSelectedDayEvents()，呢個 day query 即刻返、完成咗。
+        await tester.tap(find.text('16'));
+        await tester.pumpAndSettle();
+
+        // 月曆嘅 response 遲啲至返到——帶住 8月5日嘅一個真實 event。
+        monthCompleter.complete(json.encode([
+          {
+            'eventId': 'e-aug5',
+            'calendarId': 'cal1',
+            'eventTitle': '八月五號活動',
+            'eventStartDate':
+                DateTime.utc(2026, 8, 5, 10, 0).millisecondsSinceEpoch,
+            'eventEndDate':
+                DateTime.utc(2026, 8, 5, 11, 0).millisecondsSinceEpoch,
+            'eventAllDay': false,
+          },
+        ]));
+        await tester.pumpAndSettle();
+
+        // 月曆嘅正確 event data 一到，grid 應該即刻顯示 8月5日有行程
+        // 橫條——就算中間有個唔相關嘅日 load 完成咗，都唔應該畀個月
+        // load 嘅結果畀誤判做「過時」而靜靜咁被捨棄。
+        final colors = XuanLiTheme.light().extension<XuanLiColors>()!;
+        final eventBarFinder = find.byWidgetPredicate((w) =>
+            w is Container &&
+            w.constraints?.maxHeight == 2.5 &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).color == colors.ink60);
+
+        final day5Cell = find.ancestor(
+          of: find.text('5'),
+          matching: find.byType(GestureDetector),
+        );
+
+        expect(find.descendant(of: day5Cell, matching: eventBarFinder), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       '揀第二個月（8月）入面有 event 嗰日：真係經 CalendarScreen → '
       'CalendarSyncService → CalendarGrid 成條路查，grid 格仔會顯示行程橫條'
       '（唔係 widgets-only test 嗰種 hand-construct CalendarCellData）',
