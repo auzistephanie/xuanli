@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/main.dart';
+import 'package:xuanli/screens/tab_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,7 @@ void main() {
   });
 
   testWidgets(
-      'XuanLiApp：冇已存 profile 時，先顯示載入中，再跳去 onboarding 佔位畫面',
+      'XuanLiApp：冇已存 profile 時，先顯示載入中，再跳去 onboarding 流程',
       (tester) async {
     await tester.pumpWidget(const XuanLiApp());
 
@@ -30,8 +31,9 @@ void main() {
     });
     await tester.pump();
 
-    // 冇存過 profile → 應該路由去 onboarding 佔位畫面（唔係 TabShell）。
-    expect(find.text('Onboarding — 2b 起'), findsOneWidget);
+    // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係
+    // BirthDataStep，唔係 TabShell）。
+    expect(find.text('你嘅出生一刻'), findsOneWidget);
     expect(find.byType(TabShell), findsNothing);
 
     // 注意：有已存 profile → TabShell 呢條路由未有覆蓋，
