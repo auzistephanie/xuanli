@@ -5,6 +5,7 @@ import 'screens/onboarding/onboarding_flow.dart';
 import 'screens/tab_shell.dart';
 import 'services/data_loader.dart';
 import 'services/storage_service.dart';
+import 'services/theme_mode_controller.dart';
 import 'theme/xuanli_theme.dart';
 
 void main() {
@@ -16,12 +17,18 @@ class XuanLiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '玄曆',
-      debugShowCheckedModeBanner: false,
-      theme: XuanLiTheme.light(),
-      darkTheme: XuanLiTheme.dark(),
-      home: const _AppBootstrap(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeController,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          title: '玄曆',
+          debugShowCheckedModeBanner: false,
+          theme: XuanLiTheme.light(),
+          darkTheme: XuanLiTheme.dark(),
+          themeMode: mode,
+          home: const _AppBootstrap(),
+        );
+      },
     );
   }
 }
@@ -41,6 +48,8 @@ class _AppBootstrapState extends State<_AppBootstrap> {
 
   Future<Profile?> _run() async {
     await loadEngineData();
+    final settings = await StorageService().loadSettings();
+    themeModeController.value = settings.themeMode;
     return StorageService().loadPrimaryProfile();
   }
 

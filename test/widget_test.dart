@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/main.dart';
+import 'package:xuanli/models/settings.dart';
 import 'package:xuanli/screens/tab_shell.dart';
+import 'package:xuanli/services/storage_service.dart';
+import 'package:xuanli/services/theme_mode_controller.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    // rootBundle 係 process-level singleton，CachingAssetBundle 會將
+    // loadString() 嘅 Future cache 住（跨 test）。但每個 testWidgets
+    // 跑喺自己個 FakeAsync zone，一個舊 zone 完成咗嘅 cached Future
+    // 喺新 zone 度 await 永遠唔會 resolve（Flutter test framework 嘅
+    // zone 邊界問題）。呢個 repo 而家有多過一個 testWidgets 會經
+    // loadEngineData() 觸發真 asset 讀取，所以要喺 setUp() 清一清
+    // cache，確保每個 test 用返自己個 zone 讀一次新鮮嘅。
+    rootBundle.clear();
+  });
+
+  tearDown(() {
+    themeModeController.value = ThemeMode.system;
   });
 
   testWidgets(
@@ -39,5 +55,25 @@ void main() {
     // 注意：有已存 profile → TabShell 呢條路由未有覆蓋，
     // 因為要預先落一個完整 serialized Profile 落 SharedPreferences，
     // 超出呢次補漏嘅範圍。
+  });
+
+  testWidgets(
+      'XuanLiApp：bootstrap 會由 storage 讀返已存嘅深色模式設定，更新 themeModeController',
+      (tester) async {
+    await StorageService().saveSettings(const AppSettings(
+      themeMode: ThemeMode.dark,
+      notificationsEnabled: true,
+      notificationHour: 7,
+      notificationMinute: 30,
+    ));
+
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pump();
+
+    expect(themeModeController.value, ThemeMode.dark);
   });
 }
