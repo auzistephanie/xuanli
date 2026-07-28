@@ -112,16 +112,15 @@ void main() {
     });
 
     // 呢兩個 test 原本打算完全冇 mock platform channel（模擬呢部 Mac
-    // 冇 simulator 嘅真實情況，同 `CalendarSyncService` 自己嘅 unit
-    // test 一致）。但實測發現：喺 `testWidgets()`（唔係普通 `test()`）
-    // 入面，一個完全冇註冊 handler 嘅 platform channel call 會永遠
-    // hang 住（唔會好似普通 `test()` context 咁即刻拎到
-    // MissingPluginException 靜靜轉做 false）——用一個獨立嘅
-    // `testWidgets` reproduction 確認咗呢個 hang 係環境本身嘅行為，
-    // 唔係呢個 screen 嘅 code 有 bug。改為明確 mock 個 channel 令
-    // hasPermissions/requestPermissions 返 false，同
-    // `test/screens/calendar/calendar_screen_test.dart` 嘅
-    // 「冇日曆權限」test（第 185 行）用緊一模一樣嘅做法。
+    // 冇 simulator 嘅真實情況）。但跟住 plan 嘅寫法試過先發現行唔通：
+    // `pumpAndSettle()` 淨係等緊已經 schedule 咗嘅 frame，一個冇人
+    // 回應嘅 platform-channel call 唔會觸發 setState/新 frame，所以
+    // `pumpAndSettle()` 唔會等佢、即刻就 settle 完返嚟——跟住嗰句
+    // `expect` 搵唔到預期文字，assertion 即刻爆，而唔係真係跑到
+    // 「冇權限」嗰個顯示結果。改為明確 mock 個 channel 令
+    // hasPermissions/requestPermissions 返 false，令個 method 真係行到
+    // 「拒絕權限」條 path，同 `test/screens/calendar/calendar_screen_test.dart`
+    // 嘅「冇日曆權限」test（第 185 行）用緊一模一樣嘅做法。
     testWidgets('撳「＋ 加入我嘅日曆」：冇日曆權限 → 顯示提示 SnackBar', (tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(DeviceCalendarPlugin.channel, (call) async {
