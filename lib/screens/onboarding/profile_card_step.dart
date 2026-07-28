@@ -241,11 +241,21 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    _profileStatBox(colors, '喜用神', _profile.favorable.join('・')),
+                    _profileStatBox(
+                      colors,
+                      '喜用神',
+                      _profile.favorable.join('・'),
+                      _wuxingLabelColors['木']!, // design html: 喜用神 值用淺翠綠 #8fd0a8
+                    ),
                     const SizedBox(width: 8),
-                    _profileStatBox(colors, '忌神', _profile.unfavorable.join('・')),
+                    _profileStatBox(
+                      colors,
+                      '忌神',
+                      _profile.unfavorable.join('・'),
+                      const Color(0xFFE0A1A1), // design html: 忌神 值用淺紅 #e0a1a1
+                    ),
                     const SizedBox(width: 8),
-                    _profileStatBox(colors, '紫微命宮', _profile.ziweiStar),
+                    _profileStatBox(colors, '紫微命宮', _profile.ziweiStar, colors.gold),
                   ],
                 ),
                 Container(
@@ -278,7 +288,12 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
     );
   }
 
-  Widget _profileStatBox(XuanLiColors colors, String label, String value) {
+  Widget _profileStatBox(
+    XuanLiColors colors,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -296,7 +311,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
               style: TextStyle(
                 fontFamily: XuanLiFonts.serif,
                 fontSize: 13,
-                color: colors.gold,
+                color: valueColor,
               ),
             ),
           ],
