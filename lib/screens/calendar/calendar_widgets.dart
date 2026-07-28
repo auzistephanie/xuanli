@@ -42,16 +42,20 @@ class CalendarGrid extends StatelessWidget {
     final colors = context.xuanliColors;
     return Column(
       children: [
-        GridView.count(
-          crossAxisCount: 7,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 4,
-          children: [
-            for (var i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
-            for (final cell in days) _buildCell(context, colors, cell),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const spacing = 4.0;
+            final cellWidth = (constraints.maxWidth - spacing * 6) / 7;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                for (var i = 0; i < leadingBlanks; i++) SizedBox(width: cellWidth),
+                for (final cell in days)
+                  SizedBox(width: cellWidth, child: _buildCell(context, colors, cell)),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 10),
         Row(
