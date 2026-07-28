@@ -11,7 +11,7 @@
 - **Review 過程執到兩個假線索**（記低畀之後嘅人唔使再行多次）：
   1. 一開始以為 `addAllDayEvent` 嘅全日事件有 timezone bug，加咗個 `_hostFixedOffsetLocation()` 想修——後來證實唔使：`TZDateTime.from` 係 instant-preserving，`device_calendar` 自己嗰套「用 host local time 重新歸位」邏輯喺真機上（app 同日曆共用同一個系統 timezone）本身已經自洽，呢個「修法」刪返走。
   2. `CalendarScreen` 讀月/日 events 屬於 async，需要防止「慢嗰個 response 遲到、蓋走快嗰個嘅新結果」（request-ordering）——第一版用一個共用嘅 generation counter，review 發現呢個共用版會俾一個唔相關嘅撳日動作，靜靜蓋走緊 in-flight 嘅月讀取結果，於是拆做兩個獨立 counter（`_monthLoadGeneration`／`_dayLoadGeneration`）。
-- **已知、刻意延後嘅跟進項**（Task 3 review 提出，唔急）：Tab B「＋ 加入我嘅日曆」冇防重複撳保護——如果權限已批（冇彈系統對話框卡住），連撳兩下會建到兩個重複 event，因為 `addAllDayEvent` 一律建新、唔會更新舊嘅。呢個係 plan 本身冇考慮到嘅缺口，已經照 spec 原樣做齊，值得起個小 follow-up（撳落之後 disable 個掣，等自己嗰次寫完先放返）但唔急。
+- **已知、刻意延後嘅跟進項**（Task 3 review 提出，唔急）：Tab B「＋ 加入我嘅日曆」冇防重複撳保護——如果權限已批（冇彈系統對話框卡住），連撳兩下會建到兩個重複 event，因為 `addAllDayEvent` 一律建新、唔會更新舊嘅。「當日行程 ›」（`onViewSchedule`）都係同一形狀嘅缺口，只係後果輕微好多（最多疊多個 dialog，冇資料重複）。兩個都係 plan 本身冇考慮到嘅缺口，已經照 spec 原樣做齊，值得起個小 follow-up（撳落之後 disable 個掣，等自己嗰次寫完先放返）但唔急。
 
 ## 2026-07-25 `.active-session.lock*` 冇入 .gitignore → session 鎖檔一直推上 GitHub
 

@@ -8,6 +8,13 @@ class CalendarSyncEvent {
   final DateTime start;
 
   const CalendarSyncEvent({required this.title, required this.start});
+
+  /// 格式化做 "HH:mm 標題"，Tab B「當日行程」dialog／Tab C 日卡列表
+  /// 共用（同 [eventsOnDay] 一樣嘅 DRY 原則——顯示格式亦只應該有一份）。
+  String get displayLine {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(start.hour)}:${two(start.minute)} $title';
+  }
 }
 
 /// 包裝 device_calendar 嘅權限/讀/寫（spec §9.9）。設計原則：就算冇

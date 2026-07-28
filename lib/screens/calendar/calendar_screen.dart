@@ -250,11 +250,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       jiLine: reading.ji.map((e) => e.label).join('・'),
       calendarAvailable: _calendarAvailable,
       eventLines: [
-        for (final e in _selectedDayEvents.take(5))
-          '${_twoDigits(e.start.hour)}:${_twoDigits(e.start.minute)} ${e.title}',
+        for (final e in _selectedDayEvents.take(5)) e.displayLine,
       ],
     );
   }
-
-  static String _twoDigits(int n) => n.toString().padLeft(2, '0');
 }

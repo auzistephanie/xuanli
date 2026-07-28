@@ -93,10 +93,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     for (final e in events)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(
-                          '${e.start.hour.toString().padLeft(2, '0')}:'
-                          '${e.start.minute.toString().padLeft(2, '0')} ${e.title}',
-                        ),
+                        child: Text(e.displayLine),
                       ),
                   ],
                 ),
