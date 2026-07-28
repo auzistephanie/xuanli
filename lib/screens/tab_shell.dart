@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/profile.dart';
 import '../theme/xuanli_theme.dart';
+import 'activity/activity_screen.dart';
 import 'today/today_screen.dart';
 
 /// 主畫面：底部三個 tab（今日／我想做／月曆）。Tabbar 樣式跟
@@ -32,7 +33,8 @@ class _TabShellState extends State<TabShell> {
         index: _index,
         children: [
           TodayScreen(profile: widget.profile),
-          for (final tab in _tabs.skip(1)) Center(child: Text(tab.placeholder)),
+          ActivityScreen(profile: widget.profile),
+          for (final tab in _tabs.skip(2)) Center(child: Text(tab.placeholder)),
         ],
       ),
       bottomNavigationBar: _TabBar(

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/models/profile.dart';
@@ -25,16 +26,18 @@ Profile _sampleProfile() => Profile(
     );
 
 void main() {
-  // TabShell 現時 index 0 掛真嘅 TodayScreen（Task 5 起），佢會
-  // call buildDayReading() → buildAdvice()/personalizedYi()，兩者
-  // 都需要呢兩個 JSON-backed cache 已初始化，否則一 build 就 throw
-  // StateError（見 today_screen_test.dart / today_widgets_test.dart
-  // 用緊嘅同一套 setUpAll pattern）。
+  // TabShell 現時 index 0/1 分別掛真嘅 TodayScreen（2c 起）同
+  // ActivityScreen（2d 起），兩者都會 call 到要求 JSON-backed cache
+  // 已初始化嘅 engine function，否則一 build 就 throw StateError（見
+  // today_screen_test.dart / activity_screen_test.dart 用緊嘅同一套
+  // setUpAll pattern）。initActivities() 係 Tab B 新加嘅一個 —
+  // ActivityScreen.build() 會直接 call loadActivities()。
   setUpAll(() {
     initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
     initActivityCategories(
       File('lib/data/activity_categories.json').readAsStringSync(),
     );
+    initActivities(File('lib/data/activities.json').readAsStringSync());
   });
 
   Widget wrap(Widget child) =>
@@ -50,7 +53,7 @@ void main() {
     await tester.tap(find.text('我想做'));
     await tester.pump();
 
-    expect(find.text('Tab B — 2d 起'), findsOneWidget);
+    expect(find.text('我想做⋯'), findsOneWidget);
   });
 
   testWidgets('撳第三個 tab（月曆）都會切換', (tester) async {
