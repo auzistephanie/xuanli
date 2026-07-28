@@ -242,3 +242,85 @@ class AdviceCard extends StatelessWidget {
     );
   }
 }
+
+/// 未來七日條（design html `.week7`）。今日（`selectedDate` 命中嗰格）
+/// 有金框；吉／忌／平三種 band 各自有主題色；撳格會 call [onSelect]。
+class Week7Strip extends StatelessWidget {
+  final List<DayReading> readings;
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onSelect;
+
+  const Week7Strip({
+    super.key,
+    required this.readings,
+    required this.selectedDate,
+    required this.onSelect,
+  });
+
+  static const _weekdayChars = ['一', '二', '三', '四', '五', '六', '日'];
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.xuanliColors;
+    return Row(
+      children: [
+        for (var i = 0; i < readings.length; i++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: i == readings.length - 1 ? 0 : 6),
+              child: _buildDay(context, colors, readings[i]),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDay(BuildContext context, XuanLiColors colors, DayReading reading) {
+    final isToday = _isSameDay(reading.date, selectedDate);
+    final bandColor = reading.band == '吉'
+        ? colors.jade
+        : reading.band == '忌'
+            ? colors.red
+            : colors.ink;
+    final bgColor = reading.band == '吉'
+        ? colors.jade.withValues(alpha: 0.12)
+        : reading.band == '忌'
+            ? colors.red.withValues(alpha: 0.09)
+            : colors.cardSurface;
+    final borderColor = isToday
+        ? colors.gold
+        : reading.band == '吉'
+            ? colors.jade.withValues(alpha: 0.3)
+            : reading.band == '忌'
+                ? colors.red.withValues(alpha: 0.28)
+                : colors.ink12;
+
+    return GestureDetector(
+      onTap: () => onSelect(reading.date),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border.all(color: borderColor, width: isToday ? 2 : 1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Text(
+              _weekdayChars[reading.date.weekday - 1],
+              style: TextStyle(fontSize: 10, color: colors.ink60),
+            ),
+            Text(
+              '${reading.date.day}',
+              style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 13, color: bandColor),
+            ),
+            Text(reading.band, style: TextStyle(fontSize: 10, color: colors.ink60)),
+          ],
+        ),
+      ),
+    );
+  }
+}
