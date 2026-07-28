@@ -2,6 +2,13 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+## 2026-07-29 Phase 3a Widget 資料橋接完成（淨係 Dart 端寫入，未起 native widget）
+
+- **`buildNotificationText()` 加咗落 `lib/engine/copywriter.dart`**：短版文案（spec §9.7），例如「今日丙戌日・命理分42・宜祈福、靜修，忌簽約。避開申時落大決定。」——除咗畀之後嘅通知功能用，而家即刻俾 widget「中」size 攞嚟顯示。
+- **新增 `WidgetDataBridge`**（`lib/services/widget_data_bridge.dart`）：包裝本身已經喺 `pubspec.yaml` 但一直未用過嘅 `home_widget` package（冇加新 package），負責計未來 7 日嘅 `DayReading` 再序列化做 JSON、寫入 native widget 讀嗰個 storage（spec §9.6 嘅資料流要求）。已接入 `main.dart` 嘅 app 開啟 bootstrap，用 `unawaited()` 完全 fire-and-forget，唔會拖慢冷啟動。
+- **範圍邊界（講清楚）**：呢個 phase 淨係做完 spec §9.6 嘅 Dart 端寫入呢一半。**未起 iOS WidgetKit extension 或者 Android AppWidgetProvider**——卡喺呢部 Mac 冇裝 Xcode／Android Studio（`flutter doctor` 確認：淨係 Xcode Command Line Tools、冇 CocoaPods、冇 Android SDK）。Stephanie 會另外裝返呢批 tooling，native widget UI 呢部分要等裝好先繼續。**呢個 plan 亦刻意冇做通知排程**（spec §9.7 嘅送達機制，`flutter_local_notifications`／`zonedSchedule`）——原因係嗰個 package 用緊完全唔同嘅測試架構（Pigeon 生成嘅 platform interface，唔似 `device_calendar`／`home_widget` 咁樣簡單可以 mock 個 `MethodChannel`），而且要準確嘅通知發送時間仲要新加一個 `flutter_timezone` dependency 做真實裝置時區判斷（唔似 Phase 2h 日曆寫入嗰次，證實用 plain UTC 就啱）——兩樣都值得起獨立 follow-up plan 先做，唔喺呢個 plan 度趕。
+- **Review 過程執到一個真係設計修正**（記低畀之後嘅人唔使再撞一次）：`WidgetDataBridge.refreshNext7Days` 個 try/catch 一開始係包住成個 method body（計算+platform 寫入一齊包），咁會連計算部分真係有 bug 都靜靜吞埋——同「native widget 未註冊」呢種預期之內嘅失敗混埋一齊睇唔出分別。已經改窄做淨係包住 platform 寫入嗰步，payload 計算而家冇被包住，真係有 bug 會照樣爆出嚟。不過因為成個 app 完全冇 crash-reporting／zone-error-handling 嘅底層設施（冇 `runZonedGuarded`、冇覆寫 `FlutterError.onError`——grep 過確認），呢個「爆出嚟」而家淨係 dev/QA 見到，去到 release build 唔會有人睇到——呢個係已知、有記錄嘅缺口（唔係呢個 plan 嘅工作範圍，要整個 app 層面嘅 crash-reporting 底層設施先修得到），寫低喺度免得之後唔記得。
+
 ## 2026-07-28 Phase 2h 日曆整合完成 — Tab B/C 接返真 device_calendar，Phase 2 App UI 收尾
 
 - **新增 `CalendarSyncService`**（`lib/services/calendar_sync.dart`）：包裝 `device_calendar` 嘅權限/讀/寫（`hasPermission`/`requestPermission`/`addAllDayEvent`/`eventsInRange`/`eventsOnDay`），冇 throw、一律靜靜返 `false`/`[]`。`device_calendar: ^4.3.0` 本身已經喺 `pubspec.yaml`（之前裝咗冇用過），今次冇加新 package。
