@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/profile.dart';
+import '../models/settings.dart';
 
 /// Profile 持久化（spec §5：`profiles: [Profile]`，MVP 淨係用 `profiles[0]`）。
 /// 用 `shared_preferences` 存一個 JSON-encoded list string。
@@ -35,5 +36,28 @@ class StorageService {
   /// （未來多檔案支援 —— spec §2 決定 11 講嘅第二版功能 —— 先會有第二個）。
   Future<void> savePrimaryProfile(Profile profile) async {
     await saveProfiles([profile]);
+  }
+
+  static const _settingsKey = 'xuanli_settings';
+
+  Future<AppSettings> loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_settingsKey);
+    if (raw == null) return AppSettings.defaults;
+    return AppSettings.fromJson(json.decode(raw) as Map<String, dynamic>);
+  }
+
+  Future<void> saveSettings(AppSettings settings) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_settingsKey, json.encode(settings.toJson()));
+  }
+
+  /// 「重新做 Onboarding」用（spec §9.8）：清走已存嘅 profile，等
+  /// [_AppBootstrap]／[SettingsScreen] 之後嘅 `loadPrimaryProfile()`
+  /// 返回 null，跳返去 onboarding。唔清 settings（深色模式/通知偏好
+  /// 呢啲同「你係邊個」冇關，用戶冇必要因為重做 onboarding 而丟失）。
+  Future<void> clearProfiles() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_profilesKey);
   }
 }
