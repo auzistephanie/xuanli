@@ -31,27 +31,27 @@ class _TabShellState extends State<TabShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: _SettingsBar(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _SettingsBar(
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
             ),
-          ),
-          Expanded(
-            child: IndexedStack(
-              index: _index,
-              children: [
-                TodayScreen(profile: widget.profile),
-                ActivityScreen(profile: widget.profile),
-                CalendarScreen(profile: widget.profile),
-              ],
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: [
+                  TodayScreen(profile: widget.profile),
+                  ActivityScreen(profile: widget.profile),
+                  CalendarScreen(profile: widget.profile),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: _TabBar(
         selectedIndex: _index,
@@ -74,9 +74,13 @@ class _SettingsBar extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: GestureDetector(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 6, 14, 4),
-          child: Text('⚙', style: TextStyle(fontSize: 20, color: colors.ink60)),
+        child: Semantics(
+          button: true,
+          label: '設定',
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 14, 10),
+            child: Text('⚙', style: TextStyle(fontSize: 20, color: colors.ink60)),
+          ),
         ),
       ),
     );

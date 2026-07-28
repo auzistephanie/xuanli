@@ -99,4 +99,28 @@ void main() {
 
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
+
+  testWidgets(
+      '有 notch/狀態列 inset 時，頂部唔會俾 ⚙ bar 同 tab 內部自己嗰個 '
+      'SafeArea 雙重計算（TabShell 嘅 SafeArea 一定要包住成個 Column，'
+      '唔淨係包 _SettingsBar，否則 tab 畫面自己嘅 SafeArea 會再加一次）',
+      (tester) async {
+    const topInset = 47.0;
+    tester.view.padding = const FakeViewPadding(top: topInset);
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
+    await tester.pump();
+
+    final settingsBarTop = tester.getTopLeft(find.text('⚙')).dy;
+    final scrollTop = tester.getTopLeft(find.byType(SingleChildScrollView).first).dy;
+
+    // ⚙ 應該喺 inset 之後就即刻出現（俾 TabShell 嗰個 SafeArea 消化咗）。
+    expect(settingsBarTop, lessThan(topInset + 20));
+    // TodayScreen 內容嘅頂部同 ⚙ 之間嘅落差，唔應該再包多一次 topInset
+    // （即係 TodayScreen 自己嗰個 SafeArea 冇再加一次 47px）。
+    expect(scrollTop - settingsBarTop, lessThan(topInset));
+  });
 }
