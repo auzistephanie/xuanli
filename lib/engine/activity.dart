@@ -83,6 +83,20 @@ int? scoreActivityForDay({
 /// 喺 [dates] 範圍內幫 [activityName] 呢個活動排序，取分數最高頭 5 日。
 /// [fortuneScoreOf] 由 caller 傳入（scoring.dart 嘅 computeFortuneScore 已經要 favorable/userYearZhi，
 /// 呢度用 callback 避免 activity.dart 同 scoring.dart 互相 import 出現循環依賴）。
+///
+/// ⚠️ **已知未解決嘅 perf 缺口**：呢個 function 會喺 [dates] 入面每一日
+/// 都行一次 `AlmanacDay.forDate` + `scoreActivityForDay`，冇上限——
+/// Tab B（`lib/screens/activity/activity_screen.dart`）「三個月」範圍
+/// 會傳 90 個 date 入嚟，每次 rebuild（撳 chip／撳範圍）都要重新行
+/// 成 90 次。同一個 review 度量過類似規模嘅計算喺 JIT 模式已經逼近甚至
+/// 超過一個 frame budget（16.7ms）。嗰次 review 淨係封頂咗
+/// `_findFirstAvoidedDay`（一個純粹搵例子嘅信任文案功能，封頂唔影響
+/// 結果正確性），冇郁呢個 function 本身——因為排名結果需要真係掃晒
+/// 成個範圍先啱，封頂會令排名漏咗後面日子，屬於功能性倒退，唔可以
+/// 好似 avoided-day 嗰個一樣簡單截斷。要真係解決要嘛加 memoization
+/// （`AlmanacDay.forDate` 對同一個 date 結果係 pure，可以 cache）、
+/// 要嘛限制/分頁「三個月」範圍嘅實際掃描量，留返之後一個專門嘅
+/// performance task 處理，唔喺呢個 Phase 2d plan 範圍入面。
 List<ActivityDayResult> rankActivities({
   required String activityName,
   required List<DateTime> dates,
