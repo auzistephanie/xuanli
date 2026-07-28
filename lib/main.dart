@@ -56,12 +56,13 @@ class _AppBootstrapState extends State<_AppBootstrap> {
     themeModeController.value = settings.themeMode;
     final profile = await StorageService().loadPrimaryProfile();
     if (profile != null) {
-      // Fire-and-forget（唔 await）：widget 背景刷新唔應該延遲冷啟動
-      // （spec §10 Phase 2 驗收：冷啟動 <2s）。WidgetDataBridge 本身
-      // 內部已經 try/catch 晒 platform-write 嗰步，失敗唔會有未處理
-      // 嘅 exception 冚出嚟；純 Dart 嘅計算部分冇 catch，如果嗰度爆
-      // 係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該靜靜
-      // 吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
+      // Fire-and-forget（唔 await）：widget／notification 背景刷新都
+      // 唔應該延遲冷啟動（spec §10 Phase 2 驗收：冷啟動 <2s）。呢兩個
+      // service（WidgetDataBridge/NotificationScheduler）跟返同一個
+      // 設計原則：內部已經 try/catch 晒 platform-write 嗰步，失敗唔會
+      // 有未處理嘅 exception 冚出嚟；純 Dart 嘅計算部分冇 catch，如果
+      // 嗰度爆係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該
+      // 靜靜吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
       unawaited(WidgetDataBridge().refreshNext7Days(profile));
       unawaited(NotificationScheduler()
           .refreshNext7Days(profile: profile, settings: settings));
