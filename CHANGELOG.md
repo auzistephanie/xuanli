@@ -2,6 +2,14 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+## 2026-07-29 Phase 3b 通知排程完成（淨係 Dart 端排程，未起 native widget）
+
+- **新增 `NotificationScheduler`**（`lib/services/notification_scheduler.dart`）：包裝本身已經喺 `pubspec.yaml` 但一直未用過嘅 `flutter_local_notifications`，用 `zonedSchedule` 排未來 7 日嘅每朝通知——內容用 `buildNotificationText()`（Phase 3a 加嘅短版文案），時間/開關用 `AppSettings.notificationHour`/`notificationMinute`/`notificationsEnabled`（Phase 2g）。已接入 `main.dart` 嘅 app 開啟 bootstrap，同 `WidgetDataBridge`（Phase 3a）並排、一樣用 `unawaited()` 完全 fire-and-forget。
+- **今次加咗兩個新 package**：`flutter_timezone`（偵測裝置真實 IANA timezone，係準確通知響鐘時間嘅真實功能需求——唔似 Phase 2h 個日曆全日事件寫入嗰次，證實用 plain UTC 已經啱）；同 `timezone`（由本身已經係 transitive dependency〔經 `device_calendar` 帶入嚟〕升做直接 dependency，版本冇變，零 churn）。
+- **改正咗 Phase 3a 個 plan 自己講錯咗嘅一個假設**：Phase 3a 嗰陣刻意延後通知排程，理由係以為 `flutter_local_notifications` 需要一套同 `device_calendar`/`home_widget` 「完全唔同嘅測試架構」。呢個假設係錯嘅——執到 installed package 嘅源碼先發現，佢實際嘅 platform 實作用嘅都係普通、可以 mock 嘅 `MethodChannel`，同另外兩個 package 一模一樣。記低喺度，等之後嘅人唔使再撞多次同一個過度審慎嘅延後決定。
+- **Review 過程執到兩個真問題，已修**：(1) timezone 偵測失敗降級做 UTC 嗰段 doc comment，原本寫到好似話「總之好過唔排」——修正做兩面睇嘅講法：響錯 timezone 嘅鐘客觀嚟講可能比完全冇響更差，維持 UTC 純粹係因為有更高優先嘅「platform-channel 失敗絕對唔可以累到成個 background refresh 爆晒」原則要守，唔係話呢個妥協本身係好嘢；(2) `AndroidInitializationSettings('@mipmap/ic_launcher')` 呢個 placeholder 通知圖示，review 確認咗係**真實嘅上真機前必修 blocker**，唔係得個諗頭——Android 個 status bar 通知小圖示淨係睇 alpha channel，而呢個 app 實際嘅 launcher icon（睇過真 PNG 資產確認）係全彩、冇透明度嘅，好大機會顯示做一嚿破晒嘅白色方塊。Code 入面已經加咗 `TODO(phase3b, 上真機前一定要換)` 註解標住；**呢度特登都寫低一次**，等之後唔會漏——上真機測試通知之前，一定要整一個正經嘅單色剪影 notification icon 資產先。
+- **範圍邊界**：呢個 plan 淨係跟 spec §9.7 字面（「app 每次打開 refresh」）接咗去 app-launch bootstrap，冇接落 `SettingsScreen` 個通知開關/時間揀選器（唔會做「改完 settings 即刻 reschedule」嗰種 live 效果——下次開 app 個 refresh 自然會攞到新 settings，spec 亦冇要求即時生效）。真實裝置上嘅通知送達/權限對話框/準確響鐘時間都仲未驗證過——呢部 Mac 冇 simulator/裝置，同 Phase 2g 之後每個裝置相關功能一樣嘅老問題。
+
 ## 2026-07-29 Phase 3a Widget 資料橋接完成（淨係 Dart 端寫入，未起 native widget）
 
 - **`buildNotificationText()` 加咗落 `lib/engine/copywriter.dart`**：短版文案（spec §9.7），例如「今日丙戌日・命理分42・宜祈福、靜修，忌簽約。避開申時落大決定。」——除咗畀之後嘅通知功能用，而家即刻俾 widget「中」size 攞嚟顯示。
