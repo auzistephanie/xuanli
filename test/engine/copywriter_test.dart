@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:test/test.dart';
+import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/copywriter.dart';
 
 void main() {
   setUpAll(() {
     initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
+    initActivities(File('lib/data/activities.json').readAsStringSync());
   });
 
   group('今日貼身建議模板引擎', () {
@@ -59,6 +61,38 @@ void main() {
         mbti: 'ISFJ', ziweiStar: '天機', avoidHour: null,
       );
       expect(advice.contains('避開'), isFalse);
+    });
+  });
+
+  group('buildActivityReason', () {
+    test('三個信號全中：2026-07-13（戊子執日）剪髮 + 喜木', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 13));
+      final activity = loadActivities().firstWhere((a) => a.name == '剪髮');
+
+      final reason = buildActivityReason(
+        activity: activity,
+        day: day,
+        favorable: const ['木'],
+      );
+
+      expect(reason, startsWith('🔮'));
+      expect(reason, contains('理髮'));
+      expect(reason, contains('執'));
+      expect(reason, contains('木'));
+    });
+
+    test('全部唔中：2026-07-11（丙戌平日）剪髮 + 喜金 -> 用返 fallback 句', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final activity = loadActivities().firstWhere((a) => a.name == '剪髮');
+
+      final reason = buildActivityReason(
+        activity: activity,
+        day: day,
+        favorable: const ['金'],
+      );
+
+      expect(reason, startsWith('🔮'));
+      expect(reason, contains('剪髮'));
     });
   });
 }

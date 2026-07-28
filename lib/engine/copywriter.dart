@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'activity.dart';
 import 'almanac.dart';
 
 Map<String, List<String>>? _toneCache;
@@ -68,4 +69,35 @@ String buildAdvice({
   if (ziwei.isNotEmpty) segments.add(ziwei);
   if (avoidHour != null) segments.add('避開$avoidHour落重要決定。');
   return segments.where((s) => s.isNotEmpty).join('');
+}
+
+/// 反向擇日「🔮 原因」文案（spec §7：「每個結果經 copywriter 產生🔮原因」）。
+/// MVP 簡化版：檢查 [scoreActivityForDay] 已經計緊嘅 3 個信號
+/// （宜項關鍵字命中／建除相合／五行親和），有邊個中就講邊個，
+/// 全部唔中就用返一句保底文案——deterministic，唔用 LLM。
+String buildActivityReason({
+  required Activity activity,
+  required AlmanacDay day,
+  required List<String> favorable,
+}) {
+  final keywordHit = activity.hitKeywords.any((k) => day.yi.contains(k));
+  final zhiXingHit = activity.goodZhiXing.contains(day.zhiXing);
+  final elementMatch = favorable.contains(activity.element);
+
+  final clauses = <String>[];
+  if (keywordHit) {
+    clauses.add('通勝明載「宜${activity.hitKeywords.first}」');
+  }
+  if (zhiXingHit) {
+    clauses.add('${day.zhiXing}日利成事');
+  }
+  if (elementMatch) {
+    clauses.add('${activity.element}氣旺，同你相親');
+  }
+
+  final body = clauses.isEmpty
+      ? '今日整體平順，適合${activity.name}'
+      : clauses.join('，');
+
+  return '🔮 $body。';
 }
