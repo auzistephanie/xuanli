@@ -266,6 +266,51 @@ void main() {
       expect(events[1].title, '晚飯');
     });
 
+    test('event 冇 eventTitle（好似某啲 reminder-style event）會被靜靜跳過，唔會出現喺結果入面', () async {
+      mockChannel((call) async {
+        if (call.method == 'hasPermissions') return true;
+        if (call.method == 'retrieveCalendars') {
+          return json.encode([
+            {'id': 'personal', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+          ]);
+        }
+        if (call.method == 'retrieveEvents') {
+          return json.encode([
+            {
+              'eventId': 'e1',
+              'calendarId': 'personal',
+              'eventTitle': '晚飯',
+              'eventStartDate':
+                  DateTime.utc(2026, 7, 16, 19, 0).millisecondsSinceEpoch,
+              'eventEndDate':
+                  DateTime.utc(2026, 7, 16, 20, 0).millisecondsSinceEpoch,
+              'eventAllDay': false,
+            },
+            {
+              'eventId': 'e2',
+              'calendarId': 'personal',
+              // 冇 eventTitle key——好似某啲 reminder-style event，冇標題
+              'eventStartDate':
+                  DateTime.utc(2026, 7, 16, 9, 0).millisecondsSinceEpoch,
+              'eventEndDate':
+                  DateTime.utc(2026, 7, 16, 9, 30).millisecondsSinceEpoch,
+              'eventAllDay': false,
+            },
+          ]);
+        }
+        return null;
+      });
+
+      final service = CalendarSyncService();
+      final events = await service.eventsInRange(
+        start: DateTime(2026, 7, 1),
+        end: DateTime(2026, 8, 1),
+      );
+
+      expect(events.length, 1);
+      expect(events[0].title, '晚飯');
+    });
+
     test('eventsOnDay() 傳一個 [day, day+1) 嘅範圍去 retrieveEvents', () async {
       DateTime? sentStart;
       DateTime? sentEnd;

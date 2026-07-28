@@ -68,6 +68,14 @@ class CalendarSyncService {
   /// 想要嗰一日，唔使額外處理。（起呢個 plan 嗰陣一開始以為要額外
   /// 起個 fixed-offset `Location`先啱，落手做嗰陣先發現係諗錯咗
   /// `TZDateTime.from` 嘅語義——已經用返呢個簡單版本。）
+  ///
+  /// 補充：以上講嘅「host-local 重新起 instant」淨係 non-Android 個
+  /// code path 先係咁；Android 度 device_calendar 行緊另一條更直接嘅
+  /// path——`TZDateTime.utc(event.start!.year, .month, .day, 0, 0, 0)`，
+  /// 直接攞 input 已經有嗰組 y/m/d 做 passthrough，完全冇 host-local
+  /// 重新解讀呢一步。結論（同一部機睇一定係啱嗰日）兩邊平台都成立，
+  /// 但係經兩條唔同機制達成，唔好誤會呢段註解係講緊 platform-agnostic
+  /// 嘅單一邏輯。
   Future<bool> addAllDayEvent({
     required DateTime date,
     required String title,
