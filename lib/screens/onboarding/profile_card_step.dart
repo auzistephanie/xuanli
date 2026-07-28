@@ -64,6 +64,10 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
   bool _saving = false;
 
   Future<void> _save() async {
+    // 同 mbti_step.dart 嗰個 double-tap race 一樣嘅隱患：撳掣之後個 button
+    // 要等下一次 rebuild 先至真正 disabled，所以呢度要自己擋一擋，唔可以
+    // 淨係靠 onPressed: _saving ? null : _save 嗰個 gate。
+    if (_saving) return;
     setState(() => _saving = true);
     try {
       await StorageService().savePrimaryProfile(_profile);

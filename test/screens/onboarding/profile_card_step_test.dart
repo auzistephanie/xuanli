@@ -59,6 +59,27 @@ void main() {
     expect(saved.dayMaster, '乙木');
   });
 
+  testWidgets('連續快速撳兩下「開始睇今日」，onSaved 淨係 call 一次', (tester) async {
+    var savedCount = 0;
+    await tester.pumpWidget(wrap(ProfileCardStep(
+      name: '阿玄',
+      birthDate: DateTime(1999, 9, 20),
+      birthHour: 9,
+      birthMinute: 30,
+      birthPlace: '香港',
+      mbti: 'ISFP',
+      onSaved: () => savedCount++,
+    )));
+    await tester.pumpAndSettle();
+
+    // 兩下 tap 之間冇 pump()，模擬喺 _saving=true 生效前嘅第二下撳。
+    await tester.tap(find.text('開始睇今日'));
+    await tester.tap(find.text('開始睇今日'));
+    await tester.pumpAndSettle();
+
+    expect(savedCount, 1);
+  });
+
   testWidgets('冇時辰（降級模式）：完整度顯示 80%', (tester) async {
     await tester.pumpWidget(wrap(ProfileCardStep(
       name: '阿玄',
