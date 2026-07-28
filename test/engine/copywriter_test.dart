@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/copywriter.dart';
+import 'package:xuanli/models/day_reading.dart';
 
 void main() {
   setUpAll(() {
@@ -93,6 +94,81 @@ void main() {
 
       expect(reason, startsWith('🔮'));
       expect(reason, contains('剪髮'));
+    });
+  });
+
+  group('buildNotificationText', () {
+    test('組合日干支/命理分/宜忌/避時做一行（spec §9.7 例子格式）', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11)); // golden fixture: 丙戌, 平, 沖龍煞北
+      final reading = DayReading(
+        date: day.date,
+        ganzhiDay: day.ganzhiDay,
+        lunarLabel: day.lunarLabel,
+        zhiXing: day.zhiXing,
+        chong: day.chong,
+        fortuneScore: 42,
+        mbtiScore: 60,
+        band: '平',
+        yi: const [YjItem(label: '祈福', matchesUser: true), YjItem(label: '靜修', matchesUser: false)],
+        ji: const [YjItem(label: '簽約', matchesUser: false)],
+        advice: '（唔用於呢個 test）',
+        clashWarning: null,
+        avoidHour: '申時',
+      );
+
+      final text = buildNotificationText(reading);
+
+      expect(text, '今日丙戌日・命理分42・宜祈福、靜修，忌簽約。避開申時落大決定。');
+    });
+
+    test('yi 淨係得一項，ji 冇 → 忌部分寫「無」，冇避時就冇最後嗰句', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final reading = DayReading(
+        date: day.date,
+        ganzhiDay: day.ganzhiDay,
+        lunarLabel: day.lunarLabel,
+        zhiXing: day.zhiXing,
+        chong: day.chong,
+        fortuneScore: 88,
+        mbtiScore: 60,
+        band: '吉',
+        yi: const [YjItem(label: '開光', matchesUser: true)],
+        ji: const [],
+        advice: '（唔用於呢個 test）',
+        clashWarning: null,
+        avoidHour: null,
+      );
+
+      final text = buildNotificationText(reading);
+
+      expect(text, '今日丙戌日・命理分88・宜開光，忌無。');
+    });
+
+    test('yi 超過 2 項淨係攞頭 2 個', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
+      final reading = DayReading(
+        date: day.date,
+        ganzhiDay: day.ganzhiDay,
+        lunarLabel: day.lunarLabel,
+        zhiXing: day.zhiXing,
+        chong: day.chong,
+        fortuneScore: 50,
+        mbtiScore: 60,
+        band: '平',
+        yi: const [
+          YjItem(label: 'A', matchesUser: false),
+          YjItem(label: 'B', matchesUser: false),
+          YjItem(label: 'C', matchesUser: false),
+        ],
+        ji: const [],
+        advice: '（唔用於呢個 test）',
+        clashWarning: null,
+        avoidHour: null,
+      );
+
+      final text = buildNotificationText(reading);
+
+      expect(text, '今日丙戌日・命理分50・宜A、B，忌無。');
     });
   });
 }

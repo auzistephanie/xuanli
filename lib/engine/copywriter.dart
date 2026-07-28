@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'activity.dart';
 import 'almanac.dart';
+import '../models/day_reading.dart';
 
 Map<String, List<String>>? _toneCache;
 
@@ -106,4 +107,22 @@ String buildActivityReason({
       : clauses.join('，');
 
   return '🔮 $body。';
+}
+
+/// 短版通知文案（spec §9.7：「內容 = copywriter 短版」，例子：
+/// 「今日丙戌日・命理分 42・宜祈福靜修，忌簽約。避開申時落大決定。」）。
+/// 淨係攞頭 2 個宜、頭 2 個忌（多過就截，全空就寫「無」），
+/// deterministic（純 [reading] 做 input，冇 Random/DateTime.now()）。
+/// 畀 widget「中」size 同（之後先起嘅）通知排程共用。
+String buildNotificationText(DayReading reading) {
+  final yiPart = reading.yi.isEmpty
+      ? '無'
+      : reading.yi.take(2).map((e) => e.label).join('、');
+  final jiPart = reading.ji.isEmpty
+      ? '無'
+      : reading.ji.take(2).map((e) => e.label).join('、');
+  final avoidPart =
+      reading.avoidHour != null ? '避開${reading.avoidHour}落大決定。' : '';
+  return '今日${reading.ganzhiDay}日・命理分${reading.fortuneScore}・'
+      '宜$yiPart，忌$jiPart。$avoidPart';
 }
