@@ -95,6 +95,28 @@ void main() {
       expect(updated.notificationHour, 7);
       expect(updated.notificationMinute, 30);
     });
+
+    test('saveSettings() 覆蓋舊設定（第二次 save 取代第一次，唔係合併）', () async {
+      final service = StorageService();
+      await service.saveSettings(const AppSettings(
+        themeMode: ThemeMode.dark,
+        notificationsEnabled: false,
+        notificationHour: 22,
+        notificationMinute: 15,
+      ));
+      await service.saveSettings(const AppSettings(
+        themeMode: ThemeMode.light,
+        notificationsEnabled: true,
+        notificationHour: 8,
+        notificationMinute: 45,
+      ));
+
+      final loaded = await service.loadSettings();
+      expect(loaded.themeMode, ThemeMode.light);
+      expect(loaded.notificationsEnabled, isTrue);
+      expect(loaded.notificationHour, 8);
+      expect(loaded.notificationMinute, 45);
+    });
   });
 
   group('StorageService — clearProfiles', () {
@@ -105,6 +127,27 @@ void main() {
 
       await service.clearProfiles();
       expect(await service.loadPrimaryProfile(), isNull);
+    });
+
+    test('clearProfiles() 唔會清埋 settings（重做 onboarding 唔應該丟失深色模式/通知偏好）',
+        () async {
+      final service = StorageService();
+      await service.saveSettings(const AppSettings(
+        themeMode: ThemeMode.dark,
+        notificationsEnabled: false,
+        notificationHour: 22,
+        notificationMinute: 15,
+      ));
+      await service.savePrimaryProfile(_sampleProfile());
+
+      await service.clearProfiles();
+
+      expect(await service.loadPrimaryProfile(), isNull);
+      final settings = await service.loadSettings();
+      expect(settings.themeMode, ThemeMode.dark);
+      expect(settings.notificationsEnabled, isFalse);
+      expect(settings.notificationHour, 22);
+      expect(settings.notificationMinute, 15);
     });
   });
 }
