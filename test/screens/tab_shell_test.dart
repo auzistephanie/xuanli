@@ -36,4 +36,32 @@ void main() {
 
     expect(find.text('Tab B — 2d 起'), findsOneWidget);
   });
+
+  testWidgets('撳第三個 tab（月曆）都會切換', (tester) async {
+    await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
+
+    await tester.tap(find.text('月曆'));
+    await tester.pump();
+
+    expect(find.text('Tab C — 2e 起'), findsOneWidget);
+  });
+
+  testWidgets('揀中嘅 tab 用朱紅色+粗體，未揀中嘅用淡墨色', (tester) async {
+    await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
+
+    final colors = XuanLiTheme.light().extension<XuanLiColors>()!;
+
+    Text labelText(String label) => tester.widget<Text>(find.text(label));
+
+    expect(labelText('今日').style?.color, colors.red);
+    expect(labelText('今日').style?.fontWeight, FontWeight.w700);
+    expect(labelText('我想做').style?.color, colors.ink60);
+    expect(labelText('我想做').style?.fontWeight, FontWeight.w400);
+
+    await tester.tap(find.text('我想做'));
+    await tester.pump();
+
+    expect(labelText('今日').style?.color, colors.ink60);
+    expect(labelText('我想做').style?.color, colors.red);
+  });
 }

@@ -61,7 +61,6 @@ class _TabBar extends StatelessWidget {
         color: colors.cardSurface.withValues(alpha: 0.85),
         border: Border(top: BorderSide(color: colors.ink12)),
       ),
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 22),
       child: SafeArea(
         top: false,
         child: Row(
@@ -71,30 +70,37 @@ class _TabBar extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onSelect(i),
                   behavior: HitTestBehavior.opaque,
-                  child: Semantics(
-                    button: true,
-                    selected: i == selectedIndex,
-                    label: tabs[i].label,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          tabs[i].icon,
-                          style: TextStyle(
-                            fontSize: 19,
-                            color: i == selectedIndex ? colors.red : colors.ink60,
+                  // Padding lives INSIDE the GestureDetector (not on the
+                  // outer Container) so the full visual cell — including
+                  // the 10px top / 22px bottom strips — is tappable, not
+                  // just the icon+label content's own tight height.
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 22),
+                    child: Semantics(
+                      button: true,
+                      selected: i == selectedIndex,
+                      label: tabs[i].label,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            tabs[i].icon,
+                            style: TextStyle(
+                              fontSize: 19,
+                              color: i == selectedIndex ? colors.red : colors.ink60,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          tabs[i].label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: i == selectedIndex ? FontWeight.w700 : FontWeight.w400,
-                            color: i == selectedIndex ? colors.red : colors.ink60,
+                          const SizedBox(height: 3),
+                          Text(
+                            tabs[i].label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: i == selectedIndex ? FontWeight.w700 : FontWeight.w400,
+                              color: i == selectedIndex ? colors.red : colors.ink60,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
