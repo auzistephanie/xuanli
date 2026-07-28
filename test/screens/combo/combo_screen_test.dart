@@ -25,6 +25,20 @@ void main() {
     mbti: 'ISFP',
   );
 
+  // 第二個 fixture：驗證另一個 dayGan_MBTI 組合鍵，避免 lookup bug（錯柱/錯 substring）
+  // 剛好都撞中「乙_ISFP」都仍然過。1999-09-20 09:30 已知 dayGan=乙；
+  // 2000-01-07 09:30 已驗證 dayGan=甲（見 pillars[2]/dayMaster），配 mbti=INTJ
+  // 對應 combos.json 嘅 '甲_INTJ'：name='雪嶺孤松', motto='立志如山・落子無聲'。
+  final profile2 = buildProfile(
+    id: 'p2',
+    name: '阿甲',
+    birthDate: DateTime(2000, 1, 7),
+    birthHour: 9,
+    birthMinute: 30,
+    birthPlace: '香港',
+    mbti: 'INTJ',
+  );
+
   testWidgets('顯示乙_ISFP嘅組合內容：組合名/motto/優勢/留意位/點樣發力/稀有度佔位', (tester) async {
     await tester.pumpWidget(wrap(ComboDetailScreen(profile: profile)));
 
@@ -37,6 +51,16 @@ void main() {
     expect(find.textContaining('諗多過講'), findsOneWidget);
     expect(find.textContaining('水木旺嘅日子'), findsOneWidget);
     expect(find.textContaining('即將推出'), findsOneWidget);
+  });
+
+  testWidgets('顯示甲_INTJ嘅組合內容：唔同 dayGan/MBTI 都要揀返啱嘅組合（防 lookup key bug）', (tester) async {
+    await tester.pumpWidget(wrap(ComboDetailScreen(profile: profile2)));
+
+    expect(find.text('我嘅組合'), findsOneWidget);
+    expect(find.textContaining('甲木日主'), findsOneWidget);
+    expect(find.textContaining('INTJ'), findsWidgets);
+    expect(find.text('雪嶺孤松'), findsOneWidget);
+    expect(find.textContaining('立志如山・落子無聲'), findsOneWidget);
   });
 
   testWidgets('撳返、撳分享 icon：返會 pop，分享會顯示 stub SnackBar', (tester) async {

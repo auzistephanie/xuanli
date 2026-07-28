@@ -28,7 +28,7 @@ class ComboDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(18, 4, 18, 24),
                 child: Column(
                   children: [
-                    _buildNameCard(colors, dayGan, combo),
+                    _buildNameCard(colors, combo),
                     const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +41,7 @@ class ComboDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     _buildHowToWinCard(colors, combo),
                     const SizedBox(height: 12),
-                    _buildRarityPlaceholder(colors, dayGan),
+                    _buildRarityPlaceholder(colors),
                   ],
                 ),
               ),
@@ -88,7 +88,7 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNameCard(XuanLiColors colors, String dayGan, Combo combo) {
+  Widget _buildNameCard(XuanLiColors colors, Combo combo) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
@@ -108,7 +108,7 @@ class ComboDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '$dayGan${_dayGanElement(dayGan)}日主',
+                  '${profile.dayMaster}日主',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: colors.jade),
                 ),
               ),
@@ -204,7 +204,7 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRarityPlaceholder(XuanLiColors colors, String dayGan) {
+  Widget _buildRarityPlaceholder(XuanLiColors colors) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -217,7 +217,7 @@ class ComboDetailScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '$dayGan${_dayGanElement(dayGan)} × ${profile.mbti}・稀有度',
+            '${profile.dayMaster} × ${profile.mbti}・稀有度',
             style: TextStyle(fontSize: 11.5, color: colors.ink60),
           ),
           Container(
@@ -232,11 +232,4 @@ class ComboDetailScreen extends StatelessWidget {
       ),
     );
   }
-
-  static const _ganElement = {
-    '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-    '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
-  };
-
-  String _dayGanElement(String dayGan) => _ganElement[dayGan]!;
 }
