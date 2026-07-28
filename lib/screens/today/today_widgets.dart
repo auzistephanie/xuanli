@@ -35,7 +35,7 @@ class ScoreRing extends StatelessWidget {
               strokeWidth: 9,
               strokeCap: StrokeCap.round,
               backgroundColor: colors.paper2,
-              valueColor: AlwaysStoppedAnimation(ringColor),
+              color: ringColor,
             ),
           ),
           Column(
@@ -75,10 +75,11 @@ class ScoreRing extends StatelessWidget {
 /// 處理咗 `yi.isEmpty` 呢個 case，掛落 `isYiVague` flag），所以呢度加咗
 /// 空狀態 fallback，唔會淨係得個標題掛喺度。
 ///
-/// 呢個 widget 本身唔包 [Expanded] ——`Expanded` 淨係喺直接掛喺
-/// `Row`/`Column`/`Flex` 下面先合法，包喺呢度會令單獨用（例如呢個 widget
-/// 自己嘅 test）爆 `Incorrect use of ParentDataWidget`。兩欄並排嘅
-/// `Expanded` 包裝留返畀嗰邊嘅 `Row`（`today_screen.dart`，之後 task）做。
+/// 呢個 widget 內部自己包咗 [Expanded]——spec 入面呢個 widget 淨係得
+/// 一種用法：同另一個 `YjColumn` 兩欄並排塞入一個 `Row`。將 `Expanded`
+/// 交由呼叫方自己包，靠 doc comment 提醒，試過一次就證明唔可靠（第一稿
+/// 咁做，Task 5 個計劃樣板碼就漏咗冇包，會即刻 crash）。搬入嚟 widget
+/// 本身，令「兩欄並排」呢個唯一用法結構上冚晒，唔使靠人記得。
 class YjColumn extends StatelessWidget {
   final String dotLabel; // '宜' | '忌'
   final String title; // '今日宜' | '今日忌'
@@ -106,89 +107,91 @@ class YjColumn extends StatelessWidget {
         ? colors.jade.withValues(alpha: 0.25)
         : colors.red.withValues(alpha: 0.22);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: themeColor,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Text(
-                  dotLabel,
-                  style: TextStyle(
-                    color: colors.paper,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: themeColor,
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: XuanLiFonts.serif,
-                  fontSize: 15,
-                  letterSpacing: 2,
-                  color: themeColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (items.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Text(
-                '－',
-                style: TextStyle(fontSize: 12.5, color: colors.ink30),
-              ),
-            ),
-          for (final item in items)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      item.label,
-                      style: TextStyle(fontSize: 12.5, color: colors.ink),
+                  child: Text(
+                    dotLabel,
+                    style: TextStyle(
+                      color: colors.paper,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (item.matchesUser)
-                    Text(
-                      '✦ 合你',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        color: colors.gold,
-                        letterSpacing: 1,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: XuanLiFonts.serif,
+                    fontSize: 15,
+                    letterSpacing: 2,
+                    color: themeColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (items.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Text(
+                  '冇特別注明',
+                  style: TextStyle(fontSize: 12.5, color: colors.ink30),
+                ),
+              ),
+            for (final item in items)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        item.label,
+                        style: TextStyle(fontSize: 12.5, color: colors.ink),
                       ),
                     ),
-                ],
+                    if (item.matchesUser)
+                      Text(
+                        '✦ 合你',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: colors.gold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          if (extraNote != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Text(
-                extraNote!,
-                style: TextStyle(fontSize: 12.5, color: colors.ink30),
+            if (extraNote != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Text(
+                  extraNote!,
+                  style: TextStyle(fontSize: 12.5, color: colors.ink30),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
