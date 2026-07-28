@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/models/profile.dart';
+import 'package:xuanli/screens/settings/settings_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
@@ -38,6 +40,10 @@ void main() {
       File('lib/data/activity_categories.json').readAsStringSync(),
     );
     initActivities(File('lib/data/activities.json').readAsStringSync());
+  });
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
   });
 
   Widget wrap(Widget child) =>
@@ -83,5 +89,14 @@ void main() {
 
     expect(labelText('今日').style?.color, colors.ink60);
     expect(labelText('我想做').style?.color, colors.red);
+  });
+
+  testWidgets('撳右上角 ⚙ 會去 SettingsScreen', (tester) async {
+    await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
+
+    await tester.tap(find.text('⚙'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsScreen), findsOneWidget);
   });
 }

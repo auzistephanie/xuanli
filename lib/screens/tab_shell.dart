@@ -4,6 +4,7 @@ import '../models/profile.dart';
 import '../theme/xuanli_theme.dart';
 import 'activity/activity_screen.dart';
 import 'calendar/calendar_screen.dart';
+import 'settings/settings_screen.dart';
 import 'today/today_screen.dart';
 
 /// 主畫面：底部三個 tab（今日／我想做／月曆）。Tabbar 樣式跟
@@ -30,18 +31,53 @@ class _TabShellState extends State<TabShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
+      body: Column(
         children: [
-          TodayScreen(profile: widget.profile),
-          ActivityScreen(profile: widget.profile),
-          CalendarScreen(profile: widget.profile),
+          SafeArea(
+            bottom: false,
+            child: _SettingsBar(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
+            ),
+          ),
+          Expanded(
+            child: IndexedStack(
+              index: _index,
+              children: [
+                TodayScreen(profile: widget.profile),
+                ActivityScreen(profile: widget.profile),
+                CalendarScreen(profile: widget.profile),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: _TabBar(
         selectedIndex: _index,
         tabs: _tabs,
         onSelect: (i) => setState(() => _index = i),
+      ),
+    );
+  }
+}
+
+class _SettingsBar extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SettingsBar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.xuanliColors;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 6, 14, 4),
+          child: Text('⚙', style: TextStyle(fontSize: 20, color: colors.ink60)),
+        ),
       ),
     );
   }
