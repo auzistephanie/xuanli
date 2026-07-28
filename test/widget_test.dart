@@ -121,4 +121,42 @@ void main() {
     expect(find.byType(TabShell), findsOneWidget);
     expect(saveWidgetDataCalled, isTrue);
   });
+
+  testWidgets(
+      'XuanLiApp：有已存 profile 時，bootstrap 會觸發一次 notification refresh',
+      (tester) async {
+    var initializeCalled = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('dexterous.com/flutter/local_notifications'),
+      (call) async {
+        if (call.method == 'initialize') initializeCalled = true;
+        return true;
+      },
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_timezone'),
+      (call) async => 'Asia/Hong_Kong',
+    );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+              const MethodChannel('dexterous.com/flutter/local_notifications'), null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(const MethodChannel('flutter_timezone'), null);
+    });
+
+    await StorageService().savePrimaryProfile(_sampleProfileForBootstrapTest());
+
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TabShell), findsOneWidget);
+    expect(initializeCalled, isTrue);
+  });
 }

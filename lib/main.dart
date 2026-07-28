@@ -6,6 +6,7 @@ import 'models/profile.dart';
 import 'screens/onboarding/onboarding_flow.dart';
 import 'screens/tab_shell.dart';
 import 'services/data_loader.dart';
+import 'services/notification_scheduler.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
 import 'services/widget_data_bridge.dart';
@@ -62,6 +63,8 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       // 係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該靜靜
       // 吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
       unawaited(WidgetDataBridge().refreshNext7Days(profile));
+      unawaited(NotificationScheduler()
+          .refreshNext7Days(profile: profile, settings: settings));
     }
     return profile;
   }
