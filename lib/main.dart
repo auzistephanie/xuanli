@@ -63,7 +63,7 @@ class _AppBootstrapState extends State<_AppBootstrap> {
         if (profile == null) {
           return const OnboardingFlow();
         }
-        return const TabShell();
+        return TabShell(profile: profile);
       },
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/storage_service.dart';
 import '../tab_shell.dart';
 import 'birth_data_step.dart';
 import 'mbti_step.dart';
@@ -30,9 +31,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   String? _mbti;
 
-  void _finish() {
+  Future<void> _finish() async {
+    // [ProfileCardStep] 剛 save 咗個 profile 落 StorageService（先至 call
+    // 呢個 callback）——同 [_AppBootstrap] 用返一樣嘅
+    // StorageService().loadPrimaryProfile() 攞返嚟遞畀 [TabShell]，
+    // 唔想改 [ProfileCardStep] 個 onSaved 簽名（會連累佢自己嘅 widget test）。
+    final profile = await StorageService().loadPrimaryProfile();
+    if (!mounted || profile == null) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const TabShell()),
+      MaterialPageRoute(builder: (_) => TabShell(profile: profile)),
     );
   }
 

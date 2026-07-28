@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../models/profile.dart';
+
 /// 主畫面：底部三個 tab（今日／我想做／月曆），2c/2d/2e 逐個補真內容。
 /// Tabbar 視覺（跟 design html 精確配色/字體）留返 2c 開始起真 Tab A 嗰陣
 /// 一併做——依家用 Material NavigationBar 佔位，證明路由/切換行得通。
 class TabShell extends StatefulWidget {
-  const TabShell({super.key});
+  final Profile profile;
+
+  const TabShell({super.key, required this.profile});
 
   @override
   State<TabShell> createState() => _TabShellState();
