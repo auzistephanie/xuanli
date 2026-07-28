@@ -14,8 +14,14 @@ import 'calendar_widgets.dart';
 class CalendarScreen extends StatefulWidget {
   final Profile profile;
   final DateTime? today;
+  final DateTime? initialSelectedDate;
 
-  const CalendarScreen({super.key, required this.profile, this.today});
+  const CalendarScreen({
+    super.key,
+    required this.profile,
+    this.today,
+    this.initialSelectedDate,
+  });
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -65,9 +71,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    final today = _today;
-    _displayedMonth = DateTime(today.year, today.month);
-    _selectedDay = today.day;
+    final initial = widget.initialSelectedDate ?? _today;
+    _displayedMonth = DateTime(initial.year, initial.month);
+    _selectedDay = initial.day;
     _initCalendarSync();
   }
 

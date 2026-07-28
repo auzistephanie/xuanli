@@ -7,6 +7,7 @@ import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/models/profile.dart';
+import 'package:xuanli/screens/calendar/calendar_screen.dart';
 import 'package:xuanli/screens/settings/settings_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
@@ -122,5 +123,18 @@ void main() {
     // TodayScreen 內容嘅頂部同 ⚙ 之間嘅落差，唔應該再包多一次 topInset
     // （即係 TodayScreen 自己嗰個 SafeArea 冇再加一次 47px）。
     expect(scrollTop - settingsBarTop, lessThan(topInset));
+  });
+
+  testWidgets('deepLinkDate 提供咗 → 一開始就喺月曆 tab（唔係今日 tab），CalendarScreen 收到嗰個日期', (tester) async {
+    await tester.pumpWidget(wrap(TabShell(
+      profile: _sampleProfile(),
+      deepLinkDate: DateTime(2026, 8, 20),
+    )));
+
+    // 月曆 tab 應該已經係揀緊嗰個（bottom nav 嘅「月曆」着咗色，"今日" 冇）。
+    final calendarScreenFinder = find.byType(CalendarScreen);
+    expect(calendarScreenFinder, findsOneWidget);
+    final calendarScreen = tester.widget<CalendarScreen>(calendarScreenFinder);
+    expect(calendarScreen.initialSelectedDate, DateTime(2026, 8, 20));
   });
 }

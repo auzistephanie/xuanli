@@ -134,6 +134,17 @@ void main() {
     expect(find.textContaining('辛卯'), findsWidgets);
   });
 
+  testWidgets('initialSelectedDate 提供咗 → 一開始就顯示嗰個月、揀咗嗰日（唔係今日）', (tester) async {
+    await tester.pumpWidget(wrap(CalendarScreen(
+      profile: profile,
+      today: DateTime(2026, 7, 11),
+      initialSelectedDate: DateTime(2026, 8, 20),
+    )));
+
+    expect(find.textContaining('2026年8月'), findsOneWidget);
+    expect(find.textContaining('8月20日'), findsOneWidget);
+  });
+
   group('CalendarScreen — device_calendar 整合（mocked platform channel）', () {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

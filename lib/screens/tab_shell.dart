@@ -12,15 +12,16 @@ import 'today/today_screen.dart';
 /// 未選中用淡墨，頂部一條幼線分隔，冇 Material ripple/預設高亮。
 class TabShell extends StatefulWidget {
   final Profile profile;
+  final DateTime? deepLinkDate;
 
-  const TabShell({super.key, required this.profile});
+  const TabShell({super.key, required this.profile, this.deepLinkDate});
 
   @override
   State<TabShell> createState() => _TabShellState();
 }
 
 class _TabShellState extends State<TabShell> {
-  int _index = 0;
+  late int _index = widget.deepLinkDate != null ? 2 : 0;
 
   static const _tabs = [
     _TabInfo(icon: '☀', label: '今日'),
@@ -46,7 +47,10 @@ class _TabShellState extends State<TabShell> {
                 children: [
                   TodayScreen(profile: widget.profile),
                   ActivityScreen(profile: widget.profile),
-                  CalendarScreen(profile: widget.profile),
+                  CalendarScreen(
+                    profile: widget.profile,
+                    initialSelectedDate: widget.deepLinkDate,
+                  ),
                 ],
               ),
             ),

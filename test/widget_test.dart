@@ -1,3 +1,4 @@
+import 'package:app_links_platform_interface/app_links_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +7,7 @@ import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/main.dart';
 import 'package:xuanli/models/profile.dart';
 import 'package:xuanli/models/settings.dart';
+import 'package:xuanli/screens/calendar/calendar_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
@@ -20,8 +22,29 @@ Profile _sampleProfileForBootstrapTest() => buildProfile(
       mbti: 'ISFP',
     );
 
+/// 假嘅 [AppLinksPlatform]，直接控制 getInitialLink() 想要嘅 URI——
+/// 同 deep_link_router_test.dart 用緊嘅同一個 fake（見嗰邊嘅解釋：
+/// `AppLinksPlatform.instance` 本身就係一個特登開俾人 inject 嘅
+/// static setter，係佢自己推薦嘅測試方式）。
+class _FakeAppLinksPlatform extends AppLinksPlatform {
+  final Uri? initialLink;
+  _FakeAppLinksPlatform(this.initialLink);
+
+  @override
+  Future<Uri?> getInitialLink() async => initialLink;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // 起 test 之前捕捉住真實嘅預設 platform instance，等每個 test 完咗
+  // 都可以復原返去——唔可以好似 plan 度噉樣用 `addTearDown(() =>
+  // AppLinksPlatform.instance = _FakeAppLinksPlatform(null))`，嗰句
+  // 淨係「換咗第二個 fake」，唔係「復原返真實預設值」，會令下一個喺
+  // 同一個檔案跑嘅 test 繼承咗呢個 test 留低嘅 fake instance（同
+  // deep_link_router_test.dart 果邊 Task 1 review 捉到嘅同一種
+  // test-isolation bug）。
+  final defaultAppLinksPlatform = AppLinksPlatform.instance;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -33,10 +56,23 @@ void main() {
     // loadEngineData() 觸發真 asset 讀取，所以要喺 setUp() 清一清
     // cache，確保每個 test 用返自己個 zone 讀一次新鮮嘅。
     rootBundle.clear();
+    // _AppBootstrap._run() 而家會 await DeepLinkRouter().getInitialDayLink()
+    // ——用真實嘅預設 AppLinksPlatform（未 mock 過任何 handler）喺
+    // testWidgets 嘅 FakeAsync zone 入面，個 MethodChannel round-trip
+    // 實測要真實時間先完成（唔淨係 microtask，`tester.pump()` 郁唔到
+    // 佢，就算 `tester.runAsync()` 等 50ms 都仲未夠——同 loadEngineData()
+    // 嗰種「真 I/O 要 runAsync() 先郁到」情況係同一類 zone 邊界問題，
+    // 但呢個仲要更耐，會拖累成個檔案所有 test）。同 home_widget／
+    // local_notifications 呢啲 channel 一致嘅做法：用假 platform 令
+    // 呢一步喺全部 test 預設都即刻完成，唔使個個 test 都要自己等額外
+    // 真實時間。個別 test（下面「冷啟動有 xuanli://day/... link」）
+    // 先自己覆寫做帶住真 URI 嘅 fake。
+    AppLinksPlatform.instance = _FakeAppLinksPlatform(null);
   });
 
   tearDown(() {
     themeModeController.value = ThemeMode.system;
+    AppLinksPlatform.instance = defaultAppLinksPlatform;
   });
 
   testWidgets(
@@ -158,5 +194,25 @@ void main() {
 
     expect(find.byType(TabShell), findsOneWidget);
     expect(initializeCalled, isTrue);
+  });
+
+  testWidgets('XuanLiApp：冷啟動有 xuanli://day/... link → 直接去月曆 tab 揀咗嗰日',
+      (tester) async {
+    AppLinksPlatform.instance =
+        _FakeAppLinksPlatform(Uri.parse('xuanli://day/2026-08-20'));
+
+    await StorageService().savePrimaryProfile(_sampleProfileForBootstrapTest());
+
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pumpAndSettle();
+
+    final calendarScreenFinder = find.byType(CalendarScreen);
+    expect(calendarScreenFinder, findsOneWidget);
+    final calendarScreen = tester.widget<CalendarScreen>(calendarScreenFinder);
+    expect(calendarScreen.initialSelectedDate, DateTime(2026, 8, 20));
   });
 }

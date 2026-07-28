@@ -6,6 +6,7 @@ import 'models/profile.dart';
 import 'screens/onboarding/onboarding_flow.dart';
 import 'screens/tab_shell.dart';
 import 'services/data_loader.dart';
+import 'services/deep_link_router.dart';
 import 'services/notification_scheduler.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
@@ -49,11 +50,18 @@ class _AppBootstrap extends StatefulWidget {
 
 class _AppBootstrapState extends State<_AppBootstrap> {
   late final Future<Profile?> _bootstrap = _run();
+  DateTime? _deepLinkDate;
 
   Future<Profile?> _run() async {
     await loadEngineData();
     final settings = await StorageService().loadSettings();
     themeModeController.value = settings.themeMode;
+    // 呢個要 await（同下面兩個 fire-and-forget 唔同）：TabShell 起畫面
+    // 個陣一定要已經知道有冇 deep link，先揀啱初始 tab。但佢係單一次
+    // 快嘅 local platform call（Task 1 已經證明咗 getInitialDayLink()
+    // 唔會 throw），唔係一舖 engine 運算，所以唔會影響冷啟動 <2s 嘅
+    // budget（嗰個 budget 係為咗 unawaited() 嗰兩個先訂嘅）。
+    _deepLinkDate = await DeepLinkRouter().getInitialDayLink();
     final profile = await StorageService().loadPrimaryProfile();
     if (profile != null) {
       // Fire-and-forget（唔 await）：widget／notification 背景刷新都
@@ -89,7 +97,7 @@ class _AppBootstrapState extends State<_AppBootstrap> {
         if (profile == null) {
           return const OnboardingFlow();
         }
-        return TabShell(profile: profile);
+        return TabShell(profile: profile, deepLinkDate: _deepLinkDate);
       },
     );
   }
