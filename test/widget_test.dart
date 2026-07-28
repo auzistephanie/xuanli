@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/main.dart';
+import 'package:xuanli/models/profile.dart';
 import 'package:xuanli/models/settings.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
+
+Profile _sampleProfileForBootstrapTest() => buildProfile(
+      id: 'p1',
+      name: '阿玄',
+      birthDate: DateTime(1999, 9, 20),
+      birthHour: 9,
+      birthMinute: 30,
+      birthPlace: '香港',
+      mbti: 'ISFP',
+    );
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -75,5 +87,32 @@ void main() {
     await tester.pump();
 
     expect(themeModeController.value, ThemeMode.dark);
+  });
+
+  testWidgets(
+      'XuanLiApp：有已存 profile 時，bootstrap 會觸發一次 widget data refresh（唔會等佢完先顯示 TabShell）',
+      (tester) async {
+    var saveWidgetDataCalled = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('home_widget'), (call) async {
+      if (call.method == 'saveWidgetData') saveWidgetDataCalled = true;
+      return true;
+    });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(const MethodChannel('home_widget'), null);
+    });
+
+    await StorageService().savePrimaryProfile(_sampleProfileForBootstrapTest());
+
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TabShell), findsOneWidget);
+    expect(saveWidgetDataCalled, isTrue);
   });
 }

@@ -6,6 +6,7 @@ import 'screens/tab_shell.dart';
 import 'services/data_loader.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
+import 'services/widget_data_bridge.dart';
 import 'theme/xuanli_theme.dart';
 
 void main() {
@@ -50,7 +51,17 @@ class _AppBootstrapState extends State<_AppBootstrap> {
     await loadEngineData();
     final settings = await StorageService().loadSettings();
     themeModeController.value = settings.themeMode;
-    return StorageService().loadPrimaryProfile();
+    final profile = await StorageService().loadPrimaryProfile();
+    if (profile != null) {
+      // Fire-and-forget（唔 await）：widget 背景刷新唔應該延遲冷啟動
+      // （spec §10 Phase 2 驗收：冷啟動 <2s）。WidgetDataBridge 本身
+      // 內部已經 try/catch 晒 platform-write 嗰步，失敗唔會有未處理
+      // 嘅 exception 冚出嚟；純 Dart 嘅計算部分冇 catch，如果嗰度爆
+      // 係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該靜靜
+      // 吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
+      WidgetDataBridge().refreshNext7Days(profile);
+    }
+    return profile;
   }
 
   @override
