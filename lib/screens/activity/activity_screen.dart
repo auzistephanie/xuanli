@@ -5,6 +5,7 @@ import '../../engine/almanac.dart';
 import '../../engine/copywriter.dart';
 import '../../engine/scoring.dart';
 import '../../models/profile.dart';
+import '../../services/calendar_sync.dart';
 import '../../theme/xuanli_theme.dart';
 import '../onboarding/onboarding_widgets.dart' show OnboardingSegmentedToggle;
 import 'activity_widgets.dart';
@@ -35,6 +36,8 @@ const _rangeOptions = [
 ];
 
 class _ActivityScreenState extends State<ActivityScreen> {
+  final _calendarSync = CalendarSyncService();
+
   late String _selectedActivity = loadActivities().first.name;
   int _rangeIndex = 1; // 未來一個月
 
@@ -55,6 +58,57 @@ class _ActivityScreenState extends State<ActivityScreen> {
       unfavorable: widget.profile.unfavorable,
       userYearZhi: userYearZhi,
     ).score;
+  }
+
+  Future<void> _addToCalendar({
+    required Activity activity,
+    required DateTime date,
+    required String reason,
+  }) async {
+    final added = await _calendarSync.addAllDayEvent(
+      date: date,
+      title: '${activity.name}（玄曆吉日）',
+      description: reason,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(added ? '已加入你嘅日曆 ✓' : '需要日曆權限先可以加入 — 請去手機設定開返'),
+    ));
+  }
+
+  Future<void> _showDaySchedule(DateTime date, String dateLabel) async {
+    final events = await _calendarSync.eventsOnDay(date);
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('$dateLabel 嘅行程'),
+        content: events.isEmpty
+            ? const Text('呢日冇搵到行程（或者未開日曆權限）')
+            : SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final e in events)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          '${e.start.hour.toString().padLeft(2, '0')}:'
+                          '${e.start.minute.toString().padLeft(2, '0')} ${e.title}',
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('知道喇'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -188,6 +242,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
       subtitleLine: subtitleLine,
       reason: reason,
       showCalendarActions: showCalendarActions,
+      onAddToCalendar: showCalendarActions
+          ? () => _addToCalendar(activity: activity, date: result.date, reason: reason)
+          : null,
+      onViewSchedule: showCalendarActions
+          ? () => _showDaySchedule(result.date, dateLabel)
+          : null,
     );
   }
 

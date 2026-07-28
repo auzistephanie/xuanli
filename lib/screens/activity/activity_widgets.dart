@@ -40,14 +40,18 @@ class ActivityChip extends StatelessWidget {
 }
 
 /// 反向擇日結果卡（design html 結果卡區塊）。[showCalendarActions] 淨係
-/// 畀排名最高嗰張卡用（design html 淨係第一張示範咗日曆按鈕列）；
-/// 日曆整合本身係 stub（spec §9.9 真整合留返之後 sub-plan）。
+/// 畀排名最高嗰張卡用（design html 淨係第一張示範咗日曆按鈕列）。
+/// 呢個 widget 本身唔知道 device_calendar——[onAddToCalendar]／
+/// [onViewSchedule] 由 [ActivityScreen] 注入（dumb widget 原則，同
+/// `calendar_widgets.dart` 嘅 `CalendarCellData` 一樣）。
 class ResultCard extends StatelessWidget {
   final String dateLabel;
   final int stars; // 1-5
   final String subtitleLine;
   final String reason;
   final bool showCalendarActions;
+  final VoidCallback? onAddToCalendar;
+  final VoidCallback? onViewSchedule;
 
   const ResultCard({
     super.key,
@@ -56,6 +60,8 @@ class ResultCard extends StatelessWidget {
     required this.subtitleLine,
     required this.reason,
     required this.showCalendarActions,
+    this.onAddToCalendar,
+    this.onViewSchedule,
   });
 
   @override
@@ -109,9 +115,7 @@ class ResultCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('日曆整合 — 之後 sub-plan 起')),
-                    ),
+                    onTap: onAddToCalendar,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       alignment: Alignment.center,
@@ -129,9 +133,7 @@ class ResultCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('日曆整合 — 之後 sub-plan 起')),
-                    ),
+                    onTap: onViewSchedule,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       alignment: Alignment.center,
