@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-07-31：`.gitignore` 加 `*.bak-*` 第二道防線 — 配合 06-STANDARDS §S3「備份一律開喺 `_to_delete/`」，就算漏咗 mv 都唔會畀 `github_push.py` 誤推上 GitHub（2026-07-25 事故嘅根治）。本 repo 冇 governance `backups/`，所以唔需要 negation 例外。
+
 ## 2026-07-29 Phase 3c Deep Link Routing 完成（冷啟動 `xuanli://day/...` 接返 Calendar tab）
 
 - **新增 `DeepLinkRouter`**（`lib/services/deep_link_router.dart`）：包裝新加嘅 `app_links` package，解析 `xuanli://day/YYYY-MM-DD` 嘅冷啟動 launch URI（spec §9.6）。已接入 `TabShell`／`CalendarScreen`（新加 `deepLinkDate`／`initialSelectedDate` 兩個參數——同本身已有嘅 `today` 參數分開，`today` 淨係控制月格仔嘅 `isToday` highlight，唔受影響）同 `main.dart` 嘅 bootstrap（呢個係**要 await** 嘅，唔似 widget／notification 嗰兩個 fire-and-forget refresh，因為要喺 `TabShell` build 之前就知道應該開邊個 tab／揀邊一日）。
