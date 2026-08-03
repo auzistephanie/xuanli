@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-08-04：**CLAUDE.md Progress 補回 7/29 web deploy** — commit `6bfc34f`（feat(web): add Flutter web platform support, deploy to Vercel）完成咗但 Progress／CHANGELOG 一直冇同步，狀態文件走漏咗眼（源起：`stephanie-portfolio` 嗰邊問「xuanli 都做完？」先發現）。Progress 加返一行講明呢個係 interim web preview（等 native build 工具裝緊嘅過渡方案），**唔算** Phase 3（Widget+通知）／Phase 4（APK 交付）完成，兩個都依然待做。Live URL 已 curl 驗證 200：https://xuanli-opal.vercel.app
+
 - 2026-08-01（承 07-31 制度複檢）：**`scripts/github_push.py` 修靜默故障** — 舊版 `_PUSH_STATE_DIR` 用 `os.path.dirname(REPO)` 當 stephanie-personal 係隔籬 folder；04-MAINTENANCE §6 將 5 個 repo 搬出 Drive Mirror 後假設崩咗，`makedirs` 靜靜咁喺 `~/Desktop/dev`、`~/dev`、`daily-novel/` 開咗 3 個假 stephanie-personal，concurrent-push 偵測對 6 個 repo 死咗都冇人知（真 state 檔停留喺 7/26–7/30）。改為 `STEPHANIE_PERSONAL_DIR` 環境變數 → Drive 正本絕對路徑 → legacy sibling 三段 resolve，搵唔到就**唔寫兼出聲**（S5「死咗邊個會知」）。12 份 script 一齊改，py_compile 全過，sales-trainer 實跑驗證真 state 有更新。假 folder 已收入 `_to_delete/`。
 
 - 2026-07-31：`.gitignore` 加 `*.bak-*` 第二道防線 — 配合 06-STANDARDS §S3「備份一律開喺 `_to_delete/`」，就算漏咗 mv 都唔會畀 `github_push.py` 誤推上 GitHub（2026-07-25 事故嘅根治）。本 repo 冇 governance `backups/`，所以唔需要 negation 例外。

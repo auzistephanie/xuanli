@@ -59,6 +59,7 @@ flutter build apk --release     # Android 交付（<40MB）
 - [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
 - [x] Phase 1 引擎（TDD，fixtures spec §11；`dart test test/engine/` 全綠，`dart run tool/demo.dart` 可行）
 - [x] Phase 2 App UI（onboarding + 組合頁 + 3 tabs + 日曆整合）
+- [x] 2026-07-29 interim web 部署（`flutter create --platforms=web`，過渡方案畀 Stephanie 喺 Xcode/Android Studio 裝緊嗰陣睇到 app running live，**唔算** Phase 3/4 完成）→ https://xuanli-opal.vercel.app
 - [ ] Phase 3 Widget（iOS/Android 小+中）+ 每日通知
 - [ ] Phase 4 交付（APK + install_ios.sh）
 
