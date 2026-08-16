@@ -48,7 +48,7 @@ flutter build apk --release     # Android 交付（<40MB）
 - 儲存：`shared_preferences`，profiles list 結構（MVP 只用 index 0，唔准 hardcode 單 profile）
 - Widget 數據流：app 開啟時預生成未來 7 日 DayReading JSON → `home_widget` → 原生讀
 
-## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → 02-JUDGMENT §R2）
+## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → STANDARDS.md §S2）
 
 1. `dart test test/engine/` 全綠（Phase 1 起必跑）＋`flutter analyze && flutter test` 過，真跑貼 output
 2. UI 有改 → 肉眼查冇簡體字＋文案語氣對照 `design/design-preview.html`
