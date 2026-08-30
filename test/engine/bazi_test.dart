@@ -52,13 +52,19 @@ void main() {
 
   group('缺時辰降級模式（三柱）', () {
     test('冇 birthHour → pillars 得 3 個（冇時柱）', () {
-      final result = computeBazi(birthDate: DateTime(1999, 9, 20), birthHour: null);
+      final result = computeBazi(
+        birthDate: DateTime(1999, 9, 20),
+        birthHour: null,
+      );
       expect(result.pillars.length, 3);
       expect(result.pillars, ['己卯', '癸酉', '乙亥']);
     });
 
     test('三柱模式五行分佈都計到（分母跟 6 字調整）', () {
-      final result = computeBazi(birthDate: DateTime(1999, 9, 20), birthHour: null);
+      final result = computeBazi(
+        birthDate: DateTime(1999, 9, 20),
+        birthHour: null,
+      );
       final sum = result.wuxing.values.fold<int>(0, (a, b) => a + b);
       expect(sum, 100);
       expect(result.dayMaster, '乙木');
@@ -67,8 +73,31 @@ void main() {
 
   group('農曆輸入', () {
     test('農曆轉公曆：1999 年農曆八月十一 → 公曆 1999-09-20', () {
-      final solarDate = lunarToSolarDate(year: 1999, month: 8, day: 11, isLeapMonth: false);
+      final solarDate = lunarToSolarDate(
+        year: 1999,
+        month: 8,
+        day: 11,
+        isLeapMonth: false,
+      );
       expect(solarDate, DateTime(1999, 9, 20));
+    });
+
+    test('閏月轉公曆：2023 年閏二月初一 → 公曆 2023-03-22', () {
+      final solarDate = lunarToSolarDate(
+        year: 2023,
+        month: 2,
+        day: 1,
+        isLeapMonth: true,
+      );
+      expect(solarDate, DateTime(2023, 3, 22));
+    });
+
+    test('不存在嘅閏月會被拒絕', () {
+      expect(
+        () =>
+            lunarToSolarDate(year: 1999, month: 8, day: 11, isLeapMonth: true),
+        throwsArgumentError,
+      );
     });
   });
 }

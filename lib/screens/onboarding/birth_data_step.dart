@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/xuanli_theme.dart';
 import 'onboarding_widgets.dart';
+
+class LunarDateParts {
+  final int year;
+  final int month;
+  final int day;
+
+  const LunarDateParts({
+    required this.year,
+    required this.month,
+    required this.day,
+  });
+}
 
 /// [BirthDataStep] 每次用戶改任何欄位都會經 [onChanged] 交返一份完整
 /// 新 state，畀 [OnboardingFlow] 更新自己嘅 lifted state——呢個 widget
 /// 本身唔存內部狀態。
 class BirthDataState {
   final bool isLunar;
+  final bool isLeapMonth;
+  final LunarDateParts? lunarDate;
   final DateTime birthDate;
   final int? birthHour;
   final int birthMinute;
@@ -16,6 +31,8 @@ class BirthDataState {
 
   const BirthDataState({
     required this.isLunar,
+    this.isLeapMonth = false,
+    this.lunarDate,
     required this.birthDate,
     required this.birthHour,
     required this.birthMinute,
@@ -25,6 +42,8 @@ class BirthDataState {
 
   BirthDataState copyWith({
     bool? isLunar,
+    bool? isLeapMonth,
+    LunarDateParts? lunarDate,
     DateTime? birthDate,
     int? birthHour,
     bool clearBirthHour = false,
@@ -34,6 +53,8 @@ class BirthDataState {
   }) {
     return BirthDataState(
       isLunar: isLunar ?? this.isLunar,
+      isLeapMonth: isLeapMonth ?? this.isLeapMonth,
+      lunarDate: lunarDate ?? this.lunarDate,
       birthDate: birthDate ?? this.birthDate,
       birthHour: clearBirthHour ? null : (birthHour ?? this.birthHour),
       birthMinute: birthMinute ?? this.birthMinute,
@@ -47,9 +68,18 @@ class BirthDataState {
 /// 但方向相反——嗰邊係地支查鐘點，呢邊係鐘點查地支/時辰名，屬於獨立嘅
 /// UI-only 顯示邏輯，唔使同 engine 嗰張表耦合）。
 const _shiChenBoundaries = [
-  (23, 1, '子'), (1, 3, '丑'), (3, 5, '寅'), (5, 7, '卯'),
-  (7, 9, '辰'), (9, 11, '巳'), (11, 13, '午'), (13, 15, '未'),
-  (15, 17, '申'), (17, 19, '酉'), (19, 21, '戌'), (21, 23, '亥'),
+  (23, 1, '子'),
+  (1, 3, '丑'),
+  (3, 5, '寅'),
+  (5, 7, '卯'),
+  (7, 9, '辰'),
+  (9, 11, '巳'),
+  (11, 13, '午'),
+  (13, 15, '未'),
+  (15, 17, '申'),
+  (17, 19, '酉'),
+  (19, 21, '戌'),
+  (21, 23, '亥'),
 ];
 
 String shiChenName(int hour) {
@@ -65,6 +95,8 @@ String shiChenName(int hour) {
 
 class BirthDataStep extends StatelessWidget {
   final bool isLunar;
+  final bool isLeapMonth;
+  final LunarDateParts? lunarDate;
   final DateTime birthDate;
   final int? birthHour;
   final int birthMinute;
@@ -76,6 +108,8 @@ class BirthDataStep extends StatelessWidget {
   const BirthDataStep({
     super.key,
     required this.isLunar,
+    this.isLeapMonth = false,
+    this.lunarDate,
     required this.birthDate,
     required this.birthHour,
     required this.birthMinute,
@@ -86,15 +120,34 @@ class BirthDataStep extends StatelessWidget {
   });
 
   BirthDataState get _state => BirthDataState(
-        isLunar: isLunar,
-        birthDate: birthDate,
-        birthHour: birthHour,
-        birthMinute: birthMinute,
-        birthTimeUnknown: birthTimeUnknown,
-        birthPlace: birthPlace,
-      );
+    isLunar: isLunar,
+    isLeapMonth: isLeapMonth,
+    lunarDate: lunarDate,
+    birthDate: birthDate,
+    birthHour: birthHour,
+    birthMinute: birthMinute,
+    birthTimeUnknown: birthTimeUnknown,
+    birthPlace: birthPlace,
+  );
 
   Future<void> _pickDate(BuildContext context) async {
+    if (isLunar) {
+      final initial =
+          lunarDate ??
+          LunarDateParts(
+            year: birthDate.year,
+            month: birthDate.month,
+            day: birthDate.day,
+          );
+      final picked = await showDialog<LunarDateParts>(
+        context: context,
+        builder: (_) => _LunarDateEditDialog(initial: initial),
+      );
+      if (picked != null) {
+        onChanged(_state.copyWith(lunarDate: picked));
+      }
+      return;
+    }
     final picked = await showDatePicker(
       context: context,
       initialDate: birthDate,
@@ -112,7 +165,9 @@ class BirthDataStep extends StatelessWidget {
       initialTime: TimeOfDay(hour: birthHour ?? 9, minute: birthMinute),
     );
     if (picked != null) {
-      onChanged(_state.copyWith(birthHour: picked.hour, birthMinute: picked.minute));
+      onChanged(
+        _state.copyWith(birthHour: picked.hour, birthMinute: picked.minute),
+      );
     }
   }
 
@@ -134,20 +189,45 @@ class BirthDataStep extends StatelessWidget {
   }
 
   void _toggleTimeUnknown(bool v) {
-    onChanged(_state.copyWith(
-      birthTimeUnknown: v,
-      clearBirthHour: v,
-    ));
+    onChanged(_state.copyWith(birthTimeUnknown: v, clearBirthHour: v));
+  }
+
+  void _setCalendarType(int index) {
+    final nextIsLunar = index == 1;
+    onChanged(
+      _state.copyWith(
+        isLunar: nextIsLunar,
+        isLeapMonth: nextIsLunar ? isLeapMonth : false,
+        lunarDate: nextIsLunar
+            ? (lunarDate ??
+                  LunarDateParts(
+                    year: birthDate.year,
+                    month: birthDate.month,
+                    day: birthDate.day,
+                  ))
+            : lunarDate,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
-    final dateLabel = '${birthDate.year} 年 ${birthDate.month} 月 ${birthDate.day} 日';
+    final lunar =
+        lunarDate ??
+        LunarDateParts(
+          year: birthDate.year,
+          month: birthDate.month,
+          day: birthDate.day,
+        );
+    final dateLabel = isLunar
+        ? '農曆 ${lunar.year} 年 ${isLeapMonth ? '閏' : ''}'
+              '${lunar.month} 月 ${lunar.day} 日'
+        : '${birthDate.year} 年 ${birthDate.month} 月 ${birthDate.day} 日';
     final timeLabel = birthHour == null
         ? '未設定'
         : '${birthHour!.toString().padLeft(2, '0')}:'
-            '${birthMinute.toString().padLeft(2, '0')}（${shiChenName(birthHour!)}）';
+              '${birthMinute.toString().padLeft(2, '0')}（${shiChenName(birthHour!)}）';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
@@ -175,7 +255,7 @@ class BirthDataStep extends StatelessWidget {
           OnboardingSegmentedToggle(
             options: const ['新曆', '農曆'],
             selectedIndex: isLunar ? 1 : 0,
-            onChanged: (i) => onChanged(_state.copyWith(isLunar: i == 1)),
+            onChanged: _setCalendarType,
           ),
           const SizedBox(height: 14),
           OnboardingFieldRow(
@@ -183,6 +263,31 @@ class BirthDataStep extends StatelessWidget {
             value: dateLabel,
             onTap: () => _pickDate(context),
           ),
+          if (isLunar)
+            GestureDetector(
+              onTap: () =>
+                  onChanged(_state.copyWith(isLeapMonth: !isLeapMonth)),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '呢個月係閏月',
+                        style: TextStyle(fontSize: 12.5, color: colors.ink60),
+                      ),
+                    ),
+                    Switch(
+                      value: isLeapMonth,
+                      onChanged: (value) =>
+                          onChanged(_state.copyWith(isLeapMonth: value)),
+                      activeThumbColor: colors.jade,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (!birthTimeUnknown)
             OnboardingFieldRow(
               label: '出生時間',
@@ -204,7 +309,10 @@ class BirthDataStep extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('我唔清楚出生時間', style: TextStyle(fontSize: 12.5, color: colors.ink60)),
+                        Text(
+                          '我唔清楚出生時間',
+                          style: TextStyle(fontSize: 12.5, color: colors.ink60),
+                        ),
                         Text(
                           '會改用簡易版推算，之後可以補返',
                           style: TextStyle(fontSize: 10.5, color: colors.ink30),
@@ -234,6 +342,92 @@ class BirthDataStep extends StatelessWidget {
   }
 }
 
+class _LunarDateEditDialog extends StatefulWidget {
+  final LunarDateParts initial;
+
+  const _LunarDateEditDialog({required this.initial});
+
+  @override
+  State<_LunarDateEditDialog> createState() => _LunarDateEditDialogState();
+}
+
+class _LunarDateEditDialogState extends State<_LunarDateEditDialog> {
+  late final TextEditingController _year = TextEditingController(
+    text: widget.initial.year.toString(),
+  );
+  late final TextEditingController _month = TextEditingController(
+    text: widget.initial.month.toString(),
+  );
+  late final TextEditingController _day = TextEditingController(
+    text: widget.initial.day.toString(),
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _year.dispose();
+    _month.dispose();
+    _day.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final year = int.tryParse(_year.text);
+    final month = int.tryParse(_month.text);
+    final day = int.tryParse(_day.text);
+    if (year == null ||
+        year < 1900 ||
+        year > 2100 ||
+        month == null ||
+        month < 1 ||
+        month > 12 ||
+        day == null ||
+        day < 1 ||
+        day > 30) {
+      setState(() => _error = '請輸入 1900–2100 年、1–12 月、1–30 日');
+      return;
+    }
+    Navigator.pop(context, LunarDateParts(year: year, month: month, day: day));
+  }
+
+  Widget _numberField(TextEditingController controller, String label) {
+    return Expanded(
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: InputDecoration(labelText: label),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('農曆出生日期'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              _numberField(_year, '年'),
+              const SizedBox(width: 8),
+              _numberField(_month, '月'),
+              const SizedBox(width: 8),
+              _numberField(_day, '日'),
+            ],
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+          ],
+        ],
+      ),
+      actions: [TextButton(onPressed: _submit, child: const Text('確定'))],
+    );
+  }
+}
+
 /// 出生地點編輯對話框，獨立成 [StatefulWidget] 純粹為咗令
 /// [TextEditingController] 嘅生命週期同呢個 widget 自己綁死——由
 /// [State.dispose] 負責清理，保證唔會喺 dialog 退場動畫播緊嗰陣被
@@ -248,8 +442,9 @@ class _PlaceEditDialog extends StatefulWidget {
 }
 
 class _PlaceEditDialogState extends State<_PlaceEditDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialText);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialText,
+  );
 
   @override
   void dispose() {
