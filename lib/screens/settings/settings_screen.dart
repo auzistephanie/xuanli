@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../models/settings.dart';
+import '../../models/data_backup.dart';
+import '../../models/profile.dart';
+import '../../services/data_transfer_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/theme_mode_controller.dart';
 import '../../theme/xuanli_theme.dart';
@@ -12,7 +15,14 @@ import '../onboarding/onboarding_flow.dart';
 /// 重新做 onboarding、免責聲明、關於。冇 required constructor 參數——
 /// 由 `TabShell` 嘅 ⚙ icon 撳入嚟，自己內部靠 [StorageService] 讀寫。
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final DataTransferService? dataTransferService;
+  final ValueChanged<Profile>? onDataImported;
+
+  const SettingsScreen({
+    super.key,
+    this.dataTransferService,
+    this.onDataImported,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -20,6 +30,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   AppSettings? _settings;
+  bool _transferInProgress = false;
+
+  late final DataTransferService _dataTransfer =
+      widget.dataTransferService ?? DataTransferService();
 
   @override
   void initState() {
@@ -58,11 +72,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _save(current.copyWith(notificationHour: picked.hour, notificationMinute: picked.minute));
   }
 
-  void _stub(String feature) {
+  void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature — 之後有 device 先驗證')),
+      SnackBar(content: Text(message)),
     );
   }
+
+  Future<void> _exportData() async {
+    if (_transferInProgress) return;
+    setState(() => _transferInProgress = true);
+    try {
+      final box = context.findRenderObject() as RenderBox?;
+      await _dataTransfer.exportBackup(
+        shareOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+    } catch (_) {
+      if (mounted) _showMessage('匯出唔成功，請稍後再試');
+    } finally {
+      if (mounted) setState(() => _transferInProgress = false);
+    }
+  }
+
+  Future<void> _importData() async {
+    if (_transferInProgress) return;
+    setState(() => _transferInProgress = true);
+    try {
+      final backup = await _dataTransfer.pickBackup();
+      if (backup == null || !mounted) return;
+      final confirmed = await _confirmImport(backup);
+      if (confirmed != true || !mounted) return;
+      await _dataTransfer.importBackup(backup);
+      themeModeController.value = backup.settings.themeMode;
+      setState(() => _settings = backup.settings);
+      _showMessage('玄曆資料已成功匯入 ✓');
+      widget.onDataImported?.call(backup.profiles.first);
+    } on BackupFormatException catch (error) {
+      if (mounted) {
+        _showMessage('匯入唔成功：${error.message}。你而家嘅資料完全冇改動');
+      }
+    } catch (_) {
+      if (mounted) _showMessage('匯入唔成功。你而家嘅資料完全冇改動');
+    } finally {
+      if (mounted) setState(() => _transferInProgress = false);
+    }
+  }
+
+  Future<bool?> _confirmImport(XuanLiBackup backup) => showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('匯入玄曆資料？'),
+          content: Text(
+            '備份包含：\n'
+            '・${backup.profiles.length} 個命理檔案\n'
+            '・深色模式及通知設定\n\n'
+            '匯入後會取代目前資料。',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('確認匯入'),
+            ),
+          ],
+        ),
+      );
 
   Future<void> _confirmRedoOnboarding() async {
     final confirmed = await showDialog<bool>(
@@ -157,8 +233,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _notificationCard(colors, settings),
                           const SizedBox(height: 12),
                           _sectionLabel(colors, '資料'),
-                          _actionTile(colors, '匯出 JSON', () => _stub('匯出（分享）')),
-                          _actionTile(colors, '匯入 JSON', () => _stub('匯入（揀檔）')),
+                          _actionTile(
+                            colors,
+                            '匯出玄曆資料',
+                            _exportData,
+                            subtitle: '包含命理檔案及設定',
+                            enabled: !_transferInProgress,
+                          ),
+                          _actionTile(
+                            colors,
+                            '匯入玄曆資料',
+                            _importData,
+                            subtitle: '從玄曆 JSON 備份還原',
+                            enabled: !_transferInProgress,
+                          ),
                           _actionTile(colors, '重新做 Onboarding', _confirmRedoOnboarding),
                           const SizedBox(height: 12),
                           _sectionLabel(colors, '關於'),
@@ -284,7 +372,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _actionTile(XuanLiColors colors, String label, VoidCallback onTap) {
+  Widget _actionTile(
+    XuanLiColors colors,
+    String label,
+    VoidCallback onTap, {
+    String? subtitle,
+    bool enabled = true,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
       child: Material(
@@ -293,9 +387,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListTile(
           dense: true,
           visualDensity: VisualDensity.compact,
-          title: Text(label, style: TextStyle(fontSize: 13, color: colors.ink)),
+          title: Text(
+            label,
+            style: TextStyle(fontSize: 13, color: enabled ? colors.ink : colors.ink30),
+          ),
+          subtitle: subtitle == null
+              ? null
+              : Text(subtitle, style: TextStyle(fontSize: 11, color: colors.ink60)),
           trailing: Text('›', style: TextStyle(fontSize: 16, color: colors.ink30)),
-          onTap: onTap,
+          onTap: enabled ? onTap : null,
         ),
       ),
     );

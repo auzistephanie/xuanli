@@ -33,7 +33,7 @@ class ComboDetailScreen extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: _buildListCard(colors, '✦ 你嘅優勢', colors.jade, combo.strengths)),
+                        Expanded(child: _buildListCard(colors, '你嘅優勢', colors.jade, combo.strengths)),
                         const SizedBox(width: 10),
                         Expanded(child: _buildListCard(colors, '◈ 留意位', colors.red, combo.watchouts)),
                       ],

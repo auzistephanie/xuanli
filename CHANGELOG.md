@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-08-31：**Batch 2：Phase 2 功能收尾及本機驗收完成** — 設定頁正式接上版本化 JSON 備份，完整匯出／匯入 profiles list 同 settings；匯出用系統分享、匯入用 JSON 檔案選擇器，先做 schema／欄位／日期／五行等嚴格驗證，再顯示覆蓋確認，任何讀取、驗證或儲存失敗都保留舊資料。iOS／Android 補齊日曆權限聲明；加入日曆改用穩定識別碼偵測重複，並鎖住進行中按鈕，避免連撳建立重複事件。逐屏檢查時發現 web 字型未涵蓋部分 Unicode 圖示，已改用 Material Icons。`flutter analyze` 0 問題、全套 238/238 tests、iOS plist／Android manifest 格式及零網絡依賴掃描通過；onboarding、今日、設定等 mobile viewport 已逐屏檢查。呢部機只偵測到 macOS／Chrome，冇 iOS／Android 真機或 simulator，所以冷啟動 `<2s`、flight mode、原生分享／檔案 picker／權限 dialog／日曆 app 實寫仍列作真機驗收閘，未冒認完成。Phase 3／native widgets／部署／release 冇納入今批。
+
 - 2026-08-30：**Batch 1 correctness gate：修正 onboarding 農曆日期被當公曆計算** — `isLunar` 原本只控制 segmented toggle，建立 profile 時仍直接將同一組年月日交畀八字引擎，令農曆用戶嘅四柱、五行同後續推薦全部出錯。現改為進入 MBTI 前即場轉公曆，profile 繼續按 spec 只存公曆；農曆模式改用獨立年月日輸入（唔再錯用會拒絕農曆「二月三十」嘅公曆 picker），並補閏月標記、無效農曆日期攔截，以及普通農曆／閏月／完整 onboarding 儲存測試。同步更正 Progress：Phase 2 尚欠 JSON 匯出入、native 權限及真機／視覺／效能／離線驗收，唔再標成完成。重新安裝 Flutter 3.47.2 後，針對測試 21/21、全套測試 229/229、`flutter analyze`（No issues found）同 CLI demo 全部實跑通過。
 
 - 2026-08-04：**CLAUDE.md Progress 補回 7/29 web deploy** — commit `6bfc34f`（feat(web): add Flutter web platform support, deploy to Vercel）完成咗但 Progress／CHANGELOG 一直冇同步，狀態文件走漏咗眼（源起：`stephanie-portfolio` 嗰邊問「xuanli 都做完？」先發現）。Progress 加返一行講明呢個係 interim web preview（等 native build 工具裝緊嘅過渡方案），**唔算** Phase 3（Widget+通知）／Phase 4（APK 交付）完成，兩個都依然待做。Live URL 已 curl 驗證 200：https://xuanli-opal.vercel.app

@@ -37,6 +37,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCalendarsUsageDescription</key>
+	<string>玄曆需要讀取你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>玄曆需要讀寫你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

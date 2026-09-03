@@ -22,11 +22,12 @@ class TabShell extends StatefulWidget {
 
 class _TabShellState extends State<TabShell> {
   late int _index = widget.deepLinkDate != null ? 2 : 0;
+  late Profile _profile = widget.profile;
 
   static const _tabs = [
-    _TabInfo(icon: '☀', label: '今日'),
-    _TabInfo(icon: '✦', label: '我想做'),
-    _TabInfo(icon: '▦', label: '月曆'),
+    _TabInfo(icon: Icons.wb_sunny_outlined, label: '今日'),
+    _TabInfo(icon: Icons.auto_awesome_outlined, label: '我想做'),
+    _TabInfo(icon: Icons.calendar_month_outlined, label: '月曆'),
   ];
 
   @override
@@ -38,17 +39,23 @@ class _TabShellState extends State<TabShell> {
           children: [
             _SettingsBar(
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(
+                  builder: (_) => SettingsScreen(
+                    onDataImported: (profile) {
+                      setState(() => _profile = profile);
+                    },
+                  ),
+                ),
               ),
             ),
             Expanded(
               child: IndexedStack(
                 index: _index,
                 children: [
-                  TodayScreen(profile: widget.profile),
-                  ActivityScreen(profile: widget.profile),
+                  TodayScreen(profile: _profile),
+                  ActivityScreen(profile: _profile),
                   CalendarScreen(
-                    profile: widget.profile,
+                    profile: _profile,
                     initialSelectedDate: widget.deepLinkDate,
                   ),
                 ],
@@ -83,7 +90,7 @@ class _SettingsBar extends StatelessWidget {
           label: '設定',
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 12, 14, 10),
-            child: Text('⚙', style: TextStyle(fontSize: 20, color: colors.ink60)),
+            child: Icon(Icons.settings_outlined, size: 20, color: colors.ink60),
           ),
         ),
       ),
@@ -132,12 +139,10 @@ class _TabBar extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
+                          Icon(
                             tabs[i].icon,
-                            style: TextStyle(
-                              fontSize: 19,
-                              color: i == selectedIndex ? colors.red : colors.ink60,
-                            ),
+                            size: 19,
+                            color: i == selectedIndex ? colors.red : colors.ink60,
                           ),
                           const SizedBox(height: 3),
                           Text(
@@ -162,7 +167,7 @@ class _TabBar extends StatelessWidget {
 }
 
 class _TabInfo {
-  final String icon;
+  final IconData icon;
   final String label;
   const _TabInfo({
     required this.icon,

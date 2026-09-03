@@ -92,17 +92,17 @@ void main() {
     expect(labelText('我想做').style?.color, colors.red);
   });
 
-  testWidgets('撳右上角 ⚙ 會去 SettingsScreen', (tester) async {
+  testWidgets('撳右上角設定 icon 會去 SettingsScreen', (tester) async {
     await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
 
-    await tester.tap(find.text('⚙'));
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
 
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
   testWidgets(
-      '有 notch/狀態列 inset 時，頂部唔會俾 ⚙ bar 同 tab 內部自己嗰個 '
+      '有 notch/狀態列 inset 時，頂部唔會俾設定 bar 同 tab 內部自己嗰個 '
       'SafeArea 雙重計算（TabShell 嘅 SafeArea 一定要包住成個 Column，'
       '唔淨係包 _SettingsBar，否則 tab 畫面自己嘅 SafeArea 會再加一次）',
       (tester) async {
@@ -115,7 +115,7 @@ void main() {
     await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
     await tester.pump();
 
-    final settingsBarTop = tester.getTopLeft(find.text('⚙')).dy;
+    final settingsBarTop = tester.getTopLeft(find.byIcon(Icons.settings_outlined)).dy;
     final scrollTop = tester.getTopLeft(find.byType(SingleChildScrollView).first).dy;
 
     // ⚙ 應該喺 inset 之後就即刻出現（俾 TabShell 嗰個 SafeArea 消化咗）。

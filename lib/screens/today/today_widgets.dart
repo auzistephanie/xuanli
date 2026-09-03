@@ -171,13 +171,20 @@ class YjColumn extends StatelessWidget {
                       ),
                     ),
                     if (item.matchesUser)
-                      Text(
-                        '✦ 合你',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          color: colors.gold,
-                          letterSpacing: 1,
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.auto_awesome, size: 9, color: colors.gold),
+                          const SizedBox(width: 2),
+                          Text(
+                            '合你',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              color: colors.gold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -218,14 +225,20 @@ class AdviceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '🔮 今日貼身建議',
-            style: TextStyle(
-              fontSize: 10.5,
-              letterSpacing: 2,
-              color: colors.gold,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, size: 13, color: colors.gold),
+              const SizedBox(width: 4),
+              Text(
+                '今日貼身建議',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  letterSpacing: 2,
+                  color: colors.gold,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Text(

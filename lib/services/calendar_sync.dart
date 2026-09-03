@@ -17,6 +17,8 @@ class CalendarSyncEvent {
   }
 }
 
+enum CalendarAddResult { added, alreadyExists, failed }
+
 /// 包裝 device_calendar 嘅權限/讀/寫（spec §9.9）。設計原則：就算冇
 /// 權限、冇日曆、或者部機根本冇 platform channel implementation（呢個
 /// repo 開發用嘅 Mac 冇 simulator/device，`flutter test` 環境本身就係
@@ -83,28 +85,61 @@ class CalendarSyncService {
   /// 重新解讀呢一步。結論（同一部機睇一定係啱嗰日）兩邊平台都成立，
   /// 但係經兩條唔同機制達成，唔好誤會呢段註解係講緊 platform-agnostic
   /// 嘅單一邏輯。
-  Future<bool> addAllDayEvent({
+  Future<CalendarAddResult> addAllDayEvent({
     required DateTime date,
     required String title,
     required String description,
+    required String deduplicationKey,
   }) async {
-    if (!await requestPermission()) return false;
+    if (!await requestPermission()) return CalendarAddResult.failed;
 
     final calendarId = await _defaultWritableCalendarId();
-    if (calendarId == null) return false;
+    if (calendarId == null) return CalendarAddResult.failed;
+
+    final marker = '玄曆識別碼：$deduplicationKey';
+    if (await _containsMarker(calendarId, date, marker)) {
+      return CalendarAddResult.alreadyExists;
+    }
 
     final day = TZDateTime(UTC, date.year, date.month, date.day);
     final event = Event(
       calendarId,
       title: title,
-      description: description,
+      description: '$description\n\n$marker',
       start: day,
       end: day,
       allDay: true,
     );
 
     final result = await _plugin.createOrUpdateEvent(event);
-    return result != null && result.isSuccess;
+    return result != null && result.isSuccess
+        ? CalendarAddResult.added
+        : CalendarAddResult.failed;
+  }
+
+  Future<bool> _containsMarker(
+    String calendarId,
+    DateTime date,
+    String marker,
+  ) async {
+    final start = DateTime(date.year, date.month, date.day);
+    try {
+      final result = await _plugin.retrieveEvents(
+        calendarId,
+        RetrieveEventsParams(
+          startDate: start,
+          endDate: start.add(const Duration(days: 1)),
+        ),
+      );
+      if (!result.isSuccess || result.data == null) return false;
+      return result.data!.any(
+        (event) => event.description?.contains(marker) == true,
+      );
+    } catch (_) {
+      // 某個 calendar provider 暫時讀唔到，唔應該令原本可用嘅寫入功能
+      // 一齊失效；UI 自己嘅 in-flight lock 仍會擋住快速連撳。
+      return false;
+    }
   }
 
   /// 讀返 `[start, end)` 範圍入面、用戶全部日曆合埋一齊嘅 events，

@@ -52,6 +52,8 @@ class ResultCard extends StatelessWidget {
   final bool showCalendarActions;
   final VoidCallback? onAddToCalendar;
   final VoidCallback? onViewSchedule;
+  final String calendarButtonLabel;
+  final bool calendarButtonEnabled;
 
   const ResultCard({
     super.key,
@@ -62,6 +64,8 @@ class ResultCard extends StatelessWidget {
     required this.showCalendarActions,
     this.onAddToCalendar,
     this.onViewSchedule,
+    this.calendarButtonLabel = '＋ 加入我嘅日曆',
+    this.calendarButtonEnabled = true,
   });
 
   @override
@@ -115,7 +119,7 @@ class ResultCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: onAddToCalendar,
+                    onTap: calendarButtonEnabled ? onAddToCalendar : null,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       alignment: Alignment.center,
@@ -124,7 +128,7 @@ class ResultCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        '＋ 加入我嘅日曆',
+                        calendarButtonLabel,
                         style: TextStyle(fontSize: 11.5, color: colors.paper, letterSpacing: 1),
                       ),
                     ),
