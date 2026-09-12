@@ -2,7 +2,7 @@
 
 Flutter app：中國傳統擇日 × 八字五行 × 紫微 × MBTI 個人化宜忌。國風復古典雅，全繁體中文（廣東話語感）UI。
 
-## ⚙️ Standards（MANDATORY — 正本：`stephanie-personal/docs/ai-governance/06-STANDARDS.md`，改規則只改正本）
+## ⚙️ Standards（MANDATORY — 正本：`stephanie-personal/docs/ai-governance/STANDARDS.md`，改規則只改正本）
 
 Push（`github_push.py`，永不 git CLI・HTTPS・一 run 一 commit・**開工前 `--check`**・**收工即推**・三道閘 刪檔／SHA／交叉 review，撞閘唔好即刻 `--force`）・寫入分流（改動記錄 → `CHANGELOG.md` **頂部**；本檔上限 100 行/6KB）・清理 mv `_to_delete/`・方向性決定先 preview（02 §R3）・改完以用家身份 run 一次先報完成・governance 00–06（派工 01 §1＋03 模板；完成前過 02 §R2；冇 mount stephanie-personal 就叫 Stephanie 連埋）。**Codex 讀同層 `AGENTS.md`**。詳文＋例外表 → 正本。
 ⚠️ 本 repo 係 standards **例外**（真 git CLI＋feature branch＋英文 commit）— 見正本例外表＋下面 Git section。
@@ -58,7 +58,7 @@ flutter build apk --release     # Android 交付（<40MB）
 
 - [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
 - [x] Phase 1 引擎（TDD，fixtures spec §11；`dart test test/engine/` 全綠，`dart run tool/demo.dart` 可行）
-- [x] Phase 2 App UI（Batch 2 功能及本機驗收完成：JSON 匯出入、native 日曆權限設定、重複事件保護、逐屏 mobile QA、238/238 tests；iOS／Android 真機分享、picker、日曆實寫、flight mode、冷啟動 `<2s` 仍係交付前硬閘）
+- [ ] Phase 2 App UI（主要畫面已完成；JSON 匯出入、native 日曆權限／真機驗收、逐屏 screenshot、冷啟動及離線驗收仍待完成）
 - [x] 2026-07-29 interim web 部署（`flutter create --platforms=web`，過渡方案畀 Stephanie 喺 Xcode/Android Studio 裝緊嗰陣睇到 app running live，**唔算** Phase 3/4 完成）→ https://xuanli-opal.vercel.app
 - [ ] Phase 3 Widget（iOS/Android 小+中）+ 每日通知
 - [ ] Phase 4 交付（APK + install_ios.sh）
