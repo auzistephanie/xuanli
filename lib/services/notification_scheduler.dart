@@ -62,11 +62,9 @@ class NotificationScheduler {
 
   Future<void> _ensureInitialized() async {
     await _ensureTimezone();
-    // TODO(phase3b, 上真機前一定要換): Android 通知小圖示淨係睇 alpha
-    // channel，`ic_launcher` 呢個全彩、冇透明度嘅 app icon 唔啱用（好
-    // 大機會顯示做一嚿白色方塊），真機測試前一定要換做一個淨色剪影嘅
-    // 專用 notification icon asset。
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // Android 通知小圖示淨係睇 alpha channel，所以用專用嘅白色剪影
+    // `ic_stat_xuanli`（res/drawable-*），唔用全彩 launcher icon。
+    const androidSettings = AndroidInitializationSettings('ic_stat_xuanli');
     const iosSettings = DarwinInitializationSettings();
     await _plugin.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),

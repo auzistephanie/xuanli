@@ -58,6 +58,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   test: ^1.31.0
   app_links_platform_interface: ^2.0.4
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -95,3 +96,17 @@ flutter:
           weight: 500
         - asset: assets/fonts/NotoSansTC.ttf
           weight: 700
+
+flutter_launcher_icons:
+  ios: true
+  android: true
+  image_path: assets/icon/icon.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#B23A3A"
+  adaptive_icon_foreground: assets/icon/icon_foreground.png
+  adaptive_icon_monochrome: assets/icon/icon_mono.png
+  web:
+    generate: true
+    image_path: assets/icon/icon.png
+    background_color: "#B23A3A"
+    theme_color: "#B23A3A"
