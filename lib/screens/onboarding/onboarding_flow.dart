@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../engine/bazi.dart';
 import '../../services/storage_service.dart';
 import '../tab_shell.dart';
 import 'birth_data_step.dart';
@@ -22,6 +23,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   BirthDataState _birthData = BirthDataState(
     isLunar: false,
+    isLeapMonth: false,
+    lunarDate: const LunarDateParts(year: 2000, month: 1, day: 1),
     birthDate: DateTime(2000, 1, 1),
     birthHour: 9,
     birthMinute: 0,
@@ -30,6 +33,37 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   );
 
   String? _mbti;
+  DateTime? _solarBirthDate;
+
+  void _updateBirthData(BirthDataState state) {
+    setState(() {
+      _birthData = state;
+      _solarBirthDate = null;
+    });
+  }
+
+  void _continueFromBirthData() {
+    DateTime solarDate;
+    try {
+      solarDate = _birthData.isLunar
+          ? lunarToSolarDate(
+              year: _birthData.lunarDate!.year,
+              month: _birthData.lunarDate!.month,
+              day: _birthData.lunarDate!.day,
+              isLeapMonth: _birthData.isLeapMonth,
+            )
+          : _birthData.birthDate;
+    } on ArgumentError {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('呢個農曆日期唔存在，請重新選擇')));
+      return;
+    }
+    setState(() {
+      _solarBirthDate = solarDate;
+      _step = 1;
+    });
+  }
 
   Future<void> _finish() async {
     // [ProfileCardStep] 剛 save 咗個 profile 落 StorageService（先至 call
@@ -49,30 +83,32 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       body: SafeArea(
         child: switch (_step) {
           0 => BirthDataStep(
-              isLunar: _birthData.isLunar,
-              birthDate: _birthData.birthDate,
-              birthHour: _birthData.birthHour,
-              birthMinute: _birthData.birthMinute,
-              birthTimeUnknown: _birthData.birthTimeUnknown,
-              birthPlace: _birthData.birthPlace,
-              onChanged: (s) => setState(() => _birthData = s),
-              onNext: () => setState(() => _step = 1),
-            ),
+            isLunar: _birthData.isLunar,
+            isLeapMonth: _birthData.isLeapMonth,
+            lunarDate: _birthData.lunarDate,
+            birthDate: _birthData.birthDate,
+            birthHour: _birthData.birthHour,
+            birthMinute: _birthData.birthMinute,
+            birthTimeUnknown: _birthData.birthTimeUnknown,
+            birthPlace: _birthData.birthPlace,
+            onChanged: _updateBirthData,
+            onNext: _continueFromBirthData,
+          ),
           1 => MbtiStep(
-              onDone: (mbti) => setState(() {
-                _mbti = mbti;
-                _step = 2;
-              }),
-            ),
+            onDone: (mbti) => setState(() {
+              _mbti = mbti;
+              _step = 2;
+            }),
+          ),
           _ => ProfileCardStep(
-              name: '我',
-              birthDate: _birthData.birthDate,
-              birthHour: _birthData.birthHour,
-              birthMinute: _birthData.birthMinute,
-              birthPlace: _birthData.birthPlace,
-              mbti: _mbti!,
-              onSaved: _finish,
-            ),
+            name: '我',
+            birthDate: _solarBirthDate!,
+            birthHour: _birthData.birthHour,
+            birthMinute: _birthData.birthMinute,
+            birthPlace: _birthData.birthPlace,
+            mbti: _mbti!,
+            onSaved: _finish,
+          ),
         },
       ),
     );

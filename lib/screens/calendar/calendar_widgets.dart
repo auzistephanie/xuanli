@@ -251,9 +251,15 @@ class DayCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '📅 你嘅行程',
-                    style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colors.ink60),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 12, color: colors.ink60),
+                      const SizedBox(width: 4),
+                      Text(
+                        '你嘅行程',
+                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: colors.ink60),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 3),
                   if (eventLines.isEmpty)

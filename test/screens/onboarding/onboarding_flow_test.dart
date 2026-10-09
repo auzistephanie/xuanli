@@ -8,6 +8,7 @@ import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/tab_shell.dart';
+import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
@@ -33,7 +34,9 @@ void main() {
   testWidgets('行完 3 步（用預設出生資料 + 16 宮格揀 ISFP）會跳去 TabShell', (tester) async {
     // `theme:` required — see birth_data_step_test.dart's wrap() note;
     // every step OnboardingFlow renders needs context.xuanliColors present.
-    await tester.pumpWidget(MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()));
+    await tester.pumpWidget(
+      MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
+    );
 
     // Step 1: 出生資料，用晒預設值直接下一步。
     expect(find.text('你嘅出生一刻'), findsOneWidget);
@@ -61,5 +64,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TabShell), findsOneWidget);
+  });
+
+  testWidgets('農曆出生日期會先轉公曆再建立及儲存 profile', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
+    );
+
+    await tester.tap(find.text('農曆'));
+    await tester.pump();
+    await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('ISFP'));
+    await tester.tap(find.text('ISFP'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
+    await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('開始睇今日'));
+    await tester.pumpAndSettle();
+
+    final profile = await StorageService().loadPrimaryProfile();
+    expect(profile, isNotNull);
+    // Flow 預設輸入數字係農曆 2000-01-01；落地必須係相應公曆日期，
+    // 唔可以將同一組年月日直接當公曆存底。
+    expect(profile!.birthDate, DateTime(2000, 2, 5));
   });
 }

@@ -1,11 +1,16 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/models/profile.dart';
 import 'package:xuanli/models/settings.dart';
+import 'package:xuanli/models/data_backup.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/settings/settings_screen.dart';
 import 'package:xuanli/services/storage_service.dart';
+import 'package:xuanli/services/data_transfer_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
@@ -45,8 +50,10 @@ void main() {
     expect(find.text('常開'), findsOneWidget);
     expect(find.text('常關'), findsOneWidget);
     expect(find.text('07:30'), findsOneWidget);
-    expect(find.text('匯出 JSON'), findsOneWidget);
-    expect(find.text('匯入 JSON'), findsOneWidget);
+    expect(find.text('匯出玄曆資料'), findsOneWidget);
+    expect(find.text('包含命理檔案及設定'), findsOneWidget);
+    expect(find.text('匯入玄曆資料'), findsOneWidget);
+    expect(find.text('從玄曆 JSON 備份還原'), findsOneWidget);
     expect(find.text('重新做 Onboarding'), findsOneWidget);
     expect(find.text('免責聲明全文'), findsOneWidget);
     expect(find.text('關於玄曆'), findsOneWidget);
@@ -82,18 +89,69 @@ void main() {
     expect(find.text('推送時間'), findsOneWidget);
   });
 
-  testWidgets('撳「匯出 JSON」／「匯入 JSON」會顯示 stub SnackBar', (tester) async {
-    await tester.pumpWidget(wrap(const SettingsScreen()));
+  testWidgets('撳匯出會交完整 JSON 畀 share service', (tester) async {
+    await StorageService().savePrimaryProfile(_sampleProfile());
+    Uint8List? shared;
+    final transfer = DataTransferService(
+      share: (bytes, filename, origin) async => shared = bytes,
+    );
+    await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('匯出 JSON'));
-    await tester.pump();
-    expect(find.textContaining('之後有 device 先驗證'), findsOneWidget);
-
+    await tester.tap(find.text('匯出玄曆資料'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('匯入 JSON'));
-    await tester.pump();
-    expect(find.textContaining('之後有 device 先驗證'), findsOneWidget);
+
+    expect(shared, isNotNull);
+    expect(XuanLiBackup.decode(utf8.decode(shared!)).profiles.single.id, 'p1');
+  });
+
+  testWidgets('匯入有效 backup 先確認；取消唔覆蓋，確認先取代', (tester) async {
+    await StorageService().savePrimaryProfile(_sampleProfile());
+    final incomingProfile = Profile.fromJson({
+      ..._sampleProfile().toJson(),
+      'id': 'imported',
+      'name': '匯入檔案',
+    });
+    final backup = XuanLiBackup(
+      profiles: [incomingProfile],
+      settings: AppSettings.defaults,
+      exportedAt: DateTime.utc(2026, 8, 30),
+    );
+    final transfer = DataTransferService(
+      pick: () async => Uint8List.fromList(utf8.encode(backup.encode())),
+    );
+    await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.pumpAndSettle();
+    expect(find.text('匯入玄曆資料？'), findsOneWidget);
+    expect(find.textContaining('1 個命理檔案'), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect((await StorageService().loadPrimaryProfile())!.id, 'p1');
+
+    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('確認匯入'));
+    await tester.pumpAndSettle();
+    expect((await StorageService().loadPrimaryProfile())!.id, 'imported');
+    expect(find.textContaining('成功匯入'), findsOneWidget);
+  });
+
+  testWidgets('壞 JSON 顯示易明錯誤，舊 profile 完全不變', (tester) async {
+    await StorageService().savePrimaryProfile(_sampleProfile());
+    final transfer = DataTransferService(
+      pick: () async => Uint8List.fromList(utf8.encode('{bad')),
+    );
+    await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('資料完全冇改動'), findsOneWidget);
+    expect((await StorageService().loadPrimaryProfile())!.id, 'p1');
   });
 
   testWidgets('撳「重新做 Onboarding」→ 確定：清咗 profile 並跳去 OnboardingFlow', (tester) async {

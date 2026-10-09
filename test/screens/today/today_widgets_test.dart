@@ -38,7 +38,7 @@ void main() {
   });
 
   group('YjColumn', () {
-    testWidgets('已配對項目顯示「✦ 合你」，未配對嘅唔顯示', (tester) async {
+    testWidgets('已配對項目顯示 sparkle icon＋「合你」，未配對嘅唔顯示', (tester) async {
       await tester.pumpWidget(wrapInRow(YjColumn(
         dotLabel: '宜',
         title: '今日宜',
@@ -51,7 +51,8 @@ void main() {
 
       expect(find.text('祭祀祈福'), findsOneWidget);
       expect(find.text('解除舊約'), findsOneWidget);
-      expect(find.text('✦ 合你'), findsOneWidget);
+      expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+      expect(find.text('合你'), findsOneWidget);
     });
 
     testWidgets('有 extraNote 就顯示喺列表下面', (tester) async {
@@ -84,7 +85,8 @@ void main() {
         const AdviceCard(advice: '丙戌平日，宜靜不宜動。'),
       ));
       expect(find.textContaining('丙戌平日'), findsOneWidget);
-      expect(find.textContaining('🔮'), findsOneWidget);
+      expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+      expect(find.text('今日貼身建議'), findsOneWidget);
     });
   });
 

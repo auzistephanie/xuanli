@@ -37,6 +37,8 @@ const _rangeOptions = [
 
 class _ActivityScreenState extends State<ActivityScreen> {
   final _calendarSync = CalendarSyncService();
+  bool _calendarWriteInProgress = false;
+  final Set<String> _addedCalendarKeys = {};
 
   late String _selectedActivity = loadActivities().first.name;
   int _rangeIndex = 1; // 未來一個月
@@ -65,16 +67,35 @@ class _ActivityScreenState extends State<ActivityScreen> {
     required DateTime date,
     required String reason,
   }) async {
-    final added = await _calendarSync.addAllDayEvent(
-      date: date,
-      title: '${activity.name}（玄曆吉日）',
-      description: reason,
-    );
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(added ? '已加入你嘅日曆 ✓' : '需要日曆權限先可以加入 — 請去手機設定開返'),
-    ));
+    if (_calendarWriteInProgress) return;
+    final key = _calendarKey(activity, date);
+    setState(() => _calendarWriteInProgress = true);
+    try {
+      final result = await _calendarSync.addAllDayEvent(
+        date: date,
+        title: '${activity.name}（玄曆吉日）',
+        description: reason,
+        deduplicationKey: key,
+      );
+      if (!mounted) return;
+      if (result != CalendarAddResult.failed) {
+        setState(() => _addedCalendarKeys.add(key));
+      }
+      final message = switch (result) {
+        CalendarAddResult.added => '已加入你嘅日曆 ✓',
+        CalendarAddResult.alreadyExists => '呢個玄曆吉日已經加入過日曆',
+        CalendarAddResult.failed => '需要日曆權限先可以加入 — 請去手機設定開返',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) setState(() => _calendarWriteInProgress = false);
+    }
   }
+
+  String _calendarKey(Activity activity, DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}|${activity.name}';
 
   Future<void> _showDaySchedule(DateTime date, String dateLabel) async {
     final events = await _calendarSync.eventsOnDay(date);
@@ -232,6 +253,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
       day: day,
       favorable: widget.profile.favorable,
     );
+    final calendarKey = _calendarKey(activity, result.date);
+    final alreadyAdded = _addedCalendarKeys.contains(calendarKey);
 
     return ResultCard(
       dateLabel: dateLabel,
@@ -242,6 +265,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
       onAddToCalendar: showCalendarActions
           ? () => _addToCalendar(activity: activity, date: result.date, reason: reason)
           : null,
+      calendarButtonLabel: alreadyAdded
+          ? '已加入日曆 ✓'
+          : _calendarWriteInProgress
+              ? '加入中…'
+              : '＋ 加入我嘅日曆',
+      calendarButtonEnabled: !alreadyAdded && !_calendarWriteInProgress,
       onViewSchedule: showCalendarActions
           ? () => _showDaySchedule(result.date, dateLabel)
           : null,

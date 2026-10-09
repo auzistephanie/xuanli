@@ -8,8 +8,20 @@ DateTime lunarToSolarDate({
   required int day,
   required bool isLeapMonth,
 }) {
-  final lunar = Lunar.fromYmd(year, isLeapMonth ? -month : month, day);
+  final encodedMonth = isLeapMonth ? -month : month;
+  late final Lunar lunar;
+  try {
+    lunar = Lunar.fromYmd(year, encodedMonth, day);
+  } catch (_) {
+    throw ArgumentError('無效農曆日期：$year-$month-$day');
+  }
   final solar = lunar.getSolar();
+  final roundTrip = solar.getLunar();
+  if (roundTrip.getYear() != year ||
+      roundTrip.getMonth() != encodedMonth ||
+      roundTrip.getDay() != day) {
+    throw ArgumentError('無效農曆日期：$year-$month-$day');
+  }
   return DateTime(solar.getYear(), solar.getMonth(), solar.getDay());
 }
 
@@ -47,7 +59,13 @@ BaziResult computeBazi({
   // 冇時辰時用中午 12:00 做安全預設（遠離子時邊界），只攞年月日三柱。
   final hour = birthHour ?? 12;
   final solar = Solar.fromYmdHms(
-      birthDate.year, birthDate.month, birthDate.day, hour, birthMinute, 0);
+    birthDate.year,
+    birthDate.month,
+    birthDate.day,
+    hour,
+    birthMinute,
+    0,
+  );
   final lunar = solar.getLunar();
   final eightChar = lunar.getEightChar();
   eightChar.setSect(1); // 晚子時日柱歸翌日流派，lunar 預設係流派 2，必須顯式設
@@ -68,10 +86,14 @@ BaziResult computeBazi({
   final wuxing = _normalizeToPercent(wuxingWeighted);
 
   final sameParty = _sameSideElements(dayMasterElement);
-  final sameWeight =
-      sameParty.fold<int>(0, (sum, el) => sum + (wuxingWeighted[el] ?? 0));
+  final sameWeight = sameParty.fold<int>(
+    0,
+    (sum, el) => sum + (wuxingWeighted[el] ?? 0),
+  );
   final totalWeight = wuxingWeighted.values.fold<int>(0, (a, b) => a + b);
-  final samePartyPercent = totalWeight == 0 ? 0 : sameWeight * 100 / totalWeight;
+  final samePartyPercent = totalWeight == 0
+      ? 0
+      : sameWeight * 100 / totalWeight;
   final isBodyStrong = samePartyPercent >= 45;
 
   final List<String> favorable;
@@ -82,16 +104,10 @@ BaziResult computeBazi({
       elementThatControls(dayMasterElement),
       elementGeneratedBy(dayMasterElement),
     ];
-    unfavorable = [
-      elementThatGenerates(dayMasterElement),
-      dayMasterElement,
-    ];
+    unfavorable = [elementThatGenerates(dayMasterElement), dayMasterElement];
   } else {
     // 身弱：喜 = 生日主(印) + 同日主(比劫)；忌 = 剋日主(官殺) + 日主所剋(財)
-    favorable = [
-      elementThatGenerates(dayMasterElement),
-      dayMasterElement,
-    ];
+    favorable = [elementThatGenerates(dayMasterElement), dayMasterElement];
     unfavorable = [
       elementThatControls(dayMasterElement),
       elementControlledBy(dayMasterElement),
@@ -143,8 +159,9 @@ Map<String, int> _normalizeToPercent(Map<String, int> weighted) {
   final sum = rounded.values.fold<int>(0, (a, b) => a + b);
   final residual = 100 - sum;
   if (residual != 0) {
-    final target =
-        _wuxingOrder.reduce((a, b) => weighted[a]! >= weighted[b]! ? a : b);
+    final target = _wuxingOrder.reduce(
+      (a, b) => weighted[a]! >= weighted[b]! ? a : b,
+    );
     rounded[target] = rounded[target]! + residual;
   }
   return rounded;

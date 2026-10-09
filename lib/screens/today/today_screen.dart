@@ -170,7 +170,7 @@ class _TodayScreenState extends State<TodayScreen> {
             height: 30,
             alignment: Alignment.center,
             decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: colors.ink30)),
-            child: Text('☰', style: TextStyle(color: colors.ink60)),
+            child: Icon(Icons.menu, size: 17, color: colors.ink60),
           ),
         ),
       ],

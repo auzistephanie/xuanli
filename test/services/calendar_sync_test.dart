@@ -86,9 +86,10 @@ void main() {
         date: DateTime(2026, 7, 20),
         title: '剪髮（玄曆吉日）',
         description: '🔮 測試',
+        deduplicationKey: '2026-07-20|剪髮',
       );
 
-      expect(ok, isFalse);
+      expect(ok, CalendarAddResult.failed);
     });
 
     test('有權限、冇任何可寫日曆 → 返 false', () async {
@@ -107,9 +108,10 @@ void main() {
         date: DateTime(2026, 7, 20),
         title: '剪髮（玄曆吉日）',
         description: '🔮 測試',
+        deduplicationKey: '2026-07-20|剪髮',
       );
 
-      expect(ok, isFalse);
+      expect(ok, CalendarAddResult.failed);
     });
 
     test('有權限、有可寫日曆 → 揀 default calendar，建全日 event，傳啱標題/描述/日期', () async {
@@ -134,13 +136,14 @@ void main() {
         date: DateTime(2026, 7, 20),
         title: '剪髮（玄曆吉日）',
         description: '🔮 通勝宜理髮',
+        deduplicationKey: '2026-07-20|剪髮',
       );
 
-      expect(ok, isTrue);
+      expect(ok, CalendarAddResult.added);
       expect(sentArgs, isNotNull);
       expect(sentArgs!['calendarId'], 'work'); // 揀咗 isDefault=true 嗰個，唔係第一個
       expect(sentArgs!['eventTitle'], '剪髮（玄曆吉日）');
-      expect(sentArgs!['eventDescription'], '🔮 通勝宜理髮');
+      expect(sentArgs!['eventDescription'], contains('玄曆識別碼：2026-07-20|剪髮'));
       expect(sentArgs!['eventAllDay'], isTrue);
 
       // `sentArgs` 係 device_calendar package 真正嘅 `createOrUpdateEvent`
@@ -180,10 +183,48 @@ void main() {
         date: DateTime(2026, 7, 20),
         title: '剪髮（玄曆吉日）',
         description: '🔮 測試',
+        deduplicationKey: '2026-07-20|剪髮',
       );
 
-      expect(ok, isTrue);
+      expect(ok, CalendarAddResult.added);
       expect(sentArgs!['calendarId'], 'personal');
+    });
+
+    test('同一日同一玄曆識別碼已存在 → 唔再建第二個 event', () async {
+      var createCalls = 0;
+      mockChannel((call) async {
+        if (call.method == 'hasPermissions') return true;
+        if (call.method == 'retrieveCalendars') {
+          return json.encode([
+            {'id': 'personal', 'name': 'Personal', 'isReadOnly': false, 'isDefault': true},
+          ]);
+        }
+        if (call.method == 'retrieveEvents') {
+          return json.encode([
+            {
+              'eventId': 'existing',
+              'calendarId': 'personal',
+              'eventTitle': '剪髮（玄曆吉日）',
+              'eventDescription': '舊原因\n\n玄曆識別碼：2026-07-20|剪髮',
+              'eventStartDate': DateTime.utc(2026, 7, 20).millisecondsSinceEpoch,
+              'eventEndDate': DateTime.utc(2026, 7, 20).millisecondsSinceEpoch,
+              'eventAllDay': true,
+            },
+          ]);
+        }
+        if (call.method == 'createOrUpdateEvent') createCalls++;
+        return null;
+      });
+
+      final result = await CalendarSyncService().addAllDayEvent(
+        date: DateTime(2026, 7, 20),
+        title: '剪髮（玄曆吉日）',
+        description: '🔮 新原因',
+        deduplicationKey: '2026-07-20|剪髮',
+      );
+
+      expect(result, CalendarAddResult.alreadyExists);
+      expect(createCalls, 0);
     });
   });
 

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/profile.dart';
 import '../models/settings.dart';
+import '../models/data_backup.dart';
 
 /// Profile 持久化（spec §5：`profiles: [Profile]`，MVP 淨係用 `profiles[0]`）。
 /// 用 `shared_preferences` 存一個 JSON-encoded list string。
@@ -59,5 +60,48 @@ class StorageService {
   Future<void> clearProfiles() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_profilesKey);
+  }
+
+  Future<XuanLiBackup> buildBackup({DateTime? now}) async => XuanLiBackup(
+        profiles: await loadProfiles(),
+        settings: await loadSettings(),
+        exportedAt: now ?? DateTime.now(),
+      );
+
+  /// 先由 [XuanLiBackup.decode] 驗證晒成份資料，先會行到呢度寫入。
+  /// SharedPreferences 冇 transaction；因此保存舊 raw values，任何一步
+  /// 失敗就回復兩個 key，避免 profiles/settings 只換咗一半。
+  Future<void> replaceWithBackup(XuanLiBackup backup) async {
+    final prefs = await SharedPreferences.getInstance();
+    final oldProfiles = prefs.getString(_profilesKey);
+    final oldSettings = prefs.getString(_settingsKey);
+    try {
+      final profilesSaved = await prefs.setString(
+        _profilesKey,
+        json.encode(backup.profiles.map((profile) => profile.toJson()).toList()),
+      );
+      if (!profilesSaved) throw StateError('profiles write failed');
+      final settingsSaved = await prefs.setString(
+        _settingsKey,
+        json.encode(backup.settings.toJson()),
+      );
+      if (!settingsSaved) throw StateError('settings write failed');
+    } catch (_) {
+      await _restore(prefs, _profilesKey, oldProfiles);
+      await _restore(prefs, _settingsKey, oldSettings);
+      rethrow;
+    }
+  }
+
+  Future<void> _restore(
+    SharedPreferences prefs,
+    String key,
+    String? value,
+  ) async {
+    if (value == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setString(key, value);
+    }
   }
 }
