@@ -84,7 +84,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('林間清泉'), findsOneWidget);
 
-    await tester.tap(find.text('⇪'));
+    await tester.tap(find.byIcon(Icons.ios_share));
     await tester.pump();
     await tester.pumpAndSettle();
     expect(find.text('分享我嘅組合'), findsOneWidget);

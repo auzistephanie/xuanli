@@ -4,6 +4,7 @@ import '../../engine/rarity.dart';
 import '../../models/combo.dart';
 import '../../models/profile.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/marks.dart';
 import 'share_card_screen.dart';
 
 /// 組合詳解頁（spec §9.5）：由檔案卡撳入，顯示 [profile] 嘅日主×MBTI
@@ -37,7 +38,8 @@ class ComboDetailScreen extends StatelessWidget {
                       children: [
                         Expanded(child: _buildListCard(colors, '你嘅優勢', colors.jade, combo.strengths)),
                         const SizedBox(width: 10),
-                        Expanded(child: _buildListCard(colors, '◈ 留意位', colors.red, combo.watchouts)),
+                        Expanded(child: _buildListCard(colors, '留意位', colors.red, combo.watchouts,
+                            mark: DiamondMark(color: colors.red))),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -82,7 +84,7 @@ class ComboDetailScreen extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: Text('⇪', style: TextStyle(fontSize: 18, color: colors.ink60)),
+              child: Icon(Icons.ios_share, size: 19, color: colors.ink60, semanticLabel: '分享'),
             ),
           ),
         ],
@@ -159,7 +161,8 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildListCard(XuanLiColors colors, String title, Color titleColor, List<String> items) {
+  Widget _buildListCard(XuanLiColors colors, String title, Color titleColor, List<String> items,
+      {Widget? mark}) {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
@@ -169,10 +172,8 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: titleColor),
-          ),
+          _title(title, TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: titleColor),
+              mark: mark),
           const SizedBox(height: 7),
           for (final item in items)
             Padding(
@@ -183,6 +184,9 @@ class ComboDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _title(String text, TextStyle style, {Widget? mark}) =>
+      mark == null ? Text(text, style: style) : MarkedTitle(mark: mark, text: text, style: style);
 
   Widget _buildHowToWinCard(XuanLiColors colors, Combo combo) {
     return Container(
@@ -195,10 +199,9 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '☾ 點樣發力（跟你嘅組合）',
-            style: TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
-          ),
+          _title('點樣發力（跟你嘅組合）',
+              TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
+              mark: MoonMark(color: colors.gold)),
           const SizedBox(height: 7),
           Text(combo.howToWin, style: TextStyle(fontSize: 12, height: 1.7, color: colors.ink)),
         ],
