@@ -27,8 +27,9 @@
 | 9 | iOS 交付 | 出一個 `scripts/install_ios.sh`：喺 Mac 上 flutter build + xcodebuild 免費簽名裝落實機 |
 | 10 | 日曆 | `device_calendar` package 讀寫部機日曆（自動涵蓋已同步嘅 Google Calendar）。讀：月曆格行程幼條 + 日卡行程列表；寫：Tab B「加入我嘅日曆」。**唔做** Google OAuth（第二版） |
 | 11 | 組合頁 | 八字×MBTI 組合詳解頁入 MVP：10 日主 × 16 MBTI = 160 模板，由檔案卡撳入 |
+| 12 | 分享卡 | 2026-10-10 由 Stephanie 提前入 MVP：組合頁 ⇪ → 預覽頁 → 本機截 1080×1920 PNG → 系統 share sheet；卡上唔放姓名、出生日期、時辰、地點 |
 
-**第二版先做（唔好實作，但唔好寫死唔容許擴展）**：分享卡、稀有度%、紫微深度文案、多人檔案切換 UI、真太陽時、Google OAuth。
+**第二版先做（唔好實作，但唔好寫死唔容許擴展）**：稀有度%、紫微深度文案、多人檔案切換 UI、真太陽時、Google OAuth。
 
 ## 3. 技術棧同 packages
 

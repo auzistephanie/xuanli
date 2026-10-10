@@ -63,7 +63,7 @@ void main() {
     expect(find.textContaining('立志如山・落子無聲'), findsOneWidget);
   });
 
-  testWidgets('撳返、撳分享 icon：返會 pop，分享會顯示 stub SnackBar', (tester) async {
+  testWidgets('撳返、撳分享 icon：返會 pop，分享會開分享卡預覽頁', (tester) async {
     await tester.pumpWidget(wrap(Builder(builder: (context) {
       return Scaffold(
         body: Center(
@@ -83,8 +83,12 @@ void main() {
 
     await tester.tap(find.text('⇪'));
     await tester.pump();
-    expect(find.textContaining('第二版先做'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('分享我嘅組合'), findsOneWidget);
+    expect(find.text('分享'), findsOneWidget);
 
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('‹'));
     await tester.pumpAndSettle();
     expect(find.text('open'), findsOneWidget);

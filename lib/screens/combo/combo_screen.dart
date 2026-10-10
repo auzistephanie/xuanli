@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/combo.dart';
 import '../../models/profile.dart';
 import '../../theme/xuanli_theme.dart';
+import 'share_card_screen.dart';
 
 /// 組合詳解頁（spec §9.5）：由檔案卡撳入，顯示 [profile] 嘅日主×MBTI
 /// 組合（160 模板之一，`combos.json`／`getCombo()` 已喺 Phase 1 起好）。
@@ -75,8 +76,8 @@ class ComboDetailScreen extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('分享卡 — 第二版先做')),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(8),
