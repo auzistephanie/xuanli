@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../engine/bazi.dart';
+import '../../engine/profile_builder.dart';
+import '../../models/profile.dart';
 import '../../services/storage_service.dart';
+import '../combo/share_card_screen.dart';
 import '../tab_shell.dart';
 import 'birth_data_step.dart';
 import 'mbti_step.dart';
 import 'profile_card_step.dart';
+import 'reveal_step.dart';
 
-/// 3 步 onboarding 嘅殼：擁有跨步驟嘅共用 state（出生資料 + MBTI），
+/// 3 步 onboarding（MBTI 後加一個「揭曉一刻」[RevealStep]）嘅殼：擁有跨步驟嘅共用 state（出生資料 + MBTI），
 /// 逐步遞畀 [BirthDataStep]/[MbtiStep]/[ProfileCardStep]，行完就
 /// navigate 去 [TabShell]（`Navigator.pushReplacement`，唔靠
 /// `_AppBootstrap` 嘅 FutureBuilder 自動重新路由）。
@@ -34,6 +38,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   String? _mbti;
   DateTime? _solarBirthDate;
+  Profile? _revealProfile;
 
   void _updateBirthData(BirthDataState state) {
     setState(() {
@@ -79,6 +84,19 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
+    if (_step == 2) {
+      final profile = _revealProfile!;
+      return Scaffold(
+        backgroundColor: revealBackground,
+        body: RevealStep(
+          profile: profile,
+          onContinue: () => setState(() => _step = 3),
+          onShare: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: SafeArea(
         child: switch (_step) {
@@ -97,6 +115,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           1 => MbtiStep(
             onDone: (mbti) => setState(() {
               _mbti = mbti;
+              // 揭曉畫面只需要四柱／MBTI／五行；正式 profile（連 id）由
+              // [ProfileCardStep] 儲存時先建立。
+              _revealProfile = buildProfile(
+                id: 'reveal',
+                name: '我',
+                birthDate: _solarBirthDate!,
+                birthHour: _birthData.birthHour,
+                birthMinute: _birthData.birthMinute,
+                birthPlace: _birthData.birthPlace,
+                mbti: mbti,
+              );
               _step = 2;
             }),
           ),

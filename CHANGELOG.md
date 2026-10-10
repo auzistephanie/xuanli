@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-11：**Onboarding「揭曉一刻」動畫** — MBTI 之後、檔案卡之前加全屏 `RevealStep`（`lib/screens/onboarding/reveal_step.dart`）：3.4 秒單一 timeline——暗場「你嘅八字 × MBTI 組合係……」→ 朱紅「玄」印由大壓落（easeOutBack 回彈＋落地輕震 `HapticFeedback.mediumImpact`）→ 日主×MBTI chip → 四字組合名逐字浮現 → motto → 「每 N 人先有一個」＋估算 % → 「分享我嘅組合」（開分享卡）／「睇我嘅命理檔案」。撳畫面任何位置跳到尾；系統「減少動態效果」直接顯示最後畫面；動畫未完掣唔撳得。揭曉用嘅 profile 只係顯示用（id `reveal`），正式 profile 照舊由 `ProfileCardStep` 儲存。+5 reveal tests，onboarding flow test 補 `initCombos`（之前靠 combo 頁以外嘅路徑冇用到）；全套 252/252，analyze 0 issue；真字體逐格 render 成 GIF 肉眼查過。**未驗證**：真機震動手感、低階機掉幀。
+
 - 2026-10-11：**組合頁符號改為畫形狀** — 「◈ 留意位」「☾ 點樣發力」嘅符號同「⇪」分享掣喺 bundled subset 字體冇 glyph（截圖／web／測試會空白、各平台靠系統 fallback 樣子唔一致）。新 `lib/widgets/marks.dart`：`DiamondMark`（雙層菱形）、`MoonMark`（CustomPaint 下弦月）、`MarkedTitle`；分享掣改用打包咗嘅 Material `Icons.ios_share`（有 semantic label「分享」）。已掃全 `lib/`：剩低缺 glyph 嘅只有繁體化表嘅簡體 key（唔會上 UI）同 spec 指定嘅 🔮（手機用系統 emoji）。247/247，analyze 0 issue，真字體 render 肉眼查過。
 
 - 2026-10-11：**稀有度 %（由「第二版」提前入 MVP，Stephanie 拍板）** — 新 `lib/engine/rarity.dart`（純 Dart、deterministic）：稀有度 = 日主 1/10 × MBTI 人口比例（Myers-Briggs 基金會美國樣本；原始 16 型合共 100.3%，歸一化而唔改數據，160 組合合共 100%）。組合頁「即將推出」佔位換成「約 0.88%・大約每 114 人先有一個」＋來源細字；分享卡加「估算約 X%・每 N 人先有一個」。因為唔係香港樣本，文案一律標「估算」。TDD：+6 engine tests；全套 247/247，`flutter analyze` 0 issue，真字體 render 肉眼查過。另見：組合頁「◈ 留意位」「☾ 點樣發力」嘅符號喺 bundled 字體冇 glyph，靠系統字體 fallback（之前已經係咁，未改）。

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/engine/activity.dart';
 import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/almanac.dart';
+import 'package:xuanli/models/combo.dart';
 import 'package:xuanli/screens/onboarding/onboarding_flow.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
@@ -25,6 +26,7 @@ void main() {
       File('lib/data/activity_categories.json').readAsStringSync(),
     );
     initActivities(File('lib/data/activities.json').readAsStringSync());
+    initCombos(File('lib/data/combos.json').readAsStringSync());
   });
 
   setUp(() {
@@ -58,6 +60,12 @@ void main() {
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
 
+    // 揭曉一刻：組合名 + 稀有度，撳「睇我嘅命理檔案」。
+    expect(find.text('分享我嘅組合'), findsOneWidget);
+    expect(find.textContaining('人先有一個'), findsOneWidget);
+    await tester.tap(find.text('睇我嘅命理檔案'));
+    await tester.pumpAndSettle();
+
     // Step 3: 檔案卡，撳「開始睇今日」。
     expect(find.text('你嘅命理檔案'), findsOneWidget);
     await tester.tap(find.text('開始睇今日'));
@@ -80,6 +88,8 @@ void main() {
     await tester.pump();
     await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('睇我嘅命理檔案'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('開始睇今日'));
     await tester.pumpAndSettle();
