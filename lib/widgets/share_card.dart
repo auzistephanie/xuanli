@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../engine/rarity.dart';
 import '../models/combo.dart';
 import '../models/profile.dart';
 import '../theme/xuanli_theme.dart';
+
+/// 分享卡 QR code 指去嘅網址。QR 純粹畫喺圖上（本機生成），app 本身唔會連呢個網址。
+const xuanliWebUrl = 'https://xuanli-opal.vercel.app';
 
 /// 分享卡邏輯尺寸（9:16，以 pixelRatio 3 輸出 1080×1920，啱 IG Story）。
 const shareCardSize = Size(360, 640);
@@ -48,14 +52,14 @@ class ShareCard extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(30, 34, 30, 26),
+            padding: const EdgeInsets.fromLTRB(30, 28, 30, 22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _brand(),
-                const SizedBox(height: 34),
+                const SizedBox(height: 24),
                 _chips(),
-                const SizedBox(height: 22),
+                const SizedBox(height: 16),
                 Text(
                   combo.name,
                   textAlign: TextAlign.center,
@@ -80,13 +84,14 @@ class ShareCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _rarity(),
-                const SizedBox(height: 22),
+                const SizedBox(height: 16),
                 _divider(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
                 _wuxingBars(),
-                const SizedBox(height: 22),
+                const SizedBox(height: 14),
                 _strengths(),
                 const Spacer(),
+                const SizedBox(height: 10),
                 _footer(),
               ],
             ),
@@ -196,7 +201,7 @@ class ShareCard extends StatelessWidget {
       children: [
         for (final element in _wuxingOrder)
           Padding(
-            padding: const EdgeInsets.only(bottom: 7),
+            padding: const EdgeInsets.only(bottom: 5),
             child: Row(
               children: [
                 SizedBox(
@@ -269,20 +274,56 @@ class ShareCard extends StatelessWidget {
   }
 
   Widget _footer() {
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          '睇下你嘅八字 × MBTI 組合',
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 2,
-            color: _paper.withValues(alpha: 0.85),
+        // 米白底深色碼：對比最高，掃得最穩。四周留白（quiet zone）由 padding 提供。
+        Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: _paper,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: QrImageView(
+            data: xuanliWebUrl,
+            size: 66,
+            padding: EdgeInsets.zero,
+            backgroundColor: _paper,
+            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: _navy),
+            dataModuleStyle: const QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: _navy,
+            ),
+            semanticsLabel: '玄曆網站 QR code',
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          '玄曆 XuanLi・僅供參考',
-          style: TextStyle(fontSize: 10, letterSpacing: 1, color: _paper.withValues(alpha: 0.4)),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '掃碼睇你嘅組合',
+                style: TextStyle(
+                  fontFamily: XuanLiFonts.serif,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
+                  color: _paper.withValues(alpha: 0.95),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                '免註冊・全離線・資料唔離機',
+                style: TextStyle(fontSize: 11, color: _gold.withValues(alpha: 0.9)),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                '玄曆 XuanLi・僅供參考',
+                style: TextStyle(fontSize: 10, letterSpacing: 1, color: _paper.withValues(alpha: 0.4)),
+              ),
+            ],
+          ),
         ),
       ],
     );

@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-11：**分享卡加 QR code** — 卡底左邊米白底深藍 QR（`qr_flutter`，純 Dart 本機生成，唔連網絡）指去 `xuanliWebUrl`（https://xuanli-opal.vercel.app，定義喺 `share_card.dart`），右邊「掃碼睇你嘅組合／免註冊・全離線・資料唔離機」。QR 內容只係網址，冇任何個人資料或組合參數（test 鎖住）。為咗畀 QR 位，收緊咗卡內垂直間距；Ahem 字體（最闊）都唔 overflow。已將輸出嘅 1080×1920 PNG 用 OpenCV 掃碼驗證，decode 返 `https://xuanli-opal.vercel.app`。注意：呢個網址係完整 web app，未有「唔使 onboarding 直接輸入生日睇組合」嘅輕量入口；將來網址改咗，要同步改 `xuanliWebUrl`。新 dependency：`qr_flutter`（連 `qr`）。
+
 - 2026-10-11：**Onboarding「揭曉一刻」動畫** — MBTI 之後、檔案卡之前加全屏 `RevealStep`（`lib/screens/onboarding/reveal_step.dart`）：3.4 秒單一 timeline——暗場「你嘅八字 × MBTI 組合係……」→ 朱紅「玄」印由大壓落（easeOutBack 回彈＋落地輕震 `HapticFeedback.mediumImpact`）→ 日主×MBTI chip → 四字組合名逐字浮現 → motto → 「每 N 人先有一個」＋估算 % → 「分享我嘅組合」（開分享卡）／「睇我嘅命理檔案」。撳畫面任何位置跳到尾；系統「減少動態效果」直接顯示最後畫面；動畫未完掣唔撳得。揭曉用嘅 profile 只係顯示用（id `reveal`），正式 profile 照舊由 `ProfileCardStep` 儲存。+5 reveal tests，onboarding flow test 補 `initCombos`（之前靠 combo 頁以外嘅路徑冇用到）；全套 252/252，analyze 0 issue；真字體逐格 render 成 GIF 肉眼查過。**未驗證**：真機震動手感、低階機掉幀。
 
 - 2026-10-11：**組合頁符號改為畫形狀** — 「◈ 留意位」「☾ 點樣發力」嘅符號同「⇪」分享掣喺 bundled subset 字體冇 glyph（截圖／web／測試會空白、各平台靠系統 fallback 樣子唔一致）。新 `lib/widgets/marks.dart`：`DiamondMark`（雙層菱形）、`MoonMark`（CustomPaint 下弦月）、`MarkedTitle`；分享掣改用打包咗嘅 Material `Icons.ios_share`（有 semantic label「分享」）。已掃全 `lib/`：剩低缺 glyph 嘅只有繁體化表嘅簡體 key（唔會上 UI）同 spec 指定嘅 🔮（手機用系統 emoji）。247/247，analyze 0 issue，真字體 render 肉眼查過。

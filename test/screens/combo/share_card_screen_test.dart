@@ -3,11 +3,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/models/combo.dart';
 import 'package:xuanli/screens/combo/share_card_screen.dart';
 import 'package:xuanli/services/share_card_service.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/share_card.dart';
 
 void main() {
   setUpAll(() {
@@ -40,6 +42,17 @@ void main() {
     expect(find.textContaining('阿玄'), findsNothing);
     expect(find.textContaining('1999'), findsNothing);
     expect(find.textContaining('香港'), findsNothing);
+  });
+
+  testWidgets('分享卡有 QR code，網址係固定嘅 https 網站（冇個人資料）', (tester) async {
+    await tester.pumpWidget(wrap(ShareCardScreen(profile: profile)));
+
+    // QrImageView 唔保留輸入字串，所以 QR 內容靠 [xuanliWebUrl] 常數（`ShareCard`
+    // 直接用佢）＋輸出圖用 OpenCV 掃碼驗證過（見 CHANGELOG）。
+    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.bySemanticsLabel('玄曆網站 QR code'), findsOneWidget);
+    expect(xuanliWebUrl, 'https://xuanli-opal.vercel.app');
+    expect(find.text('掃碼睇你嘅組合'), findsOneWidget);
   });
 
   testWidgets('撳分享會截出 1080×1920 PNG 交畀 share service', (tester) async {
