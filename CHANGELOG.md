@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-11：**稀有度 %（由「第二版」提前入 MVP，Stephanie 拍板）** — 新 `lib/engine/rarity.dart`（純 Dart、deterministic）：稀有度 = 日主 1/10 × MBTI 人口比例（Myers-Briggs 基金會美國樣本；原始 16 型合共 100.3%，歸一化而唔改數據，160 組合合共 100%）。組合頁「即將推出」佔位換成「約 0.88%・大約每 114 人先有一個」＋來源細字；分享卡加「估算約 X%・每 N 人先有一個」。因為唔係香港樣本，文案一律標「估算」。TDD：+6 engine tests；全套 247/247，`flutter analyze` 0 issue，真字體 render 肉眼查過。另見：組合頁「◈ 留意位」「☾ 點樣發力」嘅符號喺 bundled 字體冇 glyph，靠系統字體 fallback（之前已經係咁，未改）。
+
 - 2026-10-10：**分享卡（由「第二版」提前入 MVP，Stephanie 拍板）** — 組合頁 ⇪ 開新預覽頁 `ShareCardScreen`，撳「分享」將 `ShareCard`（9:16 藏藍卡：印章、日主×MBTI chip、組合名＋motto、五行條、3 項優勢）用 `RepaintBoundary` 本機截成 1080×1920 PNG，交系統 share sheet（`ShareCardService`，零網絡）。卡上**唔放姓名、出生日期、時辰、地點**（test 鎖住）。分享失敗會提示。卡內唔用「✦」字元（subset 字體冇呢個 glyph），改畫形狀。稀有度 % 仍未做、卡上冇放。+3 tests，全套 241/241，`flutter analyze` 0 issue；已用真字體 render 成 PNG 肉眼查過。**未驗證**：真機 share sheet（呢部機冇 simulator）。
 
 - 2026-10-10：**下載前準備（第一節）** — (1) app 名由 `xuanli`／`Xuanli` 改為「玄曆」（Android label、iOS display name）；(2) 換走 Flutter 預設藍色 icon，改用朱紅印章「玄曆」（`assets/icon/`，`flutter_launcher_icons` 生成 iOS／Android adaptive＋monochrome／web），並加白色剪影 `ic_stat_xuanli` 做 Android 通知小圖示，清走 notification_scheduler 嘅 TODO；(3) 字體 subset（Big5 常用字＋repo 內出現過嘅字）28.8MB → 8.3MB，原檔留喺 `_to_delete/fonts-original-2026-10-10/`，web 實測冇缺字；(4) `analysis_options.yaml` 排除 `_to_delete/`、`build/`（舊 sync 備份令 analyze 出 160 個假 issue）；(5) **xuanli-opal.vercel.app 404 根因**：Vercel 專案冇 build step，每次 GitHub push 都部署 repo 根目錄（冇 index.html）覆蓋咗 7/29 嘅 web build。已用 CLI 重新部署 `build/web`，並加 `vercel.json` 停用 git 自動部署；(6) README 重寫。`flutter analyze` 0 issue、238/238 tests。**未做**：APK（呢部機冇 Android SDK／Xcode）、Vercel 專案 SSO protection 未動。

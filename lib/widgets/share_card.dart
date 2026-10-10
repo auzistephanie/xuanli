@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../engine/rarity.dart';
 import '../models/combo.dart';
 import '../models/profile.dart';
 import '../theme/xuanli_theme.dart';
@@ -77,7 +78,9 @@ class ShareCard extends StatelessWidget {
                     color: _gold,
                   ),
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: 16),
+                _rarity(),
+                const SizedBox(height: 22),
                 _divider(),
                 const SizedBox(height: 20),
                 _wuxingBars(),
@@ -163,6 +166,15 @@ class ShareCard extends StatelessWidget {
           color: textColor,
         ),
       ),
+    );
+  }
+
+  Widget _rarity() {
+    final rarity = comboRarity(dayGan: profile.pillars[2].substring(0, 1), mbti: profile.mbti);
+    return Text(
+      '估算約 ${rarity.percentLabel}・每 ${rarity.oneIn} 人先有一個',
+      textAlign: TextAlign.center,
+      style: TextStyle(fontSize: 12, letterSpacing: 1, color: _paper.withValues(alpha: 0.75)),
     );
   }
 

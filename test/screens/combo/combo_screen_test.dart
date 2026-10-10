@@ -39,7 +39,7 @@ void main() {
     mbti: 'INTJ',
   );
 
-  testWidgets('顯示乙_ISFP嘅組合內容：組合名/motto/優勢/留意位/點樣發力/稀有度佔位', (tester) async {
+  testWidgets('顯示乙_ISFP嘅組合內容：組合名/motto/優勢/留意位/點樣發力/稀有度', (tester) async {
     await tester.pumpWidget(wrap(ComboDetailScreen(profile: profile)));
 
     expect(find.text('我嘅組合'), findsOneWidget);
@@ -50,7 +50,10 @@ void main() {
     expect(find.textContaining('審美同直覺俱佳'), findsOneWidget);
     expect(find.textContaining('諗多過講'), findsOneWidget);
     expect(find.textContaining('水木旺嘅日子'), findsOneWidget);
-    expect(find.textContaining('即將推出'), findsOneWidget);
+    expect(find.text('約 0.88%'), findsOneWidget);
+    expect(find.textContaining('每 114 人'), findsOneWidget);
+    expect(find.textContaining('估算'), findsOneWidget);
+    expect(find.textContaining('即將推出'), findsNothing);
   });
 
   testWidgets('顯示甲_INTJ嘅組合內容：唔同 dayGan/MBTI 都要揀返啱嘅組合（防 lookup key bug）', (tester) async {

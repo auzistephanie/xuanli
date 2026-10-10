@@ -36,6 +36,7 @@ void main() {
     for (final element in ['木', '火', '土', '金', '水']) {
       expect(find.text(element), findsOneWidget);
     }
+    expect(find.text('估算約 0.88%・每 114 人先有一個'), findsOneWidget);
     expect(find.textContaining('阿玄'), findsNothing);
     expect(find.textContaining('1999'), findsNothing);
     expect(find.textContaining('香港'), findsNothing);
