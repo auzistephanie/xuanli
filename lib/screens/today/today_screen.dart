@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../engine/daily_stick.dart';
 import '../../engine/day_reading_engine.dart';
 import '../../models/day_reading.dart';
 import '../../models/profile.dart';
+import '../../services/storage_service.dart';
 import '../../theme/xuanli_theme.dart';
+import 'daily_stick_card.dart';
 import 'today_widgets.dart';
 
 /// Tab A・今日宜忌（spec §9.2）。[initialDate] 冇畀就用今日
@@ -23,6 +26,34 @@ class TodayScreen extends StatefulWidget {
 class _TodayScreenState extends State<TodayScreen> {
   late DateTime _selectedDate = widget.initialDate ?? _today();
 
+  final _storage = StorageService();
+  bool _stickDrawnToday = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStickDrawn();
+  }
+
+  Future<void> _loadStickDrawn() async {
+    try {
+      final saved = await _storage.loadStickDrawnDate();
+      final today = StorageService.stickDateKey(widget.initialDate ?? _today());
+      if (mounted && saved == today) setState(() => _stickDrawnToday = true);
+    } catch (_) {
+      // 讀唔到就當今日未抽（platform channel 罕見故障唔應該令今日頁出事）。
+    }
+  }
+
+  Future<void> _onStickDrawn(DateTime today) async {
+    _stickDrawnToday = true;
+    try {
+      await _storage.saveStickDrawnDate(today);
+    } catch (_) {
+      // 存唔到最多係重開 app 要再搖一次，支籤本身 deterministic，唔會變。
+    }
+  }
+
   static DateTime _today() {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
@@ -35,6 +66,7 @@ class _TodayScreenState extends State<TodayScreen> {
     final colors = context.xuanliColors;
     final reading = buildDayReading(profile: widget.profile, date: _selectedDate);
     final weekStart = widget.initialDate ?? _today();
+    final isToday = _selectedDate == weekStart;
     final week = [
       for (var i = 0; i < 7; i++)
         buildDayReading(profile: widget.profile, date: weekStart.add(Duration(days: i))),
@@ -88,6 +120,13 @@ class _TodayScreenState extends State<TodayScreen> {
               ],
             ),
             AdviceCard(advice: reading.advice),
+            if (isToday)
+              DailyStickCard(
+                stick: drawDailyStick(profile: widget.profile, reading: reading),
+                date: weekStart,
+                alreadyDrawn: _stickDrawnToday,
+                onDrawn: () => _onStickDrawn(weekStart),
+              ),
             const SizedBox(height: 14),
             Text(
               '未來七日',
