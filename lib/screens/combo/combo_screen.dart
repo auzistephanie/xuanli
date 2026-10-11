@@ -5,6 +5,7 @@ import '../../models/combo.dart';
 import '../../models/profile.dart';
 import '../../theme/xuanli_theme.dart';
 import '../../widgets/marks.dart';
+import 'partner_flow.dart';
 import 'share_card_screen.dart';
 
 /// 組合詳解頁（spec §9.5）：由檔案卡撳入，顯示 [profile] 嘅日主×MBTI
@@ -46,6 +47,8 @@ class ComboDetailScreen extends StatelessWidget {
                     _buildHowToWinCard(colors, combo),
                     const SizedBox(height: 12),
                     _buildRarityCard(colors, dayGan),
+                    const SizedBox(height: 12),
+                    _buildPartnerEntry(context, colors),
                   ],
                 ),
               ),
@@ -205,6 +208,55 @@ class ComboDetailScreen extends StatelessWidget {
           const SizedBox(height: 7),
           Text(combo.howToWin, style: TextStyle(fontSize: 12, height: 1.7, color: colors.ink)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPartnerEntry(BuildContext context, XuanLiColors colors) {
+    return Material(
+      color: colors.cardSurface,
+      borderRadius: BorderRadius.circular(XuanLiRadii.card),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(XuanLiRadii.card),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PartnerFlow(me: profile)),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: colors.gold.withValues(alpha: 0.6)),
+            borderRadius: BorderRadius.circular(XuanLiRadii.card),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '同朋友合盤',
+                      style: TextStyle(
+                        fontFamily: XuanLiFonts.serif,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2,
+                        color: colors.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '輸入朋友生日同 MBTI，睇你哋嘅關係名同合盤指數。佢嘅資料唔會儲存。',
+                      style: TextStyle(fontSize: 11.5, height: 1.6, color: colors.ink60),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(Icons.arrow_forward_ios, size: 14, color: colors.gold),
+            ],
+          ),
+        ),
       ),
     );
   }

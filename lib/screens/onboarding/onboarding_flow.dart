@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../engine/bazi.dart';
 import '../../engine/profile_builder.dart';
 import '../../models/profile.dart';
 import '../../services/storage_service.dart';
@@ -52,14 +51,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   void _continueFromBirthData() {
     DateTime solarDate;
     try {
-      solarDate = _birthData.isLunar
-          ? lunarToSolarDate(
-              year: _birthData.lunarDate!.year,
-              month: _birthData.lunarDate!.month,
-              day: _birthData.lunarDate!.day,
-              isLeapMonth: _birthData.isLeapMonth,
-            )
-          : _birthData.birthDate;
+      solarDate = _birthData.toSolarDate();
     } on ArgumentError {
       ScaffoldMessenger.of(
         context,

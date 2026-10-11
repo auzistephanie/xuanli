@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../engine/bazi.dart';
 import '../../theme/xuanli_theme.dart';
 import 'onboarding_widgets.dart';
 
@@ -39,6 +40,17 @@ class BirthDataState {
     required this.birthTimeUnknown,
     required this.birthPlace,
   });
+
+  /// 轉成公曆日期（profile 一律只存公曆）。農曆日期唔存在（例如「二月三十」）
+  /// 會 throw [ArgumentError]，由 caller 提示用家。
+  DateTime toSolarDate() => isLunar
+      ? lunarToSolarDate(
+          year: lunarDate!.year,
+          month: lunarDate!.month,
+          day: lunarDate!.day,
+          isLeapMonth: isLeapMonth,
+        )
+      : birthDate;
 
   BirthDataState copyWith({
     bool? isLunar,
@@ -105,6 +117,11 @@ class BirthDataStep extends StatelessWidget {
   final ValueChanged<BirthDataState> onChanged;
   final VoidCallback onNext;
 
+  /// 預設係「你嘅出生一刻」；幫朋友合盤時由 caller 改成講「佢」。
+  final String title;
+  final String subtitle;
+  final bool showProgress;
+
   const BirthDataStep({
     super.key,
     required this.isLunar,
@@ -117,6 +134,9 @@ class BirthDataStep extends StatelessWidget {
     required this.birthPlace,
     required this.onChanged,
     required this.onNext,
+    this.title = '你嘅出生一刻',
+    this.subtitle = '八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。',
+    this.showProgress = true,
   });
 
   BirthDataState get _state => BirthDataState(
@@ -234,10 +254,12 @@ class BirthDataStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const OnboardingProgressDots(currentStep: 0, totalSteps: 3),
-          const SizedBox(height: 14),
+          if (showProgress) ...[
+            const OnboardingProgressDots(currentStep: 0, totalSteps: 3),
+            const SizedBox(height: 14),
+          ],
           Text(
-            '你嘅出生一刻',
+            title,
             style: TextStyle(
               fontFamily: XuanLiFonts.serif,
               fontSize: 21,
@@ -248,7 +270,7 @@ class BirthDataStep extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。',
+            subtitle,
             style: TextStyle(fontSize: 12.5, color: colors.ink60, height: 1.7),
           ),
           const SizedBox(height: 16),
