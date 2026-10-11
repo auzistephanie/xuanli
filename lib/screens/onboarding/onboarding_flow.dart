@@ -99,6 +99,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         body: RevealStep(
           profile: profile,
           onContinue: () => setState(() => _step = 4),
+          // 試玩路徑：揭曉前嘅 profile 只喺記憶體，唔會寫入儲存，所以重新開始
+          // 淨係清走呢啲暫存 state（出生資料保留作預設，方便微調幫朋友試）。
+          onTryAnother: () => setState(() {
+            _step = 1;
+            _mbti = null;
+            _revealProfile = null;
+            _solarBirthDate = null;
+          }),
           onShare: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
           ),

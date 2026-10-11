@@ -22,11 +22,15 @@ class RevealStep extends StatefulWidget {
   final VoidCallback onContinue;
   final VoidCallback onShare;
 
+  /// 唔儲存，幫另一個人再試（重新由出生資料開始）。null = 唔顯示呢個掣。
+  final VoidCallback? onTryAnother;
+
   const RevealStep({
     super.key,
     required this.profile,
     required this.onContinue,
     required this.onShare,
+    this.onTryAnother,
   });
 
   @override
@@ -338,8 +342,23 @@ class _RevealStepState extends State<RevealStep>
               shape: shape,
               textStyle: const TextStyle(fontFamily: XuanLiFonts.sans, fontSize: 15),
             ),
-            child: const Text('睇我嘅命理檔案'),
+            child: const Text('儲存並睇我嘅命理檔案'),
           ),
+        ),
+        if (widget.onTryAnother != null) ...[
+          const SizedBox(height: 4),
+          TextButton(
+            onPressed: widget.onTryAnother,
+            style: TextButton.styleFrom(
+              foregroundColor: _gold,
+              textStyle: const TextStyle(fontFamily: XuanLiFonts.sans, fontSize: 14),
+            ),
+            child: const Text('幫朋友再試一個'),
+          ),
+        ],
+        Text(
+          '而家仲未儲存任何資料',
+          style: TextStyle(fontSize: 11, color: _paper.withValues(alpha: 0.45)),
         ),
       ],
     );

@@ -235,7 +235,12 @@ class _WelcomeStepState extends State<WelcomeStep>
         ),
         const SizedBox(height: 10),
         Text(
-          '約 1 分鐘・僅供參考，不代替專業意見',
+          '約 1 分鐘・睇完結果先決定要唔要儲存',
+          style: TextStyle(fontSize: 11, color: _paper.withValues(alpha: 0.6)),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '僅供參考，不代替專業意見',
           style: TextStyle(fontSize: 11, color: _paper.withValues(alpha: 0.45)),
         ),
       ],

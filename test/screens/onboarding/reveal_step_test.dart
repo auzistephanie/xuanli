@@ -25,6 +25,7 @@ void main() {
   Widget wrap({
     VoidCallback? onContinue,
     VoidCallback? onShare,
+    VoidCallback? onTryAnother,
     bool disableAnimations = false,
   }) {
     return MaterialApp(
@@ -36,6 +37,7 @@ void main() {
             profile: profile,
             onContinue: onContinue ?? () {},
             onShare: onShare ?? () {},
+            onTryAnother: onTryAnother,
           ),
         ),
       ),
@@ -58,7 +60,7 @@ void main() {
     expect(find.text('每 114 人先有一個'), findsOneWidget);
     expect(find.text('估算約 0.88%'), findsOneWidget);
     expect(find.text('分享我嘅組合'), findsOneWidget);
-    expect(find.text('睇我嘅命理檔案'), findsOneWidget);
+    expect(find.text('儲存並睇我嘅命理檔案'), findsOneWidget);
   });
 
   testWidgets('開頭組合名未出現，掣未撳得', (tester) async {
@@ -67,7 +69,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(opacityOf(tester, find.text('林')), 0);
-    await tester.tap(find.text('睇我嘅命理檔案'), warnIfMissed: false);
+    await tester.tap(find.text('儲存並睇我嘅命理檔案'), warnIfMissed: false);
     expect(continued, isFalse);
   });
 
@@ -87,7 +89,7 @@ void main() {
     await tester.pump();
 
     expect(opacityOf(tester, find.text('林')), 1);
-    expect(opacityOf(tester, find.text('睇我嘅命理檔案')), 1);
+    expect(opacityOf(tester, find.text('儲存並睇我嘅命理檔案')), 1);
   });
 
   testWidgets('兩粒掣分別觸發 onShare／onContinue', (tester) async {
@@ -101,7 +103,34 @@ void main() {
 
     await tester.tap(find.text('分享我嘅組合'));
     expect(shared, isTrue);
-    await tester.tap(find.text('睇我嘅命理檔案'));
+    await tester.tap(find.text('儲存並睇我嘅命理檔案'));
     expect(continued, isTrue);
+  });
+
+  testWidgets('顯示「未儲存任何資料」，同「幫朋友再試一個」觸發 onTryAnother', (tester) async {
+    var again = 0;
+    await tester.pumpWidget(wrap(onTryAnother: () => again++));
+    await tester.pumpAndSettle();
+
+    expect(find.text('而家仲未儲存任何資料'), findsOneWidget);
+    await tester.tap(find.text('幫朋友再試一個'));
+    expect(again, 1);
+  });
+
+  testWidgets('冇傳 onTryAnother 就唔顯示該掣', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('幫朋友再試一個'), findsNothing);
+  });
+
+  testWidgets('細屏幕（360×640）加咗掣都唔 overflow', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(wrap(onTryAnother: () {}));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
   });
 }

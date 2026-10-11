@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-11：**不存資料嘅試玩路徑** — 先查實：onboarding 入面只有 `ProfileCardStep._save()` 會寫儲存，所以「封面→出生→MBTI→揭曉」本身一路都只喺記憶體；今次補嘅係**講清楚＋有路退出**，唔係搬儲存位置。(1) 封面細字改「約 1 分鐘・睇完結果先決定要唔要儲存」；(2) 揭曉畫面按鈕改為「分享我嘅組合」／「**儲存並**睇我嘅命理檔案」（講明撳呢粒先儲存）／新「幫朋友再試一個」（清走記憶體暫存 state，返出生資料步，出生資料保留做預設方便微調）＋細字「而家仲未儲存任何資料」。(3) 新 flow test 鎖死私隱承諾：揭曉前後 `SharedPreferences` 冇任何 key、`loadPrimaryProfile()` 為 null，撳「幫朋友再試一個」後仍然係空。揭曉畫面喺 360×640 都唔 overflow（test＋真字體 render 驗證）。全套 261/261，analyze 0 issue。**未做**：試玩完離開（唔儲存）冇專屬出口——用家直接閂 tab／app 即可，下次再開仍然係封面；多人試玩結果唔會被記住。
+
 - 2026-10-11：**Onboarding 封面（輕量入口）** — 新 `WelcomeStep`（`lib/screens/onboarding/welcome_step.dart`）做 onboarding 第 0 步：藏藍底＋朱紅印＋「160 個組合，邊個係你？」＋三個賣點（睇你係「林間清泉」定「雪嶺孤松」／每日宜忌跟喜忌神／免註冊全離線出生資料唔離機）＋「睇我嘅組合」＋「約 1 分鐘・僅供參考」。掃分享卡 QR 入嚟嘅人先見封面，十秒內明白玄曆係咩，再行 出生資料 → MBTI → 揭曉。流程步序變成 封面 0 → 出生 1 → MBTI 2 → 揭曉 3 → 檔案卡 4。動畫輕量淡入，尊重「減少動態效果」，矮屏可捲動。呢個冇改 160 組合文案（賣點引用嘅「林間清泉」「雪嶺孤松」本身係 combos.json 現有組合名）。+4 welcome tests，onboarding flow／bootstrap tests 補封面一步，全套 257/257，analyze 0 issue，真字體 render 肉眼查過。**注意**：呢個仍然係「走 onboarding」，唔係「唔使儲存、直接輸入就睇結果」嘅 anonymous 試玩——後者要另外拆 profile 儲存時機，未做。
 
 - 2026-10-11：**分享卡加 QR code** — 卡底左邊米白底深藍 QR（`qr_flutter`，純 Dart 本機生成，唔連網絡）指去 `xuanliWebUrl`（https://xuanli-opal.vercel.app，定義喺 `share_card.dart`），右邊「掃碼睇你嘅組合／免註冊・全離線・資料唔離機」。QR 內容只係網址，冇任何個人資料或組合參數（test 鎖住）。為咗畀 QR 位，收緊咗卡內垂直間距；Ahem 字體（最闊）都唔 overflow。已將輸出嘅 1080×1920 PNG 用 OpenCV 掃碼驗證，decode 返 `https://xuanli-opal.vercel.app`。注意：呢個網址係完整 web app，未有「唔使 onboarding 直接輸入生日睇組合」嘅輕量入口；將來網址改咗，要同步改 `xuanliWebUrl`。新 dependency：`qr_flutter`（連 `qr`）。

@@ -68,7 +68,7 @@ void main() {
     // 揭曉一刻：組合名 + 稀有度，撳「睇我嘅命理檔案」。
     expect(find.text('分享我嘅組合'), findsOneWidget);
     expect(find.textContaining('人先有一個'), findsOneWidget);
-    await tester.tap(find.text('睇我嘅命理檔案'));
+    await tester.tap(find.text('儲存並睇我嘅命理檔案'));
     await tester.pumpAndSettle();
 
     // Step 3: 檔案卡，撳「開始睇今日」。
@@ -77,6 +77,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TabShell), findsOneWidget);
+  });
+
+  testWidgets('試玩：揭曉前後都冇寫入任何儲存，「幫朋友再試一個」返出生資料步', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
+    );
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.tap(find.text('睇我嘅組合'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('ISFP'));
+    await tester.tap(find.text('ISFP'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
+    await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+
+    // 揭曉畫面：已經睇到結果，但儲存係空嘅。
+    expect(find.text('而家仲未儲存任何資料'), findsOneWidget);
+    expect(prefs.getKeys(), isEmpty);
+    expect(await StorageService().loadPrimaryProfile(), isNull);
+
+    await tester.tap(find.text('幫朋友再試一個'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('你嘅出生一刻'), findsOneWidget);
+    expect(prefs.getKeys(), isEmpty);
+    expect(await StorageService().loadPrimaryProfile(), isNull);
   });
 
   testWidgets('農曆出生日期會先轉公曆再建立及儲存 profile', (tester) async {
@@ -96,7 +126,7 @@ void main() {
     await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('睇我嘅命理檔案'));
+    await tester.tap(find.text('儲存並睇我嘅命理檔案'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('開始睇今日'));
     await tester.pumpAndSettle();
