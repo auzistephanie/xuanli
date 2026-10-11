@@ -10,8 +10,10 @@ import 'birth_data_step.dart';
 import 'mbti_step.dart';
 import 'profile_card_step.dart';
 import 'reveal_step.dart';
+import 'welcome_step.dart';
 
-/// 3 步 onboarding（MBTI 後加一個「揭曉一刻」[RevealStep]）嘅殼：擁有跨步驟嘅共用 state（出生資料 + MBTI），
+/// onboarding 嘅殼：封面 [WelcomeStep] → 出生資料 → MBTI → 「揭曉一刻」
+/// [RevealStep] → 命理檔案卡。擁有跨步驟嘅共用 state（出生資料 + MBTI），
 /// 逐步遞畀 [BirthDataStep]/[MbtiStep]/[ProfileCardStep]，行完就
 /// navigate 去 [TabShell]（`Navigator.pushReplacement`，唔靠
 /// `_AppBootstrap` 嘅 FutureBuilder 自動重新路由）。
@@ -66,7 +68,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     }
     setState(() {
       _solarBirthDate = solarDate;
-      _step = 1;
+      _step = 2;
     });
   }
 
@@ -84,13 +86,19 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
-    if (_step == 2) {
+    if (_step == 0) {
+      return Scaffold(
+        backgroundColor: revealBackground,
+        body: WelcomeStep(onStart: () => setState(() => _step = 1)),
+      );
+    }
+    if (_step == 3) {
       final profile = _revealProfile!;
       return Scaffold(
         backgroundColor: revealBackground,
         body: RevealStep(
           profile: profile,
-          onContinue: () => setState(() => _step = 3),
+          onContinue: () => setState(() => _step = 4),
           onShare: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
           ),
@@ -100,7 +108,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Scaffold(
       body: SafeArea(
         child: switch (_step) {
-          0 => BirthDataStep(
+          1 => BirthDataStep(
             isLunar: _birthData.isLunar,
             isLeapMonth: _birthData.isLeapMonth,
             lunarDate: _birthData.lunarDate,
@@ -112,7 +120,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             onChanged: _updateBirthData,
             onNext: _continueFromBirthData,
           ),
-          1 => MbtiStep(
+          2 => MbtiStep(
             onDone: (mbti) => setState(() {
               _mbti = mbti;
               // 揭曉畫面只需要四柱／MBTI／五行；正式 profile（連 id）由
@@ -126,7 +134,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 birthPlace: _birthData.birthPlace,
                 mbti: mbti,
               );
-              _step = 2;
+              _step = 3;
             }),
           ),
           _ => ProfileCardStep(

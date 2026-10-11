@@ -40,6 +40,11 @@ void main() {
       MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
     );
 
+    // Step 0: 封面，撳「睇我嘅組合」開始。
+    expect(find.text('玄曆'), findsOneWidget);
+    await tester.tap(find.text('睇我嘅組合'));
+    await tester.pumpAndSettle();
+
     // Step 1: 出生資料，用晒預設值直接下一步。
     expect(find.text('你嘅出生一刻'), findsOneWidget);
     await tester.tap(find.text('下一步'));
@@ -79,6 +84,8 @@ void main() {
       MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
     );
 
+    await tester.tap(find.text('睇我嘅組合'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('農曆'));
     await tester.pump();
     await tester.tap(find.text('下一步'));
