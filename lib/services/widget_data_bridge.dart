@@ -62,11 +62,17 @@ class WidgetDayPayload {
 class WidgetDataBridge {
   static const _dataKey = 'xuanli_week_readings';
 
-  // TODO(phase3b, 需要 Xcode/Android Studio 先起到 native widget):
-  // 呢兩個名淨係 placeholder，要等真係起咗 iOS WidgetKit extension／
-  // Android AppWidgetProvider 之後，改做嗰邊實際嘅 class/kind 名。
+  /// iOS：App 同 widget extension 共用嘅 App Group（兩邊 entitlements 同
+  /// `scripts/add_ios_widget_target.rb` 都要一致）。
+  static const appGroupId = 'group.com.xuanli.xuanli';
+
+  // 呢三個名要同原生側一致：
+  // - iOS：`XuanLiWidget.swift` 入面 `Widget.kind`
+  // - Android：`com.xuanli.xuanli.XuanLiWidgetProvider`（小）同
+  //   `com.xuanli.xuanli.XuanLiWidgetMediumProvider`（中）
   static const _iOSWidgetName = 'XuanLiWidget';
-  static const _androidWidgetName = 'XuanLiWidgetProvider';
+  static const _androidSmallName = 'XuanLiWidgetProvider';
+  static const _androidMediumName = 'XuanLiWidgetMediumProvider';
 
   Future<void> refreshNext7Days(Profile profile, {DateTime? today}) async {
     final start = today ?? DateTime.now();
@@ -77,14 +83,18 @@ class WidgetDataBridge {
     final jsonStr = json.encode(payloads.map((p) => p.toJson()).toList());
 
     try {
+      await HomeWidget.setAppGroupId(appGroupId);
       await HomeWidget.saveWidgetData<String>(_dataKey, jsonStr);
-      await HomeWidget.updateWidget(
-        iOSName: _iOSWidgetName,
-        androidName: _androidWidgetName,
-      );
+      // 兩個 Android provider 各 update 一次；iOS 兩次都 reload 同一個 kind，無害。
+      for (final androidName in [_androidSmallName, _androidMediumName]) {
+        await HomeWidget.updateWidget(
+          iOSName: _iOSWidgetName,
+          androidName: androidName,
+        );
+      }
     } catch (_) {
-      // Best-effort：native widget extension 未起（或者用戶部機冇 pin
-      // 個 widget），呢個背景刷新失敗唔應該影響 app 其餘功能。
+      // Best-effort：native widget 未存在（或者用戶部機冇 pin 個 widget），
+      // 呢個背景刷新失敗唔應該影響 app 其餘功能。
     }
   }
 
@@ -96,7 +106,8 @@ class WidgetDataBridge {
       lunarLabel: reading.lunarLabel,
       fortuneScore: reading.fortuneScore,
       band: reading.band,
-      yi: reading.yi.take(3).map((e) => e.label).toList(),
+      // 「餘事勿取」係通勝術語（其餘事情唔好做），放喺 widget 嘅「宜」欄冇意思。
+      yi: reading.yi.map((e) => e.label).where((l) => l != '餘事勿取').take(3).toList(),
       ji: reading.ji.take(2).map((e) => e.label).toList(),
       avoidHour: reading.avoidHour,
     );

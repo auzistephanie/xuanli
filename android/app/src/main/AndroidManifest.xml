@@ -48,6 +48,37 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+        <!-- 桌面 widget（Phase 3）：小（2×2）同中（4×2）。類名要同 Dart WidgetDataBridge 一致。 -->
+        <receiver
+            android:name=".XuanLiWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_small_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/xuanli_widget_small_info" />
+        </receiver>
+        <receiver
+            android:name=".XuanLiWidgetMediumProvider"
+            android:exported="false"
+            android:label="@string/widget_medium_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/xuanli_widget_medium_info" />
+        </receiver>
+        <!-- 每日 00:05／07:00 刷新 widget；重開機同 app 更新後重新排鬧鐘。 -->
+        <receiver android:name=".XuanLiWidgetTickReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.xuanli.xuanli.WIDGET_TICK" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

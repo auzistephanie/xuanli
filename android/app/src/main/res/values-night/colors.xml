@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="xuanli_widget_bg">#1C2440</color>
+    <color name="xuanli_widget_ink">#E9DFC9</color>
+    <color name="xuanli_widget_ink60">#99E9DFC9</color>
+    <color name="xuanli_widget_track">#1FE9DFC9</color>
+    <color name="xuanli_widget_gold">#C9A24B</color>
+    <color name="xuanli_widget_jade">#7FC0AB</color>
+    <color name="xuanli_widget_red">#E08484</color>
+</resources>
