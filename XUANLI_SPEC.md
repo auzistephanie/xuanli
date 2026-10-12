@@ -1,4 +1,4 @@
-# 玄曆 XuanLi — 實施規格書（畀 Claude Code + Superpowers 用）
+# Kairo（吉時，原名玄曆 XuanLi）— 實施規格書（畀 Claude Code + Superpowers 用）
 
 > **點用呢份文件**：呢份係已經傾掂、鎖定晒決策嘅實施規格，唔使再 brainstorm 產品方向。
 > 建議流程：用 superpowers 嘅 planning skill 將本文件拆成 implementation plan（跟第 10 節四個 Phase），
@@ -277,10 +277,12 @@ Chips（可橫向 scroll）→ 範圍 segmented（1週/1月/3月）→ 結果卡
 ## 12. 設計 tokens（詳見 design html）
 
 ```
-paper #f6efe2 / paper2 #efe5d0 / ink #1c2440 / red #b23a3a / gold #c9a24b / jade #3f7d6e
-dark: bg #131829 / card #1c2440 / paper-text #e9dfc9
-字體：Noto Serif TC（標題/數字/干支）+ Noto Sans TC（正文）
-圓角：卡 16 / 格 9 / widget 28；印章 logo：朱紅底米黃「玄曆」直排
+Kairo（2026-10-13 改版，視覺語言見 design/kairo-preview.html）
+light: paper #f6efe2 / paper2 #efe5d0 / ink #1c2440 / red #b23a3a / gold #c9a24b / jade #3f7d6e
+dark（預設）: bg #0d1120 / bg2 #141a2e / card #1c2440 / text #e9dfc9 / gold #c9a24b / goldBright #f0d78c / jade #6fc3ad / 忌 #e57a6f
+字體：Noto Serif TC（標題/數字/干支）+ Noto Sans TC（正文）+ Cormorant Garamond SemiBold（Kairo 字）
+圓角：卡 16 / 格 9 / widget 28 / 全息卡 24；印章：朱紅底米黃「吉」或直排「吉時」
+3D：天體儀、立體籤筒、傾斜全息卡、星空；環境動畫尊重「減少動態效果」
 ```
 
 ## 13. 紅線（唔准做）
