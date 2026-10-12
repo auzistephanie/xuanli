@@ -55,7 +55,7 @@ class _OrreryState extends State<Orrery> with SingleTickerProviderStateMixin {
               child: CustomPaint(size: Size.square(s), painter: _OrreryPainter(_c, front: false)),
             ),
           ),
-          OrreryCore(diameter: s * widget.coreFraction, child: widget.core),
+          OrreryCore(diameter: s * widget.coreFraction),
           IgnorePointer(
             child: ExcludeSemantics(
               child: RepaintBoundary(
@@ -63,6 +63,12 @@ class _OrreryState extends State<Orrery> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
+          // 前層環遮住球，但唔可以劃過核心文字（分數、印章），所以文字放最頂。
+          if (widget.core != null)
+            SizedBox.square(
+              dimension: s * widget.coreFraction,
+              child: Center(child: widget.core),
+            ),
         ],
       ),
     );

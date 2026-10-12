@@ -219,26 +219,30 @@ class _TodayScreenState extends State<TodayScreen> {
         const BrandSeal(size: 30),
         const SizedBox(width: 8),
         const Wordmark(fontSize: 22),
-        const Spacer(),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '${_selectedDate.month}月${_selectedDate.day}日 星期$weekdayChar',
-              style: TextStyle(
-                fontFamily: XuanLiFonts.serif,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                letterSpacing: 1.5,
-                color: colors.ink,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${_selectedDate.month}月${_selectedDate.day}日 星期$weekdayChar',
+                style: TextStyle(
+                  fontFamily: XuanLiFonts.serif,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  letterSpacing: 1.5,
+                  color: colors.ink,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${reading.lunarLabel}・${reading.ganzhiDay}日・${reading.chong}',
-              style: TextStyle(fontSize: 10.5, color: colors.ink60),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                '${reading.lunarLabel}・${reading.ganzhiDay}日・${reading.chong}',
+                style: TextStyle(fontSize: 10.5, color: colors.ink60),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );

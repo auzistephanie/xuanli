@@ -96,7 +96,8 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     });
     await tester.pump();
-    // 載入畫面有 Orrery/Starfield 子樹，bootstrap 完成後要多一個 frame 先換到封面。
+    // 測試入面環境動畫關咗，靜態載入畫面唔會自己排 frame；bootstrap future
+    // 完成後 FutureBuilder 嘅 setState 要第二個 pump 先 render 到封面。
     await tester.pump();
 
     // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係封面

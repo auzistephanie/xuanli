@@ -328,9 +328,8 @@ class Week7Strip extends StatelessWidget {
           boxShadow: isToday
               ? [
                   BoxShadow(
-                    color: colors.gold.withValues(alpha: 0.3),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    color: colors.gold.withValues(alpha: 0.35),
+                    blurRadius: 12,
                   ),
                 ]
               : null,
