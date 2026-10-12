@@ -95,8 +95,11 @@ void main() {
     });
     await tester.pump();
 
-    // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係
-    // BirthDataStep，唔係 TabShell）。
+    // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係封面
+    // WelcomeStep，唔係 TabShell）；撳「睇我嘅組合」先去 BirthDataStep。
+    expect(find.text('睇我嘅組合'), findsOneWidget);
+    await tester.tap(find.text('睇我嘅組合'));
+    await tester.pumpAndSettle();
     expect(find.text('你嘅出生一刻'), findsOneWidget);
     expect(find.byType(TabShell), findsNothing);
 

@@ -7,7 +7,21 @@ import 'onboarding_widgets.dart';
 class MbtiStep extends StatefulWidget {
   final ValueChanged<String> onDone;
 
-  const MbtiStep({super.key, required this.onDone});
+  /// 幫朋友合盤時：改標題、隱藏進度條，同埋唔提供快速測驗（8 題用「你」
+  /// 第二人稱，幫別人答會混亂），淨係 16 宮格揀。
+  final String title;
+  final String subtitle;
+  final bool showProgress;
+  final bool allowQuiz;
+
+  const MbtiStep({
+    super.key,
+    required this.onDone,
+    this.title = '你嘅性格底色',
+    this.subtitle = 'MBTI 會影響我哋同你講嘢嘅方式，同埋活動建議嘅取向。',
+    this.showProgress = true,
+    this.allowQuiz = true,
+  });
 
   @override
   State<MbtiStep> createState() => _MbtiStepState();
@@ -89,10 +103,12 @@ class _MbtiStepState extends State<MbtiStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const OnboardingProgressDots(currentStep: 1, totalSteps: 3),
-          const SizedBox(height: 14),
+          if (widget.showProgress) ...[
+            const OnboardingProgressDots(currentStep: 1, totalSteps: 3),
+            const SizedBox(height: 14),
+          ],
           Text(
-            '你嘅性格底色',
+            widget.title,
             style: TextStyle(
               fontFamily: XuanLiFonts.serif,
               fontSize: 21,
@@ -103,17 +119,19 @@ class _MbtiStepState extends State<MbtiStep> {
           ),
           const SizedBox(height: 4),
           Text(
-            'MBTI 會影響我哋同你講嘢嘅方式，同埋活動建議嘅取向。',
+            widget.subtitle,
             style: TextStyle(fontSize: 12.5, color: colors.ink60, height: 1.7),
           ),
           const SizedBox(height: 16),
-          OnboardingSegmentedToggle(
-            options: const ['我知我嘅類型', '快速測驗（8題）'],
-            selectedIndex: _quizMode ? 1 : 0,
-            onChanged: (i) => _setQuizMode(i == 1),
-          ),
-          const SizedBox(height: 16),
-          if (_quizMode) _buildQuiz(colors) else _buildGrid(colors),
+          if (widget.allowQuiz) ...[
+            OnboardingSegmentedToggle(
+              options: const ['我知我嘅類型', '快速測驗（8題）'],
+              selectedIndex: _quizMode ? 1 : 0,
+              onChanged: (i) => _setQuizMode(i == 1),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (_quizMode && widget.allowQuiz) _buildQuiz(colors) else _buildGrid(colors),
         ],
       ),
     );

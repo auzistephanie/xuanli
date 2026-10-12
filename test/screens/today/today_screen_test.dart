@@ -50,6 +50,8 @@ void main() {
 
     expect(find.textContaining('7月11日'), findsOneWidget);
 
+    // 今日一籤卡令七日條推低咗，先 scroll 入畫面先撳得中。
+    await tester.ensureVisible(find.text('12'));
     await tester.tap(find.text('12'));
     await tester.pumpAndSettle();
 

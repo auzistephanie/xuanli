@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../engine/rarity.dart';
 import '../../models/combo.dart';
 import '../../models/profile.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/marks.dart';
+import 'partner_flow.dart';
+import 'share_card_screen.dart';
 
 /// 組合詳解頁（spec §9.5）：由檔案卡撳入，顯示 [profile] 嘅日主×MBTI
 /// 組合（160 模板之一，`combos.json`／`getCombo()` 已喺 Phase 1 起好）。
@@ -35,13 +39,16 @@ class ComboDetailScreen extends StatelessWidget {
                       children: [
                         Expanded(child: _buildListCard(colors, '你嘅優勢', colors.jade, combo.strengths)),
                         const SizedBox(width: 10),
-                        Expanded(child: _buildListCard(colors, '◈ 留意位', colors.red, combo.watchouts)),
+                        Expanded(child: _buildListCard(colors, '留意位', colors.red, combo.watchouts,
+                            mark: DiamondMark(color: colors.red))),
                       ],
                     ),
                     const SizedBox(height: 12),
                     _buildHowToWinCard(colors, combo),
                     const SizedBox(height: 12),
-                    _buildRarityPlaceholder(colors),
+                    _buildRarityCard(colors, dayGan),
+                    const SizedBox(height: 12),
+                    _buildPartnerEntry(context, colors),
                   ],
                 ),
               ),
@@ -75,12 +82,12 @@ class ComboDetailScreen extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('分享卡 — 第二版先做')),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: Text('⇪', style: TextStyle(fontSize: 18, color: colors.ink60)),
+              child: Icon(Icons.ios_share, size: 19, color: colors.ink60, semanticLabel: '分享'),
             ),
           ),
         ],
@@ -157,7 +164,8 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildListCard(XuanLiColors colors, String title, Color titleColor, List<String> items) {
+  Widget _buildListCard(XuanLiColors colors, String title, Color titleColor, List<String> items,
+      {Widget? mark}) {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
@@ -167,10 +175,8 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: titleColor),
-          ),
+          _title(title, TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: titleColor),
+              mark: mark),
           const SizedBox(height: 7),
           for (final item in items)
             Padding(
@@ -181,6 +187,9 @@ class ComboDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _title(String text, TextStyle style, {Widget? mark}) =>
+      mark == null ? Text(text, style: style) : MarkedTitle(mark: mark, text: text, style: style);
 
   Widget _buildHowToWinCard(XuanLiColors colors, Combo combo) {
     return Container(
@@ -193,10 +202,9 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '☾ 點樣發力（跟你嘅組合）',
-            style: TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
-          ),
+          _title('點樣發力（跟你嘅組合）',
+              TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
+              mark: MoonMark(color: colors.gold)),
           const SizedBox(height: 7),
           Text(combo.howToWin, style: TextStyle(fontSize: 12, height: 1.7, color: colors.ink)),
         ],
@@ -204,30 +212,92 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRarityPlaceholder(XuanLiColors colors) {
+  Widget _buildPartnerEntry(BuildContext context, XuanLiColors colors) {
+    return Material(
+      color: colors.cardSurface,
+      borderRadius: BorderRadius.circular(XuanLiRadii.card),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(XuanLiRadii.card),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PartnerFlow(me: profile)),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: colors.gold.withValues(alpha: 0.6)),
+            borderRadius: BorderRadius.circular(XuanLiRadii.card),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '同朋友合盤',
+                      style: TextStyle(
+                        fontFamily: XuanLiFonts.serif,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2,
+                        color: colors.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '輸入朋友生日同 MBTI，睇你哋嘅關係名同合盤指數。佢嘅資料唔會儲存。',
+                      style: TextStyle(fontSize: 11.5, height: 1.6, color: colors.ink60),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(Icons.arrow_forward_ios, size: 14, color: colors.gold),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRarityCard(XuanLiColors colors, String dayGan) {
+    final rarity = comboRarity(dayGan: dayGan, mbti: profile.mbti);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: colors.cardSurface,
-        border: Border.all(color: colors.ink12, style: BorderStyle.solid),
         borderRadius: BorderRadius.circular(XuanLiRadii.card),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${profile.dayMaster} × ${profile.mbti}・稀有度',
+                style: TextStyle(fontSize: 11.5, color: colors.ink60),
+              ),
+              Text(
+                '約 ${rarity.percentLabel}',
+                style: TextStyle(
+                  fontFamily: XuanLiFonts.serif,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: colors.gold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Text(
-            '${profile.dayMaster} × ${profile.mbti}・稀有度',
-            style: TextStyle(fontSize: 11.5, color: colors.ink60),
+            '大約每 ${rarity.oneIn} 人先有一個同你一樣嘅組合',
+            style: TextStyle(fontSize: 12, color: colors.ink),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: colors.paper2,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text('即將推出', style: TextStyle(fontSize: 11, color: colors.ink30)),
-          ),
+          const SizedBox(height: 6),
+          Text(rarityFootnote, style: TextStyle(fontSize: 10, height: 1.5, color: colors.ink30)),
         ],
       ),
     );

@@ -49,20 +49,24 @@ void main() {
   });
 
   group('WidgetDataBridge — mocked platform channel', () {
-    test('refreshNext7Days() 傳 7 日 JSON 去 saveWidgetData，再 call updateWidget', () async {
+    test('refreshNext7Days() 設 App Group、傳 7 日 JSON，再更新 iOS／兩個 Android widget', () async {
       String? savedId;
       String? savedData;
-      var updateWidgetCalled = false;
+      String? groupId;
+      final updated = <Map>[];
 
       mockChannel((call) async {
         switch (call.method) {
+          case 'setAppGroupId':
+            groupId = (call.arguments as Map)['groupId'] as String;
+            return true;
           case 'saveWidgetData':
             final args = call.arguments as Map;
             savedId = args['id'] as String;
             savedData = args['data'] as String;
             return true;
           case 'updateWidget':
-            updateWidgetCalled = true;
+            updated.add(call.arguments as Map);
             return true;
           default:
             return null;
@@ -72,8 +76,15 @@ void main() {
       final bridge = WidgetDataBridge();
       await bridge.refreshNext7Days(profile, today: DateTime(2026, 7, 11));
 
-      expect(savedId, isNotNull);
-      expect(updateWidgetCalled, isTrue);
+      // 原生 widget 靠呢三個名認返出嚟（Swift／Kotlin／entitlements 要一致）。
+      expect(groupId, WidgetDataBridge.appGroupId);
+      expect(WidgetDataBridge.appGroupId, 'group.com.xuanli.xuanli');
+      expect(savedId, 'xuanli_week_readings');
+      expect(updated.map((u) => u['android']).toSet(), {
+        'XuanLiWidgetProvider',
+        'XuanLiWidgetMediumProvider',
+      });
+      expect(updated.every((u) => u['ios'] == 'XuanLiWidget'), isTrue);
 
       final decoded = json.decode(savedData!) as List;
       expect(decoded.length, 7);
@@ -105,6 +116,60 @@ void main() {
       // 唔應該 throw ——refreshNext7Days 係 best-effort background refresh，
       // native widget 側可能仲未存在（呢個 plan 冇起 native extension）。
       await bridge.refreshNext7Days(profile, today: DateTime(2026, 7, 11));
+    });
+  });
+
+  group('原生 widget 讀嘅 JSON 合約', () {
+    test('每日物件剛好包 Swift／Kotlin 讀嘅欄位，冇多（keep 細）', () async {
+      String? savedData;
+      mockChannel((call) async {
+        if (call.method == 'saveWidgetData') {
+          savedData = (call.arguments as Map)['data'] as String;
+        }
+        return true;
+      });
+      await WidgetDataBridge().refreshNext7Days(profile, today: DateTime(2026, 7, 11));
+
+      final day = (json.decode(savedData!) as List).first as Map<String, dynamic>;
+      expect(day.keys.toSet(), {
+        'date', 'ganzhiDay', 'lunarLabel', 'fortuneScore', 'band', 'yi', 'ji', 'avoidHour',
+      });
+      expect(day['date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+      expect(['吉', '平', '忌'], contains(day['band']));
+      expect(day['fortuneScore'], inInclusiveRange(0, 100));
+    });
+
+    test('宜欄唔會出現「餘事勿取」（通勝術語，widget 一眼睇冇意思）', () async {
+      String? savedData;
+      mockChannel((call) async {
+        if (call.method == 'saveWidgetData') {
+          savedData = (call.arguments as Map)['data'] as String;
+        }
+        return true;
+      });
+      // 2026-07-11 丙戌日：通勝「宜」係 祭祀、解除、餘事勿取。
+      await WidgetDataBridge().refreshNext7Days(profile, today: DateTime(2026, 7, 11));
+
+      final days = json.decode(savedData!) as List;
+      for (final d in days) {
+        expect((d as Map)['yi'] as List, isNot(contains('餘事勿取')));
+      }
+      expect((days.first as Map)['yi'], ['祭祀', '解除']);
+    });
+
+    test('冇任何個人資料／備註跟埋出去（姓名、出生日期、MBTI）', () async {
+      String? savedData;
+      mockChannel((call) async {
+        if (call.method == 'saveWidgetData') {
+          savedData = (call.arguments as Map)['data'] as String;
+        }
+        return true;
+      });
+      await WidgetDataBridge().refreshNext7Days(profile, today: DateTime(2026, 7, 11));
+
+      for (final secret in ['阿玄', '1999', 'ISFP', '香港', 'birthDate']) {
+        expect(savedData!.contains(secret), isFalse, reason: secret);
+      }
     });
   });
 }

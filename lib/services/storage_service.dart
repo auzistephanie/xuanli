@@ -62,6 +62,24 @@ class StorageService {
     await prefs.remove(_profilesKey);
   }
 
+  static const _stickDrawnKey = 'xuanli_stick_drawn';
+
+  /// 每日一籤：今日有冇抽過。淨係存一個日期字串（`yyyy-MM-dd`），唔入備份
+  /// （備份只包 profiles／settings），亦唔係個人資料。籤本身 deterministic，
+  /// 所以唔使存結果，只需要記得「今日已經抽咗」令重開 app 直接見返支籤。
+  Future<String?> loadStickDrawnDate() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_stickDrawnKey);
+  }
+
+  Future<void> saveStickDrawnDate(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_stickDrawnKey, stickDateKey(date));
+  }
+
+  static String stickDateKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
   Future<XuanLiBackup> buildBackup({DateTime? now}) async => XuanLiBackup(
         profiles: await loadProfiles(),
         settings: await loadSettings(),
