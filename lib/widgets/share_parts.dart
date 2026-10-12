@@ -16,7 +16,6 @@ const shareNavy = Color(0xFF1C2440);
 const shareNavyDeep = Color(0xFF131829);
 const sharePaper = Color(0xFFF6EFE2);
 const shareGold = Color(0xFFC9A24B);
-const shareSealRed = Color(0xFFB23A3A);
 
 /// 所有分享卡共用嘅藏藍漸變底（組合卡、合盤卡）。
 class ShareCardBackground extends StatelessWidget {

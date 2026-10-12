@@ -31,21 +31,25 @@ class BrandSeal extends StatelessWidget {
           border: Border.all(color: KairoPalette.paper.withValues(alpha: 0.85), width: size > 40 ? 1.2 : 0.8),
           borderRadius: BorderRadius.circular(size * 0.12),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final c in chars)
-              Text(
-                c,
-                style: TextStyle(
-                  fontFamily: XuanLiFonts.serif,
-                  fontWeight: FontWeight.w900,
-                  fontSize: fontSize,
-                  height: 1.05,
-                  color: KairoPalette.paper,
+        // 印章係固定正方形：系統大字體時縮細入框，唔好 overflow。
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final c in chars)
+                Text(
+                  c,
+                  style: TextStyle(
+                    fontFamily: XuanLiFonts.serif,
+                    fontWeight: FontWeight.w900,
+                    fontSize: fontSize,
+                    height: 1.05,
+                    color: KairoPalette.paper,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

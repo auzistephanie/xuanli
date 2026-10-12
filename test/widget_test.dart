@@ -11,6 +11,7 @@ import 'package:xuanli/screens/calendar/calendar_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
+import 'package:xuanli/widgets/brand.dart';
 import 'package:xuanli/widgets/orrery.dart';
 
 Profile _sampleProfileForBootstrapTest() => buildProfile(
@@ -111,6 +112,33 @@ void main() {
     // 注意：有已存 profile → TabShell 呢條路由未有覆蓋，
     // 因為要預先落一個完整 serialized Profile 落 SharedPreferences，
     // 超出呢次補漏嘅範圍。
+  });
+
+  double wordmarkOpacity(WidgetTester tester) => tester
+      .widget<Opacity>(find.ancestor(of: find.byType(Wordmark), matching: find.byType(Opacity)).first)
+      .opacity;
+
+  testWidgets('載入畫面：Kairo 字由透明淡入（600ms 一次過）', (tester) async {
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    expect(wordmarkOpacity(tester), lessThan(0.1));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(wordmarkOpacity(tester), allOf(greaterThan(0.1), lessThan(1.0)));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(wordmarkOpacity(tester), 1.0);
+  });
+
+  testWidgets('載入畫面：減少動態效果時 Kairo 字直接顯示', (tester) async {
+    await tester.pumpWidget(const MediaQuery(
+      data: MediaQueryData(disableAnimations: true),
+      child: XuanLiApp(),
+    ));
+    await tester.pump();
+    expect(find.byType(Wordmark), findsOneWidget);
+    expect(
+      find.ancestor(of: find.byType(Wordmark), matching: find.byType(Opacity)),
+      findsNothing,
+    );
   });
 
   testWidgets(

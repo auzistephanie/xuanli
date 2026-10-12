@@ -10,8 +10,8 @@ import 'services/deep_link_router.dart';
 import 'services/notification_scheduler.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
-import 'theme/brand.dart';
 import 'services/widget_data_bridge.dart';
+import 'theme/brand.dart';
 import 'theme/xuanli_theme.dart';
 import 'widgets/brand.dart';
 import 'widgets/orrery.dart';
@@ -103,7 +103,7 @@ class _AppBootstrapState extends State<_AppBootstrap> {
                     children: [
                       Orrery(size: 220, coreFraction: 0.36),
                       SizedBox(height: 18),
-                      Wordmark(fontSize: 44),
+                      _SplashWordmark(),
                     ],
                   ),
                 ),
@@ -120,6 +120,24 @@ class _AppBootstrapState extends State<_AppBootstrap> {
         }
         return TabShell(profile: profile, deepLinkDate: _deepLinkDate);
       },
+    );
+  }
+}
+
+/// 載入畫面嘅 Kairo 字：開 app 淡入一次（600ms）；「減少動態效果」就直接顯示。
+class _SplashWordmark extends StatelessWidget {
+  const _SplashWordmark();
+
+  @override
+  Widget build(BuildContext context) {
+    const wordmark = Wordmark(fontSize: 44);
+    if (MediaQuery.disableAnimationsOf(context)) return wordmark;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+      builder: (context, t, child) => Opacity(opacity: t, child: child),
+      child: wordmark,
     );
   }
 }

@@ -34,6 +34,15 @@ void main() {
         greaterThan(tester.getTopLeft(find.text('吉')).dy));
   });
 
+  testWidgets('BrandSeal 大字體（textScaler 2）都唔會 overflow', (tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+      child: wrap(const BrandSeal(text: '吉時', size: 64)),
+    ));
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(BrandSeal)), const Size(64, 64));
+  });
+
   testWidgets('Wordmark 顯示 Kairo', (tester) async {
     await tester.pumpWidget(wrap(const Wordmark(fontSize: 24)));
     expect(find.text('Kairo'), findsOneWidget);

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'page_transitions.dart';
 
-/// 深色 palette 跟 design/kairo-preview.html（2026-10-13 Kairo 改版）。
 /// 玄曆設計 tokens（spec §12 + design/design-preview.html 嘅 :root CSS 變量）。
+///
+/// 深色 palette 跟 design/kairo-preview.html（2026-10-13 Kairo 改版）。
 /// 淺色/深色各一份 const 實例，掛喺 [ThemeData.extensions] 度，畫面用
 /// `Theme.of(context).extension<XuanLiColors>()!` 攞（`!` 安全，因為
 /// [XuanLiTheme.light]/[XuanLiTheme.dark] 一定會掛呢個 extension）。

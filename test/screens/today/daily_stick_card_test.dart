@@ -136,6 +136,23 @@ void main() {
       expect(find.text('搖籤'), findsNothing);
     });
 
+    testWidgets('翻卡路徑唔再疊 AnimatedSwitcher 嘅淡入（卡背唔會暗咗）', (tester) async {
+      await tester.pumpWidget(wrap(card()));
+      await tester.tap(find.text('搖籤'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.byType(FlipReveal), findsOneWidget);
+      final fadesAroundFlip = find.ancestor(
+        of: find.byType(FlipReveal),
+        matching: find.descendant(
+          of: find.byType(DailyStickCard),
+          matching: find.byType(FadeTransition),
+        ),
+      );
+      expect(fadesAroundFlip, findsNothing);
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('今日已抽：唔使翻卡', (tester) async {
       await tester.pumpWidget(wrap(card(alreadyDrawn: true)));
       expect(find.byType(FlipReveal), findsNothing);

@@ -146,10 +146,13 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
       layoutBuilder: (current, previous) => _flipOnReveal
           ? (current ?? const SizedBox.shrink())
           : AnimatedSwitcher.defaultLayoutBuilder(current, previous),
-      transitionBuilder: (child, anim) => FadeTransition(
-        opacity: anim,
-        child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
-      ),
+      // 翻卡路徑唔好再淡入：FlipReveal 自己做過場，疊埋 450ms 淡入會令卡背睇落暗咗。
+      transitionBuilder: (child, anim) => _flipOnReveal
+          ? child
+          : FadeTransition(
+              opacity: anim,
+              child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
+            ),
       child: _revealed
           ? (_flipOnReveal ? _flipResult(colors) : _result(colors))
           : _idle(colors),
