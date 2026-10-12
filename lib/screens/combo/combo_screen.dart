@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../../engine/rarity.dart';
 import '../../models/combo.dart';
 import '../../models/profile.dart';
+import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
 import '../../widgets/marks.dart';
+import '../../widgets/tilt_card.dart';
+import '../../widgets/wuxing_orbs.dart';
 import 'partner_flow.dart';
 import 'share_card_screen.dart';
 
@@ -95,13 +98,20 @@ class ComboDetailScreen extends StatelessWidget {
     );
   }
 
+  /// 全息名卡：深藍漸變喺淺色／深色主題都一樣，所以卡內一律用
+  /// [KairoPalette] 固定色，唔跟 [XuanLiColors]（淺色主題嘅玉色喺深底睇唔清）。
   Widget _buildNameCard(XuanLiColors colors, Combo combo) {
-    return Container(
+    return TiltCard(
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
-      decoration: BoxDecoration(
-        color: colors.cardSurface,
-        borderRadius: BorderRadius.circular(XuanLiRadii.card),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF25305C), Color(0xFF141A33), Color(0xFF0F1328)],
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -111,26 +121,26 @@ class ComboDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: colors.jade.withValues(alpha: 0.12),
+                  color: KairoPalette.jadeBright.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${profile.dayMaster}日主',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: colors.jade),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.jadeBright),
                 ),
               ),
               const SizedBox(width: 10),
-              Text('×', style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 15, color: colors.gold)),
+              const Text('×', style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 15, color: KairoPalette.goldBright)),
               const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: colors.gold,
+                  color: KairoPalette.gold,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   profile.mbti,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: colors.ink),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.night),
                 ),
               ),
             ],
@@ -143,23 +153,26 @@ class ComboDetailScreen extends StatelessWidget {
               fontSize: 28,
               fontWeight: FontWeight.w900,
               letterSpacing: 6,
-              color: colors.ink,
+              color: KairoPalette.paper,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           Text(
             combo.motto,
-            style: TextStyle(fontSize: 11, color: colors.gold, letterSpacing: 2),
+            style: const TextStyle(fontSize: 11, color: KairoPalette.goldBright, letterSpacing: 2),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 18),
+          WuxingOrbs(wuxing: profile.wuxing),
           const SizedBox(height: 14),
           Text(
             combo.description,
-            style: TextStyle(fontSize: 12.5, height: 1.8, color: colors.ink60),
+            style: TextStyle(fontSize: 12.5, height: 1.8, color: KairoPalette.paper.withValues(alpha: 0.65)),
             textAlign: TextAlign.left,
           ),
         ],
+      ),
       ),
     );
   }
