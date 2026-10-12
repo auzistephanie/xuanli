@@ -103,76 +103,76 @@ class ComboDetailScreen extends StatelessWidget {
   Widget _buildNameCard(XuanLiColors colors, Combo combo) {
     return TiltCard(
       child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF25305C), Color(0xFF141A33), Color(0xFF0F1328)],
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF25305C), Color(0xFF141A33), Color(0xFF0F1328)],
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
-        borderRadius: BorderRadius.all(Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: KairoPalette.jadeBright.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: KairoPalette.jadeBright.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${profile.dayMaster}日主',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.jadeBright),
+                  ),
                 ),
-                child: Text(
-                  '${profile.dayMaster}日主',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.jadeBright),
+                const SizedBox(width: 10),
+                const Text(
+                  '×',
+                  style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 15, color: KairoPalette.goldBright),
                 ),
-              ),
-              const SizedBox(width: 10),
-              const Text('×', style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 15, color: KairoPalette.goldBright)),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: KairoPalette.gold,
-                  borderRadius: BorderRadius.circular(20),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(color: KairoPalette.gold, borderRadius: BorderRadius.circular(20)),
+                  child: Text(
+                    profile.mbti,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.night),
+                  ),
                 ),
-                child: Text(
-                  profile.mbti,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: KairoPalette.night),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            combo.name,
-            style: TextStyle(
-              fontFamily: XuanLiFonts.serif,
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 6,
-              color: KairoPalette.paper,
+              ],
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            combo.motto,
-            style: const TextStyle(fontSize: 11, color: KairoPalette.goldBright, letterSpacing: 2),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 18),
-          WuxingOrbs(wuxing: profile.wuxing),
-          const SizedBox(height: 14),
-          Text(
-            combo.description,
-            style: TextStyle(fontSize: 12.5, height: 1.8, color: KairoPalette.paper.withValues(alpha: 0.65)),
-            textAlign: TextAlign.left,
-          ),
-        ],
-      ),
+            const SizedBox(height: 14),
+            Text(
+              combo.name,
+              style: TextStyle(
+                fontFamily: XuanLiFonts.serif,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 6,
+                color: KairoPalette.paper,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              combo.motto,
+              style: const TextStyle(fontSize: 11, color: KairoPalette.goldBright, letterSpacing: 2),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 18),
+            WuxingOrbs(wuxing: profile.wuxing),
+            const SizedBox(height: 14),
+            Text(
+              combo.description,
+              style: TextStyle(fontSize: 12.5, height: 1.8, color: KairoPalette.paper.withValues(alpha: 0.65)),
+              textAlign: TextAlign.left,
+            ),
+          ],
+        ),
       ),
     );
   }

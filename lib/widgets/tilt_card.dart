@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -29,6 +30,7 @@ class _TiltCardState extends State<TiltCard> with SingleTickerProviderStateMixin
   Offset _settleFrom = Offset.zero;
   int? _pointer;
   StreamSubscription<AccelerometerEvent>? _sub;
+  bool? _sensorsOn;
   late final AnimationController _settle;
 
   @override
@@ -43,23 +45,32 @@ class _TiltCardState extends State<TiltCard> with SingleTickerProviderStateMixin
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // TickerMode：路由畀人蓋住時停聽感應器。只喺值變咗先重新訂閱。
+    final on = Motion.sensors(context) && TickerMode.valuesOf(context).enabled && _platformHasSensors;
+    if (on == _sensorsOn) return;
+    _sensorsOn = on;
     _sub?.cancel();
     _sub = null;
-    if (Motion.sensors(context)) {
-      try {
-        _sub = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval).listen(
-          (e) {
-            if (_pointer != null || !mounted) return;
-            final target = gravityToNormalized(e.x, e.y);
-            setState(() => _current = Offset.lerp(_current, target, 0.15)!);
-          },
-          onError: (_) {},
-          cancelOnError: true,
-        );
-      } catch (_) {
-        // 冇感應器（模擬器／桌面）：靠拖動就得。
-      }
+    if (on) {
+      // 只限 Android／iOS：其他平台冇 sensors_plus 實作，MissingPluginException
+      // 會經 FlutterError 報（唔會畀 try／onError 接住），所以根本唔好訂。
+      _sub = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval).listen(
+        _onAccel,
+        onError: (_) {},
+        cancelOnError: true,
+      );
     }
+  }
+
+  static bool get _platformHasSensors =>
+      defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
+
+  void _onAccel(AccelerometerEvent e) {
+    // 手指拖緊或者回正動畫進行中：唔理感應器，避免搖晃。
+    if (_pointer != null || _settle.isAnimating || !mounted) return;
+    final next = Offset.lerp(_current, gravityToNormalized(e.x, e.y), 0.15)!;
+    if ((next - _current).distanceSquared < 1e-5) return;
+    setState(() => _current = next);
   }
 
   @override
@@ -81,6 +92,10 @@ class _TiltCardState extends State<TiltCard> with SingleTickerProviderStateMixin
   void _release(PointerEvent e) {
     if (_pointer != e.pointer) return;
     _pointer = null;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      setState(() => _current = Offset.zero);
+      return;
+    }
     _settleFrom = _current;
     _settle.forward(from: 0);
   }
@@ -105,7 +120,7 @@ class _TiltCardState extends State<TiltCard> with SingleTickerProviderStateMixin
           borderRadius: widget.borderRadius,
           child: Stack(
             children: [
-              widget.child,
+              RepaintBoundary(child: widget.child),
               Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(

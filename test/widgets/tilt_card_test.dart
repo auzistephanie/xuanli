@@ -48,4 +48,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, greaterThan(100));
   });
+
+  testWidgets('減少動態效果：放手即刻回正，唔使等動畫', (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
+        child: Scaffold(body: Center(child: TiltCard(child: SizedBox(width: 200, height: 120)))),
+      ),
+    ));
+    final center = tester.getCenter(find.byType(TiltCard));
+    final g = await tester.startGesture(center);
+    await g.moveTo(center + const Offset(90, 0));
+    await tester.pump();
+    expect(transformOf(tester).entry(0, 2), isNot(0));
+    await g.up();
+    await tester.pump();
+    expect(transformOf(tester).entry(0, 2), 0);
+    expect(tester.hasRunningAnimations, isFalse);
+  });
 }

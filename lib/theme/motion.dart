@@ -9,7 +9,7 @@ class Motion {
   static bool ambientEnabled = true;
 
   static bool ambient(BuildContext context) =>
-      ambientEnabled && !MediaQuery.of(context).disableAnimations;
+      ambientEnabled && !MediaQuery.disableAnimationsOf(context);
 
   /// 陀螺儀／加速計：web 冇可靠權限流程，一律用拖動代替。
   static bool sensors(BuildContext context) => ambient(context) && !kIsWeb;
