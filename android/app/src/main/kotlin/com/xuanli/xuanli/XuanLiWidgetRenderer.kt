@@ -74,7 +74,7 @@ object XuanLiWidgetRenderer {
         val s = state(context)
         val day = s.day
         if (day == null) {
-            views.setTextViewText(R.id.widget_date, "玄曆")
+            views.setTextViewText(R.id.widget_date, "Kairo")
             views.setImageViewBitmap(R.id.widget_ring, ringBitmap(context, null, null))
             views.setTextViewText(R.id.widget_band, "")
             views.setTextViewText(R.id.widget_hint, "開 app 完成設定")
@@ -98,7 +98,7 @@ object XuanLiWidgetRenderer {
         if (day == null) {
             views.setImageViewBitmap(R.id.widget_ring, ringBitmap(context, null, null))
             views.setTextViewText(R.id.widget_band, "")
-            views.setTextViewText(R.id.widget_date, "玄曆")
+            views.setTextViewText(R.id.widget_date, "Kairo")
             views.setTextViewText(R.id.widget_lunar, "")
             views.setTextViewText(R.id.widget_yi, "開 app 完成設定")
             views.setTextViewText(R.id.widget_ji, "")

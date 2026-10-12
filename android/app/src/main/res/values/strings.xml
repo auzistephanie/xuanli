@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_small_label">玄曆・今日</string>
+    <string name="widget_small_label">Kairo・今日</string>
     <string name="widget_small_description">今日命理分同吉凶一眼睇晒</string>
-    <string name="widget_medium_label">玄曆・今日宜忌</string>
+    <string name="widget_medium_label">Kairo・今日宜忌</string>
     <string name="widget_medium_description">今日命理分、宜忌同避時提示</string>
 </resources>

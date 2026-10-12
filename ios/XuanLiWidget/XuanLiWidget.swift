@@ -126,7 +126,7 @@ struct SmallView: View {
                     Text("開 app 更新").font(.system(size: 9)).foregroundColor(palette.ink60)
                 }
             } else {
-                Text("玄曆").font(.system(size: 13, weight: .bold, design: .serif)).foregroundColor(palette.ink)
+                Text("Kairo").font(.system(size: 13, weight: .bold, design: .serif)).foregroundColor(palette.ink)
                 ScoreRing(score: nil, palette: palette, diameter: 66)
                 Text("開 app 完成設定").font(.system(size: 9)).foregroundColor(palette.ink60)
             }
@@ -165,7 +165,7 @@ struct MediumView: View {
                         Text("開 app 更新").font(.system(size: 9)).foregroundColor(palette.ink60)
                     }
                 } else {
-                    Text("玄曆").font(.system(size: 14, weight: .bold, design: .serif)).foregroundColor(palette.ink)
+                    Text("Kairo").font(.system(size: 14, weight: .bold, design: .serif)).foregroundColor(palette.ink)
                     Text("開 app 完成設定").font(.system(size: 12)).foregroundColor(palette.ink60)
                 }
             }
@@ -203,7 +203,7 @@ struct XuanLiWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             XuanLiWidgetView(entry: entry)
         }
-        .configurationDisplayName("玄曆・今日")
+        .configurationDisplayName("Kairo・今日")
         .description("今日命理分、宜忌同避時提示")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
