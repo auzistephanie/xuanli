@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// 深色 palette 跟 design/kairo-preview.html（2026-10-13 Kairo 改版）。
 /// 玄曆設計 tokens（spec §12 + design/design-preview.html 嘅 :root CSS 變量）。
 /// 淺色/深色各一份 const 實例，掛喺 [ThemeData.extensions] 度，畫面用
 /// `Theme.of(context).extension<XuanLiColors>()!` 攞（`!` 安全，因為
@@ -44,16 +45,16 @@ class XuanLiColors extends ThemeExtension<XuanLiColors> {
   );
 
   static const dark = XuanLiColors(
-    paper: Color(0xFF131829), // design html --d-bg
-    paper2: Color(0xFF1C2440), // design html --d-card
+    paper: Color(0xFF0D1120), // Kairo night
+    paper2: Color(0xFF141A2E), // Kairo night2
     cardSurface: Color(0xFF1C2440),
-    ink: Color(0xFFE9DFC9), // design html --d-paper (text colour in dark mode)
+    ink: Color(0xFFE9DFC9),
     ink60: Color(0x99E9DFC9),
     ink30: Color(0x40E9DFC9),
     ink12: Color(0x1FE9DFC9),
-    red: Color(0xFFE08484), // design html dark-mode 忌 colour
+    red: Color(0xFFE57A6F), // kairo-preview 忌
     gold: Color(0xFFC9A24B),
-    jade: Color(0xFF7FC0AB), // design html dark-mode 宜 colour
+    jade: Color(0xFF6FC3AD), // kairo-preview 宜
   );
 
   @override

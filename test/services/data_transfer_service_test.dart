@@ -73,7 +73,7 @@ void main() {
     );
     expect(invalid.pickBackup(), throwsA(isA<BackupFormatException>()));
     expect((await storage.loadPrimaryProfile())!.id, 'old');
-    expect((await storage.loadSettings()).themeMode, ThemeMode.system);
+    expect((await storage.loadSettings()).themeMode, ThemeMode.dark);
   });
 
   test('有效 backup 確認 import 後一次過取代 profiles list 同 settings', () async {

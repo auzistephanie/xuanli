@@ -37,17 +37,17 @@ void main() {
       expect(XuanLiColors.light.jade, const Color(0xFF3F7D6E));
     });
 
-    test('XuanLiColors.dark 每個色都對正 design html 嘅 hex 值', () {
-      expect(XuanLiColors.dark.paper, const Color(0xFF131829));
-      expect(XuanLiColors.dark.paper2, const Color(0xFF1C2440));
+    test('XuanLiColors.dark 係 Kairo 夜空 palette', () {
+      expect(XuanLiColors.dark.paper, const Color(0xFF0D1120));
+      expect(XuanLiColors.dark.paper2, const Color(0xFF141A2E));
       expect(XuanLiColors.dark.cardSurface, const Color(0xFF1C2440));
       expect(XuanLiColors.dark.ink, const Color(0xFFE9DFC9));
       expect(XuanLiColors.dark.ink60, const Color(0x99E9DFC9));
       expect(XuanLiColors.dark.ink30, const Color(0x40E9DFC9));
       expect(XuanLiColors.dark.ink12, const Color(0x1FE9DFC9));
-      expect(XuanLiColors.dark.red, const Color(0xFFE08484));
+      expect(XuanLiColors.dark.red, const Color(0xFFE57A6F));
       expect(XuanLiColors.dark.gold, const Color(0xFFC9A24B));
-      expect(XuanLiColors.dark.jade, const Color(0xFF7FC0AB));
+      expect(XuanLiColors.dark.jade, const Color(0xFF6FC3AD));
     });
   });
 }

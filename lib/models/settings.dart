@@ -23,7 +23,7 @@ class AppSettings {
 
   /// 未存過任何設定時嘅預設值——spec §9.7 講嘅預設 07:30、通知預設開。
   static const defaults = AppSettings(
-    themeMode: ThemeMode.system,
+    themeMode: ThemeMode.dark,
     notificationsEnabled: true,
     notificationHour: 7,
     notificationMinute: 30,
