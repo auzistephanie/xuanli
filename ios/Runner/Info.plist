@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>玄曆</string>
+	<string>Kairo</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -37,10 +37,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMotionUsageDescription</key>
+	<string>Kairo 用動作感應器偵測你搖機同傾斜手機，等籤筒同卡片跟住你郁。感應數據只留喺手機，唔會傳出去。</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>玄曆需要讀取你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
+	<string>Kairo 需要讀取你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>玄曆需要讀寫你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
+	<string>Kairo 需要讀寫你嘅日曆，喺月曆顯示行程並加入你揀選嘅吉日。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

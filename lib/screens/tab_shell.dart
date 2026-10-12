@@ -51,13 +51,17 @@ class _TabShellState extends State<TabShell> {
             Expanded(
               child: IndexedStack(
                 index: _index,
+                // 隱藏嘅 tab 關 TickerMode：環境動畫（天體儀／星空）同感應器喺背後停晒。
                 children: [
-                  TodayScreen(profile: _profile),
-                  ActivityScreen(profile: _profile),
-                  CalendarScreen(
-                    profile: _profile,
-                    initialSelectedDate: widget.deepLinkDate,
-                  ),
+                  for (final (i, tab) in [
+                    TodayScreen(profile: _profile),
+                    ActivityScreen(profile: _profile),
+                    CalendarScreen(
+                      profile: _profile,
+                      initialSelectedDate: widget.deepLinkDate,
+                    ),
+                  ].indexed)
+                    TickerMode(key: ValueKey('tab-ticker-$i'), enabled: i == _index, child: tab),
                 ],
               ),
             ),

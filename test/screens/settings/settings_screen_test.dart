@@ -50,13 +50,13 @@ void main() {
     expect(find.text('常開'), findsOneWidget);
     expect(find.text('常關'), findsOneWidget);
     expect(find.text('07:30'), findsOneWidget);
-    expect(find.text('匯出玄曆資料'), findsOneWidget);
+    expect(find.text('匯出 Kairo 資料'), findsOneWidget);
     expect(find.text('包含命理檔案及設定'), findsOneWidget);
-    expect(find.text('匯入玄曆資料'), findsOneWidget);
-    expect(find.text('從玄曆 JSON 備份還原'), findsOneWidget);
+    expect(find.text('匯入 Kairo 資料'), findsOneWidget);
+    expect(find.text('從 Kairo JSON 備份還原'), findsOneWidget);
     expect(find.text('重新做 Onboarding'), findsOneWidget);
     expect(find.text('免責聲明全文'), findsOneWidget);
-    expect(find.text('關於玄曆'), findsOneWidget);
+    expect(find.text('關於 Kairo'), findsOneWidget);
   });
 
   testWidgets('撳「常開」會即刻更新 themeModeController 並存落 storage', (tester) async {
@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('匯出玄曆資料'));
+    await tester.tap(find.text('匯出 Kairo 資料'));
     await tester.pumpAndSettle();
 
     expect(shared, isNotNull);
@@ -123,15 +123,15 @@ void main() {
     await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.tap(find.text('匯入 Kairo 資料'));
     await tester.pumpAndSettle();
-    expect(find.text('匯入玄曆資料？'), findsOneWidget);
+    expect(find.text('匯入 Kairo 資料？'), findsOneWidget);
     expect(find.textContaining('1 個命理檔案'), findsOneWidget);
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     expect((await StorageService().loadPrimaryProfile())!.id, 'p1');
 
-    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.tap(find.text('匯入 Kairo 資料'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('確認匯入'));
     await tester.pumpAndSettle();
@@ -147,7 +147,7 @@ void main() {
     await tester.pumpWidget(wrap(SettingsScreen(dataTransferService: transfer)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('匯入玄曆資料'));
+    await tester.tap(find.text('匯入 Kairo 資料'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('資料完全冇改動'), findsOneWidget);
@@ -186,7 +186,7 @@ void main() {
     expect(await StorageService().loadPrimaryProfile(), isNotNull);
   });
 
-  testWidgets('撳「免責聲明全文」／「關於玄曆」會彈 dialog，撳「知道喇」會關返', (tester) async {
+  testWidgets('撳「免責聲明全文」／「關於 Kairo」會彈 dialog，撳「知道喇」會關返', (tester) async {
     await tester.pumpWidget(wrap(const SettingsScreen()));
     await tester.pumpAndSettle();
 
@@ -197,7 +197,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('僅供參考'), findsNothing);
 
-    await tester.tap(find.text('關於玄曆'));
+    await tester.tap(find.text('關於 Kairo'));
     await tester.pumpAndSettle();
     expect(find.textContaining('版本'), findsOneWidget);
     await tester.tap(find.text('知道喇'));

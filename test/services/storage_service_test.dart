@@ -58,9 +58,9 @@ void main() {
   });
 
   group('StorageService — settings', () {
-    test('loadSettings() 喺未存過時返回 AppSettings.defaults（跟系統・通知開・07:30）', () async {
+    test('loadSettings() 喺未存過時返回 AppSettings.defaults（深色・通知開・07:30）', () async {
       final result = await StorageService().loadSettings();
-      expect(result.themeMode, ThemeMode.system);
+      expect(result.themeMode, ThemeMode.dark);
       expect(result.notificationsEnabled, isTrue);
       expect(result.notificationHour, 7);
       expect(result.notificationMinute, 30);

@@ -5,4 +5,4 @@ import 'package:flutter/material.dart';
 /// value 即刻全 app 生效，唔使重新 bootstrap。一個 module-level
 /// singleton——呢個 app 淨係呢一個 cross-cutting value 需要咁做，冇必要
 /// 因為佢一個引入成套 state management package。
-final ValueNotifier<ThemeMode> themeModeController = ValueNotifier(ThemeMode.system);
+final ValueNotifier<ThemeMode> themeModeController = ValueNotifier(ThemeMode.dark);

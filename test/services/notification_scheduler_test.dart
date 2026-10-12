@@ -130,7 +130,7 @@ void main() {
       final ids = scheduledCalls.map((c) => c['id'] as int).toSet();
       expect(ids, {1000, 1001, 1002, 1003, 1004, 1005, 1006});
       for (final call in scheduledCalls) {
-        expect(call['title'], '玄曆');
+        expect(call['title'], 'Kairo');
         expect((call['body'] as String).startsWith('今日'), isTrue);
       }
     });

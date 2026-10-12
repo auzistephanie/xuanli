@@ -7,6 +7,7 @@ import '../engine/copywriter.dart';
 import '../engine/day_reading_engine.dart';
 import '../models/profile.dart';
 import '../models/settings.dart';
+import '../theme/brand.dart';
 
 /// 排未來 7 日嘅每朝通知（spec §9.7）。設計原則同 `WidgetDataBridge`
 /// （Phase 3a）一致：純 Dart 嘅文案計算行喺 try/catch 外面（一個真
@@ -125,7 +126,7 @@ class NotificationScheduler {
 
         await _plugin.zonedSchedule(
           _idFor(i),
-          '玄曆',
+          kBrandName,
           texts[i],
           scheduled,
           const NotificationDetails(

@@ -134,6 +134,38 @@ void main() {
     expect(find.textContaining('80%'), findsOneWidget);
   });
 
+  testWidgets('深色模式：固定深藍檔案卡上嘅文字要淺色（唔可以跟 theme 變深）', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: XuanLiTheme.dark(),
+        home: Scaffold(
+          body: ProfileCardStep(
+            name: '阿玄',
+            birthDate: DateTime(1999, 9, 20),
+            birthHour: 9,
+            birthMinute: 30,
+            birthPlace: '香港',
+            mbti: 'ISFP',
+            onSaved: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final label in ['喜用神', '乙木日主', '100%']) {
+      final text = tester.widget<Text>(find.textContaining(label).first);
+      expect(
+        text.style!.color!.computeLuminance(),
+        greaterThan(0.5),
+        reason: '「$label」喺深藍卡上應該係淺色字',
+      );
+    }
+    // MBTI chip 係金底，字要深色。
+    final mbti = tester.widget<Text>(find.text('ISFP'));
+    expect(mbti.style!.color!.computeLuminance(), lessThan(0.1));
+  });
+
   group('撳檔案卡入組合詳解頁', () {
     setUpAll(() {
       initCombos(File('lib/data/combos.json').readAsStringSync());

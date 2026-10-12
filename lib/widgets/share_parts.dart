@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../theme/xuanli_theme.dart';
+import 'brand.dart';
 
 /// 分享卡 QR code 指去嘅網址。QR 純粹畫喺圖上（本機生成），app 本身唔會連呢個網址。
 const xuanliWebUrl = 'https://xuanli-opal.vercel.app';
@@ -15,7 +16,6 @@ const shareNavy = Color(0xFF1C2440);
 const shareNavyDeep = Color(0xFF131829);
 const sharePaper = Color(0xFFF6EFE2);
 const shareGold = Color(0xFFC9A24B);
-const shareSealRed = Color(0xFFB23A3A);
 
 /// 所有分享卡共用嘅藏藍漸變底（組合卡、合盤卡）。
 class ShareCardBackground extends StatelessWidget {
@@ -47,45 +47,18 @@ class ShareCardBackground extends StatelessWidget {
   }
 }
 
-/// 卡頂：朱紅「玄」印＋「玄曆」。
+/// 卡頂：朱紅「吉」印＋Kairo。
 class ShareBrand extends StatelessWidget {
   const ShareBrand({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          width: 30,
-          height: 30,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: shareSealRed,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: const Text(
-            '玄',
-            style: TextStyle(
-              fontFamily: XuanLiFonts.serif,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: sharePaper,
-              height: 1.1,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        const Text(
-          '玄曆',
-          style: TextStyle(
-            fontFamily: XuanLiFonts.serif,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 4,
-            color: sharePaper,
-          ),
-        ),
+        BrandSeal(size: 30),
+        SizedBox(width: 10),
+        Wordmark(fontSize: 26),
       ],
     );
   }
@@ -119,7 +92,7 @@ class ShareFooter extends StatelessWidget {
               dataModuleShape: QrDataModuleShape.square,
               color: shareNavy,
             ),
-            semanticsLabel: '玄曆網站 QR code',
+            semanticsLabel: 'Kairo 網站 QR code',
           ),
         ),
         const SizedBox(width: 14),
@@ -144,7 +117,7 @@ class ShareFooter extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                '玄曆 XuanLi・僅供參考',
+                'Kairo・僅供參考',
                 style: TextStyle(
                   fontSize: 10,
                   letterSpacing: 1,

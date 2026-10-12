@@ -11,8 +11,10 @@ import 'package:xuanli/screens/today/today_widgets.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
 
 void main() {
-  Widget wrap(Widget child) =>
-      MaterialApp(theme: XuanLiTheme.light(), home: Scaffold(body: child));
+  Widget wrap(Widget child) => MaterialApp(
+    theme: XuanLiTheme.light(),
+    home: Scaffold(body: child),
+  );
 
   // YjColumn 包咗 Expanded 喺自己入面（spec 入面淨係得「兩欄並排」呢個
   // 用法），所以要有真 Row 做 flex parent 先撐得住，同 today_screen.dart
@@ -29,25 +31,43 @@ void main() {
 
   group('ScoreRing', () {
     testWidgets('顯示分數同 label', (tester) async {
-      await tester.pumpWidget(wrap(
-        ScoreRing(score: 42, ringColor: Colors.amber, label: '命理分・平'),
-      ));
+      await tester.pumpWidget(
+        wrap(ScoreRing(score: 42, ringColor: Colors.amber, label: '命理分・平')),
+      );
       expect(find.text('42'), findsOneWidget);
       expect(find.text('命理分・平'), findsOneWidget);
+    });
+
+    testWidgets('size 參數控制尺寸', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const ScoreRing(
+            score: 75,
+            ringColor: Colors.teal,
+            label: '契合',
+            size: 72,
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(ScoreRing)), const Size(72, 72));
     });
   });
 
   group('YjColumn', () {
     testWidgets('已配對項目顯示 sparkle icon＋「合你」，未配對嘅唔顯示', (tester) async {
-      await tester.pumpWidget(wrapInRow(YjColumn(
-        dotLabel: '宜',
-        title: '今日宜',
-        isYi: true,
-        items: const [
-          YjItem(label: '祭祀祈福', matchesUser: true),
-          YjItem(label: '解除舊約', matchesUser: false),
-        ],
-      )));
+      await tester.pumpWidget(
+        wrapInRow(
+          YjColumn(
+            dotLabel: '宜',
+            title: '今日宜',
+            isYi: true,
+            items: const [
+              YjItem(label: '祭祀祈福', matchesUser: true),
+              YjItem(label: '解除舊約', matchesUser: false),
+            ],
+          ),
+        ),
+      );
 
       expect(find.text('祭祀祈福'), findsOneWidget);
       expect(find.text('解除舊約'), findsOneWidget);
@@ -56,24 +76,27 @@ void main() {
     });
 
     testWidgets('有 extraNote 就顯示喺列表下面', (tester) async {
-      await tester.pumpWidget(wrapInRow(YjColumn(
-        dotLabel: '忌',
-        title: '今日忌',
-        isYi: false,
-        items: const [YjItem(label: '簽約大事', matchesUser: false)],
-        extraNote: '申時 15–17',
-      )));
+      await tester.pumpWidget(
+        wrapInRow(
+          YjColumn(
+            dotLabel: '忌',
+            title: '今日忌',
+            isYi: false,
+            items: const [YjItem(label: '簽約大事', matchesUser: false)],
+            extraNote: '申時 15–17',
+          ),
+        ),
+      );
 
       expect(find.text('申時 15–17'), findsOneWidget);
     });
 
     testWidgets('items 空 list 顯示「冇特別注明」，唔會淨係得個標題', (tester) async {
-      await tester.pumpWidget(wrapInRow(const YjColumn(
-        dotLabel: '宜',
-        title: '今日宜',
-        isYi: true,
-        items: [],
-      )));
+      await tester.pumpWidget(
+        wrapInRow(
+          const YjColumn(dotLabel: '宜', title: '今日宜', isYi: true, items: []),
+        ),
+      );
 
       expect(find.text('冇特別注明'), findsOneWidget);
     });
@@ -81,9 +104,7 @@ void main() {
 
   group('AdviceCard', () {
     testWidgets('顯示建議文字', (tester) async {
-      await tester.pumpWidget(wrap(
-        const AdviceCard(advice: '丙戌平日，宜靜不宜動。'),
-      ));
+      await tester.pumpWidget(wrap(const AdviceCard(advice: '丙戌平日，宜靜不宜動。')));
       expect(find.textContaining('丙戌平日'), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
       expect(find.text('今日貼身建議'), findsOneWidget);
@@ -104,15 +125,26 @@ void main() {
       final start = DateTime(2026, 7, 11);
       final readings = [
         for (var i = 0; i < 7; i++)
-          buildDayReading(profile: profile, date: start.add(Duration(days: i))),
+          buildDayReading(
+            profile: profile,
+            date: start.add(Duration(days: i)),
+          ),
       ];
       DateTime? selected;
 
-      await tester.pumpWidget(wrap(Week7Strip(
-        readings: readings,
-        selectedDate: start,
-        onSelect: (d) => selected = d,
-      )));
+      // 真 app 入面七日條喺 SingleChildScrollView 度（自然高度）；冇呢層
+      // 格仔會被撐到 600px 高，透視傾斜後字會投影出畫面。
+      await tester.pumpWidget(
+        wrap(
+          SingleChildScrollView(
+            child: Week7Strip(
+              readings: readings,
+              selectedDate: start,
+              onSelect: (d) => selected = d,
+            ),
+          ),
+        ),
+      );
 
       expect(find.text('11'), findsOneWidget);
       expect(find.text('17'), findsOneWidget);

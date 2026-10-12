@@ -6,6 +6,8 @@ import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/models/combo.dart';
 import 'package:xuanli/screens/combo/combo_screen.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/tilt_card.dart';
+import 'package:xuanli/widgets/wuxing_orbs.dart';
 
 void main() {
   setUpAll(() {
@@ -96,5 +98,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('open'), findsOneWidget);
     expect(find.text('林間清泉'), findsNothing);
+  });
+
+  testWidgets('組合名卡可傾斜，有五行晶球', (tester) async {
+    await tester.pumpWidget(wrap(ComboDetailScreen(profile: profile)));
+    expect(find.byType(TiltCard), findsOneWidget);
+    expect(find.byType(WuxingOrbs), findsOneWidget);
   });
 }

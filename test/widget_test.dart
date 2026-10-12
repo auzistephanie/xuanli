@@ -11,6 +11,8 @@ import 'package:xuanli/screens/calendar/calendar_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
+import 'package:xuanli/widgets/brand.dart';
+import 'package:xuanli/widgets/orrery.dart';
 
 Profile _sampleProfileForBootstrapTest() => buildProfile(
       id: 'p1',
@@ -83,7 +85,8 @@ void main() {
     // Bootstrap future（loadEngineData + loadPrimaryProfile）未 resolve
     // 之前，一個 pump() 應該只行到 loading 狀態。
     await tester.pump();
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(Orrery), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
 
     // loadEngineData() 靠 rootBundle.loadString() 讀真 asset，
     // 呢個係真實 async I/O，唔係 fake-clock timer——單靠 pump()／
@@ -93,6 +96,9 @@ void main() {
     await tester.runAsync(() async {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     });
+    await tester.pump();
+    // 測試入面環境動畫關咗，靜態載入畫面唔會自己排 frame；bootstrap future
+    // 完成後 FutureBuilder 嘅 setState 要第二個 pump 先 render 到封面。
     await tester.pump();
 
     // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係封面
@@ -106,6 +112,33 @@ void main() {
     // 注意：有已存 profile → TabShell 呢條路由未有覆蓋，
     // 因為要預先落一個完整 serialized Profile 落 SharedPreferences，
     // 超出呢次補漏嘅範圍。
+  });
+
+  double wordmarkOpacity(WidgetTester tester) => tester
+      .widget<Opacity>(find.ancestor(of: find.byType(Wordmark), matching: find.byType(Opacity)).first)
+      .opacity;
+
+  testWidgets('載入畫面：Kairo 字由透明淡入（600ms 一次過）', (tester) async {
+    await tester.pumpWidget(const XuanLiApp());
+    await tester.pump();
+    expect(wordmarkOpacity(tester), lessThan(0.1));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(wordmarkOpacity(tester), allOf(greaterThan(0.1), lessThan(1.0)));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(wordmarkOpacity(tester), 1.0);
+  });
+
+  testWidgets('載入畫面：減少動態效果時 Kairo 字直接顯示', (tester) async {
+    await tester.pumpWidget(const MediaQuery(
+      data: MediaQueryData(disableAnimations: true),
+      child: XuanLiApp(),
+    ));
+    await tester.pump();
+    expect(find.byType(Wordmark), findsOneWidget);
+    expect(
+      find.ancestor(of: find.byType(Wordmark), matching: find.byType(Opacity)),
+      findsNothing,
+    );
   });
 
   testWidgets(

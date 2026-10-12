@@ -1,4 +1,4 @@
-# 玄曆 XuanLi — CLAUDE.md
+# Kairo（原名玄曆 XuanLi）— CLAUDE.md
 
 Flutter app：中國傳統擇日 × 八字五行 × 紫微 × MBTI 個人化宜忌。國風復古典雅，全繁體中文（廣東話語感）UI。
 
@@ -10,7 +10,7 @@ Push（`github_push.py`，永不 git CLI・HTTPS・一 run 一 commit・**開工
 ## 必讀文件（順序）
 
 1. `XUANLI_SPEC.md` — 完整實施規格。**所有產品決策已鎖定（spec 第 2 節），唔好重新討論或自行更改**；發現 spec 有矛盾就停低問 Stephanie，唔好自己拍板。
-2. `design/design-preview.html` — 視覺最終權威（配色/排版/文案語氣全部以佢為準）
+2. `design/kairo-preview.html` — 視覺語言權威（配色／品牌／3D／動態）；`design/design-preview.html` — 版面同文案語氣參考（未涵蓋嘅畫面照佢）
 3. `lib/data/combos.json` — 160 個組合文案（已寫好、已驗證，唔好改內容；只准 bug fix 例如 JSON 讀取問題）
 
 ## 工作流程
@@ -39,6 +39,7 @@ flutter build apk --release     # Android 交付（<40MB）
 5. **八字子時**：必須 `eightChar.setSect(1)`（晚子時日柱歸翌日）— lunar 預設係錯嘅流派
 6. **醫療/投資文案安全線**：睇醫生只講「邊日更順」，永不輸出勸阻就醫；投資唔出具體買賣建議
 7. UI 文案語氣跟 design html：親切、典雅、帶少少玄學神秘感，用「你」唔用「您」
+8. **內部識別唔改名**：package／bundle ID／App Group／`xuanli://`／prefs key／備份格式／「玄曆識別碼」保留，見 docs/superpowers/specs/2026-10-13-kairo-rebrand-design.md D1
 
 ## 架構速記
 
@@ -56,11 +57,12 @@ flutter build apk --release     # Android 交付（<40MB）
 
 ## Progress
 
-- [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
+- [x] 規格 + 設計稿 + combos.json（Cowork）
 - [x] Phase 1 引擎（TDD，fixtures spec §11；`dart test test/engine/` 全綠，`dart run tool/demo.dart` 可行）
-- [ ] Phase 2 App UI（功能齊：備份、日曆、分享卡＋QR、稀有度、封面／揭曉、不存資料試玩、兩人合盤、每日一籤——spec 決定 12–15 已提前入 MVP；PR #1 於 2026-10-12 merge）。**真機驗收未做**（冷啟動 <2s、離線、權限 dialog、分享、震動），docs/pr-1-review-checklist.md §A 係清單
+- [ ] Phase 2 App UI（功能齊，見 CHANGELOG＋spec §2 決定 12–15；PR #1 2026-10-12 merge）。**真機驗收未做**（冷啟動 <2s、離線、權限 dialog、分享、震動），docs/pr-1-review-checklist.md §A 係清單
 - [x] interim web 部署 → https://xuanli-opal.vercel.app（**唔算** Phase 3/4；`vercel.json` 已停 git 自動部署，更新要 `flutter build web` 後喺 `build/web` 行 `vercel deploy --prod`）
 - [ ] Phase 3 Widget＋通知：數據橋、通知、冷啟動 deep link 已做；Android／iOS 小+中 widget 原生碼已寫（Kotlin 編譯＋邏輯測試、Swift typecheck 過），**未經 Gradle／Xcode／真機**；iOS 要喺有 Xcode 嘅機行 `ruby scripts/add_ios_widget_target.rb`（未套用）；已開 app 時撳 widget 唔跳（router 只處理冷啟動）
+- [x] Kairo 改名＋3D／動態（2026-10-13）——**真機未驗**，清單見 CHANGELOG
 - [ ] Phase 4 交付（APK + install_ios.sh）——開發機冇 Android SDK／Xcode，未開始
 
 ## Git

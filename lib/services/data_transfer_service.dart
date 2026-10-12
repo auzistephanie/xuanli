@@ -57,7 +57,7 @@ class DataTransferService {
     await SharePlus.instance.share(ShareParams(
       files: [XFile.fromData(bytes, name: filename, mimeType: 'application/json')],
       fileNameOverrides: [filename],
-      title: '匯出玄曆資料',
+      title: '匯出 Kairo 資料',
       sharePositionOrigin: shareOrigin,
     ));
   }

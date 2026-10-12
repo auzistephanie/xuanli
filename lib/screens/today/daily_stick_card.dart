@@ -1,17 +1,25 @@
+import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../engine/daily_stick.dart';
+import '../../services/shake_detector.dart';
+import '../../theme/motion.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/brand.dart';
+import '../../widgets/flip_reveal.dart';
 import '../../widgets/stick_cylinder.dart';
 import '../../widgets/stick_share_card.dart';
 import '../../widgets/vertical_verse.dart';
 import '../combo/share_preview_screen.dart';
 
 /// Tab A 嘅「今日一籤」：未抽 → 籤筒＋「搖籤」；撳咗 → 籤筒搖動、一支籤彈起（約 1.4 秒）
-/// → 顯示籤詩。[alreadyDrawn] 為 true（今日抽過）就直接顯示支籤。
+/// → 3D 翻卡顯示籤詩。手機上（環境動畫開住）搖一搖手機都得。
+/// [alreadyDrawn] 為 true（今日抽過）就直接顯示支籤，唔翻卡。
 /// 籤 deterministic（見 `daily_stick.dart`），所以重抽都係同一支。
 class DailyStickCard extends StatefulWidget {
   final DailyStick stick;
@@ -40,6 +48,14 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
   );
   late bool _revealed = widget.alreadyDrawn;
 
+  /// 今次係搖出嚟（唔係重開 app 已抽）先翻卡。
+  bool _flipOnReveal = false;
+
+  StreamSubscription<UserAccelerometerEvent>? _shakeSub;
+  bool? _sensorsOn;
+  final _shake = ShakeDetector();
+  final _clock = Stopwatch()..start();
+
   @override
   void initState() {
     super.initState();
@@ -49,23 +65,58 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 同 TiltCard 一樣：TickerMode 關（路由畀人蓋住）就停聽；只喺值變咗先重新訂閱。
+    final on = !_revealed && _canShake(context) && TickerMode.valuesOf(context).enabled;
+    if (on == _sensorsOn) return;
+    _sensorsOn = on;
+    _shakeSub?.cancel();
+    _shakeSub = null;
+    if (on) {
+      // 用「去咗重力」嘅加速度，ShakeDetector 要嘅係淨係搖動嘅力度。
+      _shakeSub = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval).listen(
+        (e) {
+          final m = math.sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+          if (_shake.add(magnitude: m, at: _clock.elapsed)) _draw();
+        },
+        onError: (_) {},
+        cancelOnError: true,
+      );
+    }
+  }
+
+  /// 只限 Android／iOS（其他平台冇 sensors_plus 實作）＋環境動畫開住。
+  static bool _canShake(BuildContext context) =>
+      Motion.sensors(context) &&
+      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
+  void _stopShake() {
+    _shakeSub?.cancel();
+    _shakeSub = null;
+    _sensorsOn = false;
+  }
+
+  @override
   void didUpdateWidget(DailyStickCard old) {
     super.didUpdateWidget(old);
     // 儲存嘅「今日已抽」係非同步載入，載完先到（呢個時候未開始搖就直接顯示）。
     if (widget.alreadyDrawn && !_revealed && !_c.isAnimating) {
+      _stopShake();
       setState(() => _revealed = true);
     }
   }
 
   @override
   void dispose() {
+    _shakeSub?.cancel();
     _c.dispose();
     super.dispose();
   }
 
   void _draw() {
     if (_revealed || _c.isAnimating) return;
-    if (MediaQuery.of(context).disableAnimations) {
+    if (MediaQuery.disableAnimationsOf(context)) {
       _finish();
       return;
     }
@@ -76,13 +127,36 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
   void _finish() {
     if (!mounted || _revealed) return;
     HapticFeedback.mediumImpact();
-    setState(() => _revealed = true);
+    _stopShake();
+    setState(() {
+      _revealed = true;
+      _flipOnReveal = true;
+    });
     widget.onDrawn();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final switcher = AnimatedSwitcher(
+      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 450),
+      switchInCurve: Curves.easeOut,
+      // 翻卡路徑：舊嘅籤筒即刻收起，唔好同翻緊嘅卡疊埋一齊。
+      layoutBuilder: (current, previous) => _flipOnReveal
+          ? (current ?? const SizedBox.shrink())
+          : AnimatedSwitcher.defaultLayoutBuilder(current, previous),
+      // 翻卡路徑唔好再淡入：FlipReveal 自己做過場，疊埋 450ms 淡入會令卡背睇落暗咗。
+      transitionBuilder: (child, anim) => _flipOnReveal
+          ? child
+          : FadeTransition(
+              opacity: anim,
+              child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
+            ),
+      child: _revealed
+          ? (_flipOnReveal ? _flipResult(colors) : _result(colors))
+          : _idle(colors),
+    );
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 12),
@@ -92,15 +166,16 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
         border: Border.all(color: colors.gold.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(XuanLiRadii.card),
       ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 450),
-        switchInCurve: Curves.easeOut,
-        transitionBuilder: (child, anim) => FadeTransition(
-          opacity: anim,
-          child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
-        ),
-        child: _revealed ? _result(colors) : _idle(colors),
-      ),
+      child: reduceMotion
+          // AnimatedSize 用 Duration.zero 會喺 layout 入面即刻完成而 assert，所以減少動態就唔包。
+          ? switcher
+          // 高度變化（籤筒 → 籤詩）用 AnimatedSize 慢慢撐開，唔會一下跳。
+          : AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: switcher,
+            ),
     );
   }
 
@@ -120,10 +195,10 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
         ),
         const SizedBox(height: 4),
         Text(
-          '靜心諗住一件事，撳一下搖籤',
+          _canShake(context) ? '靜心諗住一件事，搖一搖手機或者撳一下' : '靜心諗住一件事，撳一下搖籤',
           style: TextStyle(fontSize: 12, color: colors.ink60),
         ),
-        const SizedBox(height: 10),
+        // 唔使再加間距：籤筒上面本身有 popHeadroom（彈起嘅籤用）。
         GestureDetector(
           onTap: _draw,
           behavior: HitTestBehavior.opaque,
@@ -134,7 +209,7 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
               // 搖動：衰減嘅正弦；0.65 之後一支籤彈起。
               final angle = math.sin(t * math.pi * 10) * 0.20 * (1 - t * 0.45);
               final pop = t < 0.65 ? 0.0 : ((t - 0.65) / 0.35).clamp(0.0, 1.0);
-              return StickCylinder(angle: angle, pop: pop);
+              return StickCylinder(angle: angle, pop: pop, spin: t * 2);
             },
           ),
         ),
@@ -159,10 +234,26 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
     );
   }
 
+  Widget _flipResult(XuanLiColors colors) {
+    return FlipReveal(
+      key: const ValueKey('result'),
+      back: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.gold, width: 1.5),
+          gradient: const LinearGradient(colors: [Color(0xFF7A2222), Color(0xFF8F2B2B)]),
+        ),
+        child: const BrandSeal(size: 44),
+      ),
+      front: _result(colors),
+    );
+  }
+
   Widget _result(XuanLiColors colors) {
     final stick = widget.stick;
     return Column(
-      key: const ValueKey('result'),
+      key: const ValueKey('result-front'),
       children: [
         Text(
           '今日一籤',

@@ -11,7 +11,11 @@ import 'services/notification_scheduler.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
 import 'services/widget_data_bridge.dart';
+import 'theme/brand.dart';
 import 'theme/xuanli_theme.dart';
+import 'widgets/brand.dart';
+import 'widgets/orrery.dart';
+import 'widgets/starfield.dart';
 
 void main() {
   runApp(const XuanLiApp());
@@ -26,7 +30,7 @@ class XuanLiApp extends StatelessWidget {
       valueListenable: themeModeController,
       builder: (context, mode, _) {
         return MaterialApp(
-          title: '玄曆',
+          title: kBrandName,
           debugShowCheckedModeBanner: false,
           theme: XuanLiTheme.light(),
           darkTheme: XuanLiTheme.dark(),
@@ -72,8 +76,12 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       // 嗰度爆係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該
       // 靜靜吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
       unawaited(WidgetDataBridge().refreshNext7Days(profile));
-      unawaited(NotificationScheduler()
-          .refreshNext7Days(profile: profile, settings: settings));
+      unawaited(
+        NotificationScheduler().refreshNext7Days(
+          profile: profile,
+          settings: settings,
+        ),
+      );
     }
     return profile;
   }
@@ -85,13 +93,26 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: KairoPalette.night,
+            body: Stack(
+              children: [
+                Positioned.fill(child: Starfield()),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Orrery(size: 220, coreFraction: 0.36),
+                      SizedBox(height: 18),
+                      _SplashWordmark(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         }
         if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('載入失敗：${snapshot.error}')),
-          );
+          return Scaffold(body: Center(child: Text('載入失敗：${snapshot.error}')));
         }
         final profile = snapshot.data;
         if (profile == null) {
@@ -99,6 +120,24 @@ class _AppBootstrapState extends State<_AppBootstrap> {
         }
         return TabShell(profile: profile, deepLinkDate: _deepLinkDate);
       },
+    );
+  }
+}
+
+/// 載入畫面嘅 Kairo 字：開 app 淡入一次（600ms）；「減少動態效果」就直接顯示。
+class _SplashWordmark extends StatelessWidget {
+  const _SplashWordmark();
+
+  @override
+  Widget build(BuildContext context) {
+    const wordmark = Wordmark(fontSize: 44);
+    if (MediaQuery.disableAnimationsOf(context)) return wordmark;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+      builder: (context, t, child) => Opacity(opacity: t, child: child),
+      child: wordmark,
     );
   }
 }

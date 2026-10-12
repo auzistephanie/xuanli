@@ -12,6 +12,7 @@ import 'package:xuanli/screens/today/daily_stick_card.dart';
 import 'package:xuanli/screens/today/today_screen.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/flip_reveal.dart';
 import 'package:xuanli/widgets/stick_share_card.dart';
 
 void main() {
@@ -123,6 +124,40 @@ void main() {
       expect(drawn, 1);
     });
 
+    testWidgets('搖完之後用 FlipReveal 翻出籤', (tester) async {
+      final stick = drawDailyStick(profile: profile, reading: reading());
+      await tester.pumpWidget(wrap(card()));
+      await tester.tap(find.text('搖籤'));
+      await tester.pump(); // 第一格先開始計時
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.byType(FlipReveal), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.text(stick.levelName), findsOneWidget);
+      expect(find.text('搖籤'), findsNothing);
+    });
+
+    testWidgets('翻卡路徑唔再疊 AnimatedSwitcher 嘅淡入（卡背唔會暗咗）', (tester) async {
+      await tester.pumpWidget(wrap(card()));
+      await tester.tap(find.text('搖籤'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.byType(FlipReveal), findsOneWidget);
+      final fadesAroundFlip = find.ancestor(
+        of: find.byType(FlipReveal),
+        matching: find.descendant(
+          of: find.byType(DailyStickCard),
+          matching: find.byType(FadeTransition),
+        ),
+      );
+      expect(fadesAroundFlip, findsNothing);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('今日已抽：唔使翻卡', (tester) async {
+      await tester.pumpWidget(wrap(card(alreadyDrawn: true)));
+      expect(find.byType(FlipReveal), findsNothing);
+    });
+
     testWidgets('5 個籤級都顯示得到，冇 overflow', (tester) async {
       for (final score in [95, 75, 60, 45, 20]) {
         await tester.pumpWidget(wrap(card(alreadyDrawn: true, score: score)));
@@ -197,7 +232,7 @@ void main() {
       expect(find.text(stick.numberLabel), findsOneWidget);
       expect(find.textContaining('2026年7月11日'), findsOneWidget);
       expect(find.text('掃碼抽你嘅今日籤'), findsOneWidget);
-      expect(find.bySemanticsLabel('玄曆網站 QR code'), findsOneWidget);
+      expect(find.bySemanticsLabel('Kairo 網站 QR code'), findsOneWidget);
       for (final secret in ['阿玄', '1999', 'ISFP', '香港', '命理分']) {
         expect(find.textContaining(secret), findsNothing, reason: secret);
       }

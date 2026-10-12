@@ -96,11 +96,16 @@ class CalendarGrid extends StatelessWidget {
         : cell.band == '忌'
             ? colors.red
             : colors.ink30;
-    final bgColor = cell.band == '吉'
-        ? colors.jade.withValues(alpha: 0.10)
-        : cell.band == '忌'
-            ? colors.red.withValues(alpha: 0.08)
-            : colors.cardSurface;
+    // 半透明底色先疊落 paper 變實色：揀中嗰格嘅 jade BoxShadow 會畫喺
+    // 成個格底下，底色半透明就會成格透出 jade（深色模式淺字疊淺綠睇唔到）。
+    final bgColor = Color.alphaBlend(
+      cell.band == '吉'
+          ? colors.jade.withValues(alpha: 0.10)
+          : cell.band == '忌'
+              ? colors.red.withValues(alpha: 0.08)
+              : colors.cardSurface,
+      colors.paper,
+    );
     final isSelected = cell.day == selectedDay;
 
     return GestureDetector(
