@@ -4,6 +4,8 @@ import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
 import '../../widgets/brand.dart';
 import '../../widgets/marks.dart';
+import '../../widgets/orrery.dart';
+import '../../widgets/starfield.dart';
 import 'reveal_step.dart' show revealBackground;
 
 const _navy = Color(0xFF1C2440);
@@ -69,29 +71,34 @@ class _WelcomeStepState extends State<WelcomeStep>
   Widget build(BuildContext context) {
     return ColoredBox(
       color: revealBackground,
-      child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(30, 28, 30, 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _fadeUp(_iv(0.0, 0.35), _brand()),
-                    const SizedBox(height: 34),
-                    _fadeUp(_iv(0.15, 0.5), _headline()),
-                    const SizedBox(height: 30),
-                    _fadeUp(_iv(0.35, 0.7), _points()),
-                    const SizedBox(height: 34),
-                    _fadeUp(_iv(0.6, 1.0), _cta()),
-                  ],
+      child: Stack(
+        children: [
+          const Positioned.fill(child: Starfield()),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(30, 28, 30, 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _fadeUp(_iv(0.0, 0.35), _brand()),
+                        const SizedBox(height: 22),
+                        _fadeUp(_iv(0.15, 0.5), _headline()),
+                        const SizedBox(height: 22),
+                        _fadeUp(_iv(0.35, 0.7), _points()),
+                        const SizedBox(height: 22),
+                        _fadeUp(_iv(0.6, 1.0), _cta()),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -99,8 +106,12 @@ class _WelcomeStepState extends State<WelcomeStep>
   Widget _brand() {
     return const Column(
       children: [
-        BrandSeal(text: kBrandSeal, size: 64),
-        SizedBox(height: 14),
+        Orrery(
+          size: 170,
+          coreFraction: 0.34,
+          core: BrandSeal(text: kBrandSeal, size: 40),
+        ),
+        SizedBox(height: 10),
         Wordmark(fontSize: 40),
       ],
     );

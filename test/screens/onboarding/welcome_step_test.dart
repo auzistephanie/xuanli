@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/screens/onboarding/welcome_step.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/orrery.dart';
 
 void main() {
   Widget wrap({VoidCallback? onStart, bool disableAnimations = false}) {
@@ -24,6 +25,15 @@ void main() {
     expect(find.textContaining('出生資料唔離你部機'), findsOneWidget);
     expect(find.textContaining('僅供參考'), findsOneWidget);
     expect(find.text('睇我嘅組合'), findsOneWidget);
+  });
+
+  testWidgets('封面有天體儀、Kairo 字同吉時印', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    expect(find.byType(Orrery), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
+    expect(find.text('吉'), findsOneWidget);
+    expect(find.text('時'), findsOneWidget);
   });
 
   testWidgets('撳「睇我嘅組合」觸發 onStart', (tester) async {

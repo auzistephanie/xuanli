@@ -11,6 +11,7 @@ import 'package:xuanli/screens/calendar/calendar_screen.dart';
 import 'package:xuanli/screens/tab_shell.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/services/theme_mode_controller.dart';
+import 'package:xuanli/widgets/orrery.dart';
 
 Profile _sampleProfileForBootstrapTest() => buildProfile(
       id: 'p1',
@@ -83,7 +84,8 @@ void main() {
     // Bootstrap future（loadEngineData + loadPrimaryProfile）未 resolve
     // 之前，一個 pump() 應該只行到 loading 狀態。
     await tester.pump();
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(Orrery), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
 
     // loadEngineData() 靠 rootBundle.loadString() 讀真 asset，
     // 呢個係真實 async I/O，唔係 fake-clock timer——單靠 pump()／
@@ -93,6 +95,8 @@ void main() {
     await tester.runAsync(() async {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     });
+    await tester.pump();
+    // 載入畫面有 Orrery/Starfield 子樹，bootstrap 完成後要多一個 frame 先換到封面。
     await tester.pump();
 
     // 冇存過 profile → 應該路由去真正 onboarding 流程（第一步係封面

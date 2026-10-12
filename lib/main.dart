@@ -13,6 +13,9 @@ import 'services/theme_mode_controller.dart';
 import 'theme/brand.dart';
 import 'services/widget_data_bridge.dart';
 import 'theme/xuanli_theme.dart';
+import 'widgets/brand.dart';
+import 'widgets/orrery.dart';
+import 'widgets/starfield.dart';
 
 void main() {
   runApp(const XuanLiApp());
@@ -73,8 +76,12 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       // 嗰度爆係一個真 bug，應該可以喺開發/測試環境俾人發現，唔應該
       // 靜靜吞咗（見 widget_data_bridge.dart 嘅 Task 2 review 討論）。
       unawaited(WidgetDataBridge().refreshNext7Days(profile));
-      unawaited(NotificationScheduler()
-          .refreshNext7Days(profile: profile, settings: settings));
+      unawaited(
+        NotificationScheduler().refreshNext7Days(
+          profile: profile,
+          settings: settings,
+        ),
+      );
     }
     return profile;
   }
@@ -86,13 +93,26 @@ class _AppBootstrapState extends State<_AppBootstrap> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: KairoPalette.night,
+            body: Stack(
+              children: [
+                Positioned.fill(child: Starfield()),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Orrery(size: 220, coreFraction: 0.36),
+                      SizedBox(height: 18),
+                      Wordmark(fontSize: 44),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         }
         if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('載入失敗：${snapshot.error}')),
-          );
+          return Scaffold(body: Center(child: Text('載入失敗：${snapshot.error}')));
         }
         final profile = snapshot.data;
         if (profile == null) {
