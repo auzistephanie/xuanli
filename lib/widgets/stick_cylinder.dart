@@ -10,7 +10,11 @@ const _stick = Color(0xFFE6D3A3);
 /// 籤筒（畫出嚟，唔用圖片／字體 glyph）。[angle] 係搖動角度（弧度），
 /// [pop] 係 0–1 一支籤彈起嘅程度；[spin] 係 0–1（可以超過，取小數部分）
 /// 筒身直條紋嘅水平移位，模擬轉動。
+///
+/// 畫布比 [height] 高 [popHeadroom]（喺上面），俾彈起嘅籤有位，唔會插入上面嘅字。
 class StickCylinder extends StatelessWidget {
+  static const popHeadroom = 0.30;
+
   final double angle;
   final double pop;
   final double spin;
@@ -34,7 +38,7 @@ class StickCylinder extends StatelessWidget {
         angle: angle,
         alignment: Alignment.bottomCenter,
         child: CustomPaint(
-          size: Size(width, height),
+          size: Size(width, height * (1 + StickCylinder.popHeadroom)),
           painter: _CylinderPainter(pop, spin),
         ),
       ),
@@ -50,8 +54,10 @@ class _CylinderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 上面留咗 headroom；以下所有計算用返筒嘅邏輯高度 h。
     final w = size.width;
-    final h = size.height;
+    final h = size.height / (1 + StickCylinder.popHeadroom);
+    canvas.translate(0, size.height - h);
     final bodyTop = h * 0.40;
     final body = RRect.fromLTRBR(w * 0.18, bodyTop, w * 0.82, h, const Radius.circular(10));
 

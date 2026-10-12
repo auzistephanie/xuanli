@@ -75,7 +75,7 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
     _shakeSub = null;
     if (on) {
       // 用「去咗重力」嘅加速度，ShakeDetector 要嘅係淨係搖動嘅力度。
-      _shakeSub = userAccelerometerEventStream().listen(
+      _shakeSub = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval).listen(
         (e) {
           final m = math.sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
           if (_shake.add(magnitude: m, at: _clock.elapsed)) _draw();
@@ -138,6 +138,22 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final switcher = AnimatedSwitcher(
+      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 450),
+      switchInCurve: Curves.easeOut,
+      // 翻卡路徑：舊嘅籤筒即刻收起，唔好同翻緊嘅卡疊埋一齊。
+      layoutBuilder: (current, previous) => _flipOnReveal
+          ? (current ?? const SizedBox.shrink())
+          : AnimatedSwitcher.defaultLayoutBuilder(current, previous),
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
+      ),
+      child: _revealed
+          ? (_flipOnReveal ? _flipResult(colors) : _result(colors))
+          : _idle(colors),
+    );
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 12),
@@ -147,17 +163,16 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
         border: Border.all(color: colors.gold.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(XuanLiRadii.card),
       ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 450),
-        switchInCurve: Curves.easeOut,
-        transitionBuilder: (child, anim) => FadeTransition(
-          opacity: anim,
-          child: ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(anim), child: child),
-        ),
-        child: _revealed
-            ? (_flipOnReveal ? _flipResult(colors) : _result(colors))
-            : _idle(colors),
-      ),
+      child: reduceMotion
+          // AnimatedSize 用 Duration.zero 會喺 layout 入面即刻完成而 assert，所以減少動態就唔包。
+          ? switcher
+          // 高度變化（籤筒 → 籤詩）用 AnimatedSize 慢慢撐開，唔會一下跳。
+          : AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: switcher,
+            ),
     );
   }
 
@@ -180,7 +195,7 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
           _canShake(context) ? '靜心諗住一件事，搖一搖手機或者撳一下' : '靜心諗住一件事，撳一下搖籤',
           style: TextStyle(fontSize: 12, color: colors.ink60),
         ),
-        const SizedBox(height: 10),
+        // 唔使再加間距：籤筒上面本身有 popHeadroom（彈起嘅籤用）。
         GestureDetector(
           onTap: _draw,
           behavior: HitTestBehavior.opaque,
@@ -220,7 +235,6 @@ class _DailyStickCardState extends State<DailyStickCard> with SingleTickerProvid
     return FlipReveal(
       key: const ValueKey('result'),
       back: Container(
-        height: 260,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),

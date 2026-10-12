@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 /// 一出現就由 [back] 3D 翻去 [front]（約 0.9 秒，先蓄力後回彈）。
 /// 「減少動態效果」→ 直接顯示 [front]。
+/// 正面一直都 layout（未翻到用 Opacity 0 收埋），所以尺寸由頭到尾都係正面嘅；
+/// 背面用 [Positioned.fill] 填滿同一個框。
 class FlipReveal extends StatefulWidget {
   final Widget back;
   final Widget front;
@@ -54,14 +56,23 @@ class _FlipRevealState extends State<FlipReveal> with SingleTickerProviderStateM
             ..setEntry(3, 2, 0.0015)
             ..rotateY(angle)
             ..scaleByDouble(s, s, 1.0, 1.0),
-          child: showFront
-              ? widget.front
-              // 背面預先反轉，翻到一半之前睇落唔會係鏡像。
-              : Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationY(math.pi),
-                  child: widget.back,
+          child: Stack(
+            children: [
+              IgnorePointer(
+                ignoring: !showFront,
+                child: Opacity(opacity: showFront ? 1 : 0, child: widget.front),
+              ),
+              if (!showFront)
+                Positioned.fill(
+                  // 背面預先反轉，翻到一半之前睇落唔會係鏡像。
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: widget.back,
+                  ),
                 ),
+            ],
+          ),
         );
       },
     );

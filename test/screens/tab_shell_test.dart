@@ -63,6 +63,16 @@ void main() {
     expect(find.text('我想做⋯'), findsOneWidget);
   });
 
+  testWidgets('隱藏嘅 tab 停 TickerMode（感應器／環境動畫唔喺背後行）', (tester) async {
+    await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
+    bool enabled(int i) => tester.widget<TickerMode>(find.byKey(ValueKey('tab-ticker-$i'), skipOffstage: false)).enabled;
+
+    expect([enabled(0), enabled(1), enabled(2)], [true, false, false]);
+    await tester.tap(find.text('我想做'));
+    await tester.pumpAndSettle();
+    expect([enabled(0), enabled(1), enabled(2)], [false, true, false]);
+  });
+
   testWidgets('撳第三個 tab（月曆）都會切換', (tester) async {
     await tester.pumpWidget(wrap(TabShell(profile: _sampleProfile())));
 

@@ -125,12 +125,15 @@ void main() {
     });
 
     testWidgets('搖完之後用 FlipReveal 翻出籤', (tester) async {
+      final stick = drawDailyStick(profile: profile, reading: reading());
       await tester.pumpWidget(wrap(card()));
       await tester.tap(find.text('搖籤'));
       await tester.pump(); // 第一格先開始計時
       await tester.pump(const Duration(milliseconds: 1500));
       expect(find.byType(FlipReveal), findsOneWidget);
       await tester.pumpAndSettle();
+      expect(find.text(stick.levelName), findsOneWidget);
+      expect(find.text('搖籤'), findsNothing);
     });
 
     testWidgets('今日已抽：唔使翻卡', (tester) async {
