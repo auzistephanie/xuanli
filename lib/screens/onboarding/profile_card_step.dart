@@ -99,7 +99,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
     );
     final avatarInitial = _profile.name.isNotEmpty
         ? _profile.name.substring(0, 1)
-        : '玄';
+        : '吉';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),

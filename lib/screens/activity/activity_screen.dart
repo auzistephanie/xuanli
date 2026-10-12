@@ -7,6 +7,7 @@ import '../../engine/scoring.dart';
 import '../../models/profile.dart';
 import '../../services/calendar_sync.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/brand.dart';
 import '../onboarding/onboarding_widgets.dart' show OnboardingSegmentedToggle;
 import 'activity_widgets.dart';
 
@@ -73,7 +74,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     try {
       final result = await _calendarSync.addAllDayEvent(
         date: date,
-        title: '${activity.name}（玄曆吉日）',
+        title: '${activity.name}（Kairo 吉日）',
         description: reason,
         deduplicationKey: key,
       );
@@ -83,7 +84,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       }
       final message = switch (result) {
         CalendarAddResult.added => '已加入你嘅日曆 ✓',
-        CalendarAddResult.alreadyExists => '呢個玄曆吉日已經加入過日曆',
+        CalendarAddResult.alreadyExists => '呢個 Kairo 吉日已經加入過日曆',
         CalendarAddResult.failed => '需要日曆權限先可以加入 — 請去手機設定開返',
       };
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
@@ -154,32 +155,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                      color: colors.red, borderRadius: BorderRadius.circular(7)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('玄',
-                          style: TextStyle(
-                              color: colors.paper,
-                              fontFamily: XuanLiFonts.serif,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 11,
-                              height: 1.1)),
-                      Text('曆',
-                          style: TextStyle(
-                              color: colors.paper,
-                              fontFamily: XuanLiFonts.serif,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 11,
-                              height: 1.1)),
-                    ],
-                  ),
-                ),
+                const BrandSeal(size: 34),
                 const SizedBox(width: 10),
                 Text(
                   '我想做⋯',

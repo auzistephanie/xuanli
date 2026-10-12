@@ -14,11 +14,11 @@ void main() {
     );
   }
 
-  testWidgets('封面講清楚玄曆係咩：標題、三個賣點、私隱同免責', (tester) async {
+  testWidgets('封面講清楚 Kairo 係咩：標題、三個賣點、私隱同免責', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('玄曆'), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
     expect(find.textContaining('160 個組合'), findsOneWidget);
     expect(find.textContaining('每日宜忌'), findsOneWidget);
     expect(find.textContaining('出生資料唔離你部機'), findsOneWidget);

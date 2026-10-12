@@ -54,7 +54,7 @@ class ShareCardService {
     await SharePlus.instance.share(ShareParams(
       files: [XFile.fromData(png, name: filename, mimeType: 'image/png')],
       fileNameOverrides: [filename],
-      title: '玄曆・我嘅組合',
+      title: 'Kairo・我嘅組合',
       sharePositionOrigin: shareOrigin,
     ));
   }

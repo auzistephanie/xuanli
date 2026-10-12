@@ -10,6 +10,7 @@ import 'services/deep_link_router.dart';
 import 'services/notification_scheduler.dart';
 import 'services/storage_service.dart';
 import 'services/theme_mode_controller.dart';
+import 'theme/brand.dart';
 import 'services/widget_data_bridge.dart';
 import 'theme/xuanli_theme.dart';
 
@@ -26,7 +27,7 @@ class XuanLiApp extends StatelessWidget {
       valueListenable: themeModeController,
       builder: (context, mode, _) {
         return MaterialApp(
-          title: '玄曆',
+          title: kBrandName,
           debugShowCheckedModeBanner: false,
           theme: XuanLiTheme.light(),
           darkTheme: XuanLiTheme.dark(),

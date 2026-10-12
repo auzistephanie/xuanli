@@ -197,7 +197,7 @@ void main() {
       expect(find.text(stick.numberLabel), findsOneWidget);
       expect(find.textContaining('2026年7月11日'), findsOneWidget);
       expect(find.text('掃碼抽你嘅今日籤'), findsOneWidget);
-      expect(find.bySemanticsLabel('玄曆網站 QR code'), findsOneWidget);
+      expect(find.bySemanticsLabel('Kairo 網站 QR code'), findsOneWidget);
       for (final secret in ['阿玄', '1999', 'ISFP', '香港', '命理分']) {
         expect(find.textContaining(secret), findsNothing, reason: secret);
       }

@@ -196,7 +196,7 @@ void main() {
       expect(find.textContaining('已加入你嘅日曆'), findsOneWidget);
       expect(sentArgs, isNotNull);
       expect(sentArgs!['eventAllDay'], isTrue);
-      expect((sentArgs!['eventTitle'] as String).contains('（玄曆吉日）'), isTrue);
+      expect((sentArgs!['eventTitle'] as String).contains('（Kairo 吉日）'), isTrue);
     });
   });
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/brand.dart';
 import '../../widgets/marks.dart';
 import 'reveal_step.dart' show revealBackground;
 
 const _navy = Color(0xFF1C2440);
 const _paper = Color(0xFFF6EFE2);
 const _gold = Color(0xFFC9A24B);
-const _sealRed = Color(0xFFB23A3A);
 
 /// Onboarding 第 0 步：封面。畀未用過嘅人（包括掃分享卡 QR 入嚟嗰班）
 /// 十秒內明白玄曆係咩、點解值得填資料，然後撳「睇我嘅組合」開始。
@@ -96,49 +97,11 @@ class _WelcomeStepState extends State<WelcomeStep>
   }
 
   Widget _brand() {
-    return Column(
+    return const Column(
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: _sealRed,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(color: _sealRed.withValues(alpha: 0.35), blurRadius: 24),
-            ],
-          ),
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border.all(color: _paper.withValues(alpha: 0.8)),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: const Text(
-              '玄',
-              style: TextStyle(
-                fontFamily: XuanLiFonts.serif,
-                fontSize: 30,
-                fontWeight: FontWeight.w900,
-                color: _paper,
-                height: 1.1,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
-        const Text(
-          '玄曆',
-          style: TextStyle(
-            fontFamily: XuanLiFonts.serif,
-            fontSize: 26,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 8,
-            color: _paper,
-          ),
-        ),
+        BrandSeal(text: kBrandSeal, size: 64),
+        SizedBox(height: 14),
+        Wordmark(fontSize: 40),
       ],
     );
   }

@@ -138,7 +138,7 @@ void main() {
     expect(find.text(result.name), findsOneWidget);
     expect(find.text('${result.score}'), findsOneWidget);
     expect(find.text('掃碼同朋友合盤'), findsOneWidget);
-    expect(find.bySemanticsLabel('玄曆網站 QR code'), findsOneWidget);
+    expect(find.bySemanticsLabel('Kairo 網站 QR code'), findsOneWidget);
     expect(find.textContaining('阿玄'), findsNothing);
     expect(find.textContaining('1999'), findsNothing);
     expect(find.textContaining('2000'), findsNothing);

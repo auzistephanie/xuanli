@@ -50,7 +50,7 @@ void main() {
     // QrImageView 唔保留輸入字串，所以 QR 內容靠 [xuanliWebUrl] 常數（`ShareCard`
     // 直接用佢）＋輸出圖用 OpenCV 掃碼驗證過（見 CHANGELOG）。
     expect(find.byType(QrImageView), findsOneWidget);
-    expect(find.bySemanticsLabel('玄曆網站 QR code'), findsOneWidget);
+    expect(find.bySemanticsLabel('Kairo 網站 QR code'), findsOneWidget);
     expect(xuanliWebUrl, 'https://xuanli-opal.vercel.app');
     expect(find.text('掃碼睇你嘅組合'), findsOneWidget);
   });

@@ -6,6 +6,7 @@ import '../../models/day_reading.dart';
 import '../../models/profile.dart';
 import '../../services/storage_service.dart';
 import '../../theme/xuanli_theme.dart';
+import '../../widgets/brand.dart';
 import 'daily_stick_card.dart';
 import 'today_widgets.dart';
 
@@ -148,37 +149,7 @@ class _TodayScreenState extends State<TodayScreen> {
     final weekdayChar = _weekdayNames[_selectedDate.weekday - 1];
     return Row(
       children: [
-        Container(
-          width: 34,
-          height: 34,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: colors.red, borderRadius: BorderRadius.circular(7)),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '玄',
-                style: TextStyle(
-                  color: colors.paper,
-                  fontFamily: XuanLiFonts.serif,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                '曆',
-                style: TextStyle(
-                  color: colors.paper,
-                  fontFamily: XuanLiFonts.serif,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                  height: 1.1,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const BrandSeal(size: 34),
         Expanded(
           child: Column(
             children: [

@@ -104,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _dataTransfer.importBackup(backup);
       themeModeController.value = backup.settings.themeMode;
       setState(() => _settings = backup.settings);
-      _showMessage('玄曆資料已成功匯入 ✓');
+      _showMessage('Kairo 資料已成功匯入 ✓');
       widget.onDataImported?.call(backup.profiles.first);
     } on BackupFormatException catch (error) {
       if (mounted) {
@@ -120,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<bool?> _confirmImport(XuanLiBackup backup) => showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('匯入玄曆資料？'),
+          title: const Text('匯入 Kairo 資料？'),
           content: Text(
             '備份包含：\n'
             '・${backup.profiles.length} 個命理檔案\n'
@@ -188,12 +188,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       '免責聲明',
       const SingleChildScrollView(
         child: Text(
-          '玄曆所有推薦內容（包括命理分、宜忌、活動建議、行事曆提示等）都係基於傳統曆法同你嘅個人命理'
+          'Kairo 所有推薦內容（包括命理分、宜忌、活動建議、行事曆提示等）都係基於傳統曆法同你嘅個人命理'
           '資料自動生成，僅供參考、帶少少玄學生活趣味，並唔代表任何形式嘅專業意見。\n\n'
-          '健康、法律、財務等重要決定，請以專業人士（醫生、律師、持牌顧問等）意見為準——玄曆嘅健康'
+          '健康、法律、財務等重要決定，請以專業人士（醫生、律師、持牌顧問等）意見為準——Kairo 嘅健康'
           '相關內容只會話你邊一日狀態較順，唔會亦唔應該被理解為「唔好睇醫生」嘅建議；財務／投資相關'
           '內容亦只提供宜忌方向，唔構成具體買賣建議。\n\n'
-          '你嘅出生資料同命理檔案全部只存喺你部機度，玄曆唔會上傳、分享或者用嚟做任何其他用途。',
+          '你嘅出生資料同命理檔案全部只存喺你部機度，Kairo 唔會上傳、分享或者用嚟做任何其他用途。',
         ),
       ),
     );
@@ -201,9 +201,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showAbout() {
     _infoDialog(
-      '關於玄曆',
+      '關於 Kairo',
       const Text(
-        '玄曆 XuanLi\n版本 1.0.0\n\n'
+        'Kairo・吉時\n版本 1.0.0\n\n'
         '中國傳統擇日 × 個人八字五行 × 紫微 × MBTI，全離線運作，你嘅出生資料唔會離開部機。',
       ),
     );
@@ -235,23 +235,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _sectionLabel(colors, '資料'),
                           _actionTile(
                             colors,
-                            '匯出玄曆資料',
+                            '匯出 Kairo 資料',
                             _exportData,
                             subtitle: '包含命理檔案及設定',
                             enabled: !_transferInProgress,
                           ),
                           _actionTile(
                             colors,
-                            '匯入玄曆資料',
+                            '匯入 Kairo 資料',
                             _importData,
-                            subtitle: '從玄曆 JSON 備份還原',
+                            subtitle: '從 Kairo JSON 備份還原',
                             enabled: !_transferInProgress,
                           ),
                           _actionTile(colors, '重新做 Onboarding', _confirmRedoOnboarding),
                           const SizedBox(height: 12),
                           _sectionLabel(colors, '關於'),
                           _actionTile(colors, '免責聲明全文', _showDisclaimer),
-                          _actionTile(colors, '關於玄曆', _showAbout),
+                          _actionTile(colors, '關於 Kairo', _showAbout),
                         ],
                       ),
                     ),

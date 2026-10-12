@@ -41,7 +41,7 @@ void main() {
     );
 
     // Step 0: 封面，撳「睇我嘅組合」開始。
-    expect(find.text('玄曆'), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
     await tester.tap(find.text('睇我嘅組合'));
     await tester.pumpAndSettle();
 

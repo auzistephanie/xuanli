@@ -242,7 +242,7 @@ class _RevealStepState extends State<RevealStep>
               ),
               alignment: Alignment.center,
               child: const Text(
-                '玄',
+                '吉',
                 style: TextStyle(
                   fontFamily: XuanLiFonts.serif,
                   fontSize: 30,
