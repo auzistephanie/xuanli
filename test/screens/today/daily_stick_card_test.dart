@@ -12,6 +12,7 @@ import 'package:xuanli/screens/today/daily_stick_card.dart';
 import 'package:xuanli/screens/today/today_screen.dart';
 import 'package:xuanli/services/storage_service.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/flip_reveal.dart';
 import 'package:xuanli/widgets/stick_share_card.dart';
 
 void main() {
@@ -121,6 +122,20 @@ void main() {
 
       expect(find.text(stick.levelName), findsOneWidget);
       expect(drawn, 1);
+    });
+
+    testWidgets('搖完之後用 FlipReveal 翻出籤', (tester) async {
+      await tester.pumpWidget(wrap(card()));
+      await tester.tap(find.text('搖籤'));
+      await tester.pump(); // 第一格先開始計時
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.byType(FlipReveal), findsOneWidget);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('今日已抽：唔使翻卡', (tester) async {
+      await tester.pumpWidget(wrap(card(alreadyDrawn: true)));
+      expect(find.byType(FlipReveal), findsNothing);
     });
 
     testWidgets('5 個籤級都顯示得到，冇 overflow', (tester) async {
