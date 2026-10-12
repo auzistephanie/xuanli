@@ -62,7 +62,7 @@ flutter build apk --release     # Android 交付（<40MB）
 - [ ] Phase 2 App UI（功能齊，見 CHANGELOG＋spec §2 決定 12–15；PR #1 2026-10-12 merge）。**真機驗收未做**（冷啟動 <2s、離線、權限 dialog、分享、震動），docs/pr-1-review-checklist.md §A 係清單
 - [x] interim web 部署 → https://xuanli-opal.vercel.app（**唔算** Phase 3/4；`vercel.json` 已停 git 自動部署，更新要 `flutter build web` 後喺 `build/web` 行 `vercel deploy --prod`）
 - [ ] Phase 3 Widget＋通知：數據橋、通知、冷啟動 deep link 已做；Android／iOS 小+中 widget 原生碼已寫（Kotlin 編譯＋邏輯測試、Swift typecheck 過），**未經 Gradle／Xcode／真機**；iOS 要喺有 Xcode 嘅機行 `ruby scripts/add_ios_widget_target.rb`（未套用）；已開 app 時撳 widget 唔跳（router 只處理冷啟動）
-- [x] Kairo 改名＋3D／動態（2026-10-13，feat/kairo-rebrand）——**真機未驗**：陀螺儀傾斜手感、搖手機抽籤、震動、APK 大小
+- [x] Kairo 改名＋3D／動態（2026-10-13）——**真機未驗**，清單見 CHANGELOG
 - [ ] Phase 4 交付（APK + install_ios.sh）——開發機冇 Android SDK／Xcode，未開始
 
 ## Git
