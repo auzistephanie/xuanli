@@ -6,6 +6,7 @@ import '../../models/profile.dart';
 import '../../services/data_transfer_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/theme_mode_controller.dart';
+import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
 import '../onboarding/onboarding_flow.dart';
 
@@ -319,7 +320,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                color: selected ? colors.ink : colors.ink60,
+                color: selected ? KairoPalette.navy : colors.ink60,
               ),
             ),
           ),

@@ -4,6 +4,7 @@ import '../../engine/annual_outlook.dart';
 import '../../engine/profile_builder.dart';
 import '../../models/profile.dart';
 import '../../services/storage_service.dart';
+import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
 import '../combo/combo_screen.dart';
 import 'onboarding_widgets.dart';
@@ -26,6 +27,10 @@ const _wuxingLabelColors = {
   '水': Color(0xFF8FB6D9),
 };
 const _wuxingOrder = ['木', '火', '土', '金', '水'];
+
+/// 檔案卡係固定深藍漸層底（唔跟深淺模式），所以卡上文字都要固定淺色，
+/// 唔可以用 colors.paper（深色模式下會變近黑）。
+const _cardText = Color(0xFFF6EFE2);
 
 class ProfileCardStep extends StatefulWidget {
   final String name;
@@ -170,7 +175,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                               fontFamily: XuanLiFonts.serif,
                               fontWeight: FontWeight.w900,
                               fontSize: 22,
-                              color: colors.paper,
+                              color: _cardText,
                             ),
                           ),
                         ),
@@ -184,7 +189,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                                 fontFamily: XuanLiFonts.serif,
                                 fontSize: 19,
                                 fontWeight: FontWeight.w700,
-                                color: colors.paper,
+                                color: _cardText,
                                 letterSpacing: 2,
                               ),
                             ),
@@ -205,7 +210,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                                     style: TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w700,
-                                      color: colors.ink,
+                                      color: KairoPalette.navy,
                                     ),
                                   ),
                                 ),
@@ -216,14 +221,14 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colors.paper.withValues(alpha: 0.16),
+                                    color: _cardText.withValues(alpha: 0.16),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
                                     '${_profile.dayMaster}日主',
                                     style: TextStyle(
                                       fontSize: 10.5,
-                                      color: colors.paper,
+                                      color: _cardText,
                                     ),
                                   ),
                                 ),
@@ -257,7 +262,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                                 child: LinearProgressIndicator(
                                   value: (_profile.wuxing[element] ?? 0) / 100,
                                   minHeight: 9,
-                                  backgroundColor: colors.paper.withValues(
+                                  backgroundColor: _cardText.withValues(
                                     alpha: 0.14,
                                   ),
                                   valueColor: AlwaysStoppedAnimation(
@@ -274,7 +279,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 10.5,
-                                  color: colors.paper.withValues(alpha: 0.6),
+                                  color: _cardText.withValues(alpha: 0.6),
                                 ),
                               ),
                             ),
@@ -314,7 +319,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: colors.paper.withValues(alpha: 0.25),
+                            color: _cardText.withValues(alpha: 0.25),
                           ),
                         ),
                       ),
@@ -325,7 +330,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                             '肖${_profile.zodiac}・${outlook.summary} ｜ 檔案完整度 ${_profile.completeness}%',
                             style: TextStyle(
                               fontSize: 11,
-                              color: colors.paper.withValues(alpha: 0.75),
+                              color: _cardText.withValues(alpha: 0.75),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -333,7 +338,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                             '撳呢張卡睇你嘅組合詳解 ›',
                             style: TextStyle(
                               fontSize: 10.5,
-                              color: colors.paper.withValues(alpha: 0.6),
+                              color: _cardText.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -370,7 +375,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: colors.paper.withValues(alpha: 0.1),
+          color: _cardText.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -380,7 +385,7 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
               label,
               style: TextStyle(
                 fontSize: 11.5,
-                color: colors.paper.withValues(alpha: 0.75),
+                color: _cardText.withValues(alpha: 0.75),
               ),
             ),
             const SizedBox(height: 2),
