@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 /// Kairo 過場：新頁淡入＋由 96% 放大到 100%，舊頁輕微淡出。
@@ -29,9 +30,10 @@ class KairoPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+/// iOS 用原生過場，保留邊緣左掃返回上一頁（Stephanie 2026-10-13 拍板）。
 const kairoPageTransitions = PageTransitionsTheme(builders: {
   TargetPlatform.android: KairoPageTransitionsBuilder(),
-  TargetPlatform.iOS: KairoPageTransitionsBuilder(),
+  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
   TargetPlatform.macOS: KairoPageTransitionsBuilder(),
   TargetPlatform.linux: KairoPageTransitionsBuilder(),
   TargetPlatform.windows: KairoPageTransitionsBuilder(),

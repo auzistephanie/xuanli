@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/theme/page_transitions.dart';
@@ -19,11 +20,12 @@ Widget _app({bool disableAnimations = false}) => MaterialApp(
     );
 
 void main() {
-  test('light／dark 主題全平台用 KairoPageTransitionsBuilder', () {
+  test('light／dark 主題：iOS 用原生過場（保留左掃返回），其他平台用 Kairo 過場', () {
     for (final theme in [XuanLiTheme.light(), XuanLiTheme.dark()]) {
-      for (final p in [TargetPlatform.android, TargetPlatform.iOS]) {
-        expect(theme.pageTransitionsTheme.builders[p],
-            isA<KairoPageTransitionsBuilder>());
+      final b = theme.pageTransitionsTheme.builders;
+      expect(b[TargetPlatform.iOS], isA<CupertinoPageTransitionsBuilder>());
+      for (final p in [TargetPlatform.android, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows, TargetPlatform.fuchsia]) {
+        expect(b[p], isA<KairoPageTransitionsBuilder>());
       }
     }
   });
