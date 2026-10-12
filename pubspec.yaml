@@ -97,6 +97,10 @@ flutter:
           weight: 500
         - asset: assets/fonts/NotoSansTC.ttf
           weight: 700
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond-SemiBold.ttf
+          weight: 600
 
 flutter_launcher_icons:
   ios: true

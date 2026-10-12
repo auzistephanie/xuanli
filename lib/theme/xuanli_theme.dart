@@ -145,6 +145,9 @@ class XuanLiFonts {
 
   /// 正文（design html body 預設字體）。
   static const sans = 'NotoSansTC';
+
+  /// Kairo 品牌字（只有拉丁字 subset，唔好用嚟顯示中文）。
+  static const wordmark = 'CormorantGaramond';
 }
 
 /// Builds the app [ThemeData] from [XuanLiColors].
