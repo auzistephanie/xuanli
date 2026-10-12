@@ -58,10 +58,10 @@ flutter build apk --release     # Android 交付（<40MB）
 
 - [x] 規格 + 設計稿 + combos.json（Cowork session 完成）
 - [x] Phase 1 引擎（TDD，fixtures spec §11；`dart test test/engine/` 全綠，`dart run tool/demo.dart` 可行）
-- [ ] Phase 2 App UI（主要畫面已完成；JSON 匯出入、native 日曆權限／真機驗收、逐屏 screenshot、冷啟動及離線驗收仍待完成）
-- [x] 2026-07-29 interim web 部署（`flutter create --platforms=web`，過渡方案畀 Stephanie 喺 Xcode/Android Studio 裝緊嗰陣睇到 app running live，**唔算** Phase 3/4 完成）→ https://xuanli-opal.vercel.app
-- [ ] Phase 3 Widget（iOS/Android 小+中）+ 每日通知
-- [ ] Phase 4 交付（APK + install_ios.sh）
+- [ ] Phase 2 App UI（功能齊：備份、日曆、分享卡＋QR、稀有度、封面／揭曉、不存資料試玩、兩人合盤、每日一籤——spec 決定 12–15 已提前入 MVP；PR #1 於 2026-10-12 merge）。**真機驗收未做**（冷啟動 <2s、離線、權限 dialog、分享、震動），docs/pr-1-review-checklist.md §A 係清單
+- [x] interim web 部署 → https://xuanli-opal.vercel.app（**唔算** Phase 3/4；`vercel.json` 已停 git 自動部署，更新要 `flutter build web` 後喺 `build/web` 行 `vercel deploy --prod`）
+- [ ] Phase 3 Widget＋通知：數據橋、通知、冷啟動 deep link 已做；Android／iOS 小+中 widget 原生碼已寫（Kotlin 編譯＋邏輯測試、Swift typecheck 過），**未經 Gradle／Xcode／真機**；iOS 要喺有 Xcode 嘅機行 `ruby scripts/add_ios_widget_target.rb`（未套用）；已開 app 時撳 widget 唔跳（router 只處理冷啟動）
+- [ ] Phase 4 交付（APK + install_ios.sh）——開發機冇 Android SDK／Xcode，未開始
 
 ## Git
 
