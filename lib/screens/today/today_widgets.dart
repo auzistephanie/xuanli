@@ -10,29 +10,31 @@ class ScoreRing extends StatelessWidget {
   final int score; // 0-100
   final Color ringColor;
   final String label;
+  final double size;
 
   const ScoreRing({
     super.key,
     required this.score,
     required this.ringColor,
     required this.label,
+    this.size = 104,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
     return SizedBox(
-      width: 104,
-      height: 104,
+      width: size,
+      height: size,
       child: Stack(
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: 104,
-            height: 104,
+            width: size,
+            height: size,
             child: CircularProgressIndicator(
               value: score / 100,
-              strokeWidth: 9,
+              strokeWidth: size * 0.087,
               strokeCap: StrokeCap.round,
               backgroundColor: colors.paper2,
               color: ringColor,
@@ -45,7 +47,7 @@ class ScoreRing extends StatelessWidget {
                 '$score',
                 style: TextStyle(
                   fontFamily: XuanLiFonts.serif,
-                  fontSize: 30,
+                  fontSize: size * 0.29,
                   fontWeight: FontWeight.w900,
                   color: colors.ink,
                 ),
@@ -55,7 +57,7 @@ class ScoreRing extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: size < 90 ? 8.5 : 10,
                   color: colors.ink60,
                   letterSpacing: 1,
                 ),
@@ -291,27 +293,31 @@ class Week7Strip extends StatelessWidget {
     );
   }
 
-  Widget _buildDay(BuildContext context, XuanLiColors colors, DayReading reading) {
+  Widget _buildDay(
+    BuildContext context,
+    XuanLiColors colors,
+    DayReading reading,
+  ) {
     final isToday = _isSameDay(reading.date, selectedDate);
     final bandColor = reading.band == '吉'
         ? colors.jade
         : reading.band == '忌'
-            ? colors.red
-            : colors.ink;
+        ? colors.red
+        : colors.ink;
     final bgColor = reading.band == '吉'
         ? colors.jade.withValues(alpha: 0.12)
         : reading.band == '忌'
-            ? colors.red.withValues(alpha: 0.09)
-            : colors.cardSurface;
+        ? colors.red.withValues(alpha: 0.09)
+        : colors.cardSurface;
     final borderColor = isToday
         ? colors.gold
         : reading.band == '吉'
-            ? colors.jade.withValues(alpha: 0.3)
-            : reading.band == '忌'
-                ? colors.red.withValues(alpha: 0.28)
-                : colors.ink12;
+        ? colors.jade.withValues(alpha: 0.3)
+        : reading.band == '忌'
+        ? colors.red.withValues(alpha: 0.28)
+        : colors.ink12;
 
-    return GestureDetector(
+    final cell = GestureDetector(
       onTap: () => onSelect(reading.date),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 7),
@@ -319,6 +325,15 @@ class Week7Strip extends StatelessWidget {
           color: bgColor,
           border: Border.all(color: borderColor, width: isToday ? 2 : 1),
           borderRadius: BorderRadius.circular(10),
+          boxShadow: isToday
+              ? [
+                  BoxShadow(
+                    color: colors.gold.withValues(alpha: 0.3),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           children: [
@@ -328,12 +343,27 @@ class Week7Strip extends StatelessWidget {
             ),
             Text(
               '${reading.date.day}',
-              style: TextStyle(fontFamily: XuanLiFonts.serif, fontSize: 13, color: bandColor),
+              style: TextStyle(
+                fontFamily: XuanLiFonts.serif,
+                fontSize: 13,
+                color: bandColor,
+              ),
             ),
-            Text(reading.band, style: TextStyle(fontSize: 10, color: colors.ink60)),
+            Text(
+              reading.band,
+              style: TextStyle(fontSize: 10, color: colors.ink60),
+            ),
           ],
         ),
       ),
+    );
+    return Transform(
+      alignment: Alignment.bottomCenter,
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.002)
+        ..translateByDouble(0.0, isToday ? -5.0 : 0.0, 0.0, 1.0)
+        ..rotateX(isToday ? 0 : 0.3),
+      child: cell,
     );
   }
 }

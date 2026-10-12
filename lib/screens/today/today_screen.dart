@@ -5,8 +5,11 @@ import '../../engine/day_reading_engine.dart';
 import '../../models/day_reading.dart';
 import '../../models/profile.dart';
 import '../../services/storage_service.dart';
+import '../../theme/brand.dart';
 import '../../theme/xuanli_theme.dart';
 import '../../widgets/brand.dart';
+import '../../widgets/orrery.dart';
+import '../../widgets/starfield.dart';
 import 'daily_stick_card.dart';
 import 'today_widgets.dart';
 
@@ -65,83 +68,147 @@ class _TodayScreenState extends State<TodayScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.xuanliColors;
-    final reading = buildDayReading(profile: widget.profile, date: _selectedDate);
+    final reading = buildDayReading(
+      profile: widget.profile,
+      date: _selectedDate,
+    );
     final weekStart = widget.initialDate ?? _today();
     final isToday = _selectedDate == weekStart;
     final week = [
       for (var i = 0; i < 7; i++)
-        buildDayReading(profile: widget.profile, date: weekStart.add(Duration(days: i))),
+        buildDayReading(
+          profile: widget.profile,
+          date: weekStart.add(Duration(days: i)),
+        ),
     ];
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(colors, reading),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-              decoration: BoxDecoration(
-                color: colors.cardSurface,
-                border: Border.all(color: colors.ink12),
-                borderRadius: BorderRadius.circular(XuanLiRadii.card),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ScoreRing(
-                    score: reading.fortuneScore,
-                    ringColor: colors.gold,
-                    label: '命理分・${reading.band}',
-                  ),
-                  Container(width: 1, height: 76, color: colors.ink12),
-                  ScoreRing(
-                    score: reading.mbtiScore,
-                    ringColor: colors.jade,
-                    label: '狀態契合・${widget.profile.mbti}',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Stack(
+      children: [
+        if (isDark) const Positioned.fill(child: Starfield()),
+        SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                YjColumn(dotLabel: '宜', title: '今日宜', items: reading.yi, isYi: true),
-                const SizedBox(width: 12),
-                YjColumn(
-                  dotLabel: '忌',
-                  title: '今日忌',
-                  items: reading.ji,
-                  isYi: false,
-                  extraNote: reading.avoidHour,
+                _buildHeader(colors, reading),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 250,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Orrery(
+                        size: 240,
+                        core: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${reading.fortuneScore}',
+                              style: const TextStyle(
+                                fontFamily: XuanLiFonts.serif,
+                                fontSize: 44,
+                                fontWeight: FontWeight.w900,
+                                height: 1,
+                                color: KairoPalette.goldBright,
+                                shadows: [
+                                  Shadow(
+                                    color: Color(0x99C9A24B),
+                                    blurRadius: 12,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '命理分・${reading.band}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                letterSpacing: 1.5,
+                                color: KairoPalette.paper,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Column(
+                          children: [
+                            ScoreRing(
+                              score: reading.mbtiScore,
+                              ringColor: colors.jade,
+                              label: '契合',
+                              size: 70,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '狀態契合・${widget.profile.mbti}',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                color: colors.ink60,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    YjColumn(
+                      dotLabel: '宜',
+                      title: '今日宜',
+                      items: reading.yi,
+                      isYi: true,
+                    ),
+                    const SizedBox(width: 12),
+                    YjColumn(
+                      dotLabel: '忌',
+                      title: '今日忌',
+                      items: reading.ji,
+                      isYi: false,
+                      extraNote: reading.avoidHour,
+                    ),
+                  ],
+                ),
+                AdviceCard(advice: reading.advice),
+                if (isToday)
+                  DailyStickCard(
+                    stick: drawDailyStick(
+                      profile: widget.profile,
+                      reading: reading,
+                    ),
+                    date: weekStart,
+                    alreadyDrawn: _stickDrawnToday,
+                    onDrawn: () => _onStickDrawn(weekStart),
+                  ),
+                const SizedBox(height: 14),
+                Text(
+                  '未來七日',
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 2,
+                    color: colors.ink60,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Week7Strip(
+                  readings: week,
+                  selectedDate: _selectedDate,
+                  onSelect: (d) => setState(() => _selectedDate = d),
                 ),
               ],
             ),
-            AdviceCard(advice: reading.advice),
-            if (isToday)
-              DailyStickCard(
-                stick: drawDailyStick(profile: widget.profile, reading: reading),
-                date: weekStart,
-                alreadyDrawn: _stickDrawnToday,
-                onDrawn: () => _onStickDrawn(weekStart),
-              ),
-            const SizedBox(height: 14),
-            Text(
-              '未來七日',
-              style: TextStyle(fontSize: 11, letterSpacing: 2, color: colors.ink60),
-            ),
-            const SizedBox(height: 8),
-            Week7Strip(
-              readings: week,
-              selectedDate: _selectedDate,
-              onSelect: (d) => setState(() => _selectedDate = d),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -149,39 +216,29 @@ class _TodayScreenState extends State<TodayScreen> {
     final weekdayChar = _weekdayNames[_selectedDate.weekday - 1];
     return Row(
       children: [
-        const BrandSeal(size: 34),
-        Expanded(
-          child: Column(
-            children: [
-              Text(
-                '${_selectedDate.month}月${_selectedDate.day}日 星期$weekdayChar',
-                style: TextStyle(
-                  fontFamily: XuanLiFonts.serif,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 17,
-                  letterSpacing: 3,
-                  color: colors.ink,
-                ),
+        const BrandSeal(size: 30),
+        const SizedBox(width: 8),
+        const Wordmark(fontSize: 22),
+        const Spacer(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '${_selectedDate.month}月${_selectedDate.day}日 星期$weekdayChar',
+              style: TextStyle(
+                fontFamily: XuanLiFonts.serif,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                letterSpacing: 1.5,
+                color: colors.ink,
               ),
-              const SizedBox(height: 2),
-              Text(
-                '${reading.lunarLabel}・${reading.ganzhiDay}日・${reading.chong}',
-                style: TextStyle(fontSize: 11, color: colors.ink60, letterSpacing: 1),
-              ),
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('設定 — 2g 起')),
-          ),
-          child: Container(
-            width: 30,
-            height: 30,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: colors.ink30)),
-            child: Icon(Icons.menu, size: 17, color: colors.ink60),
-          ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${reading.lunarLabel}・${reading.ganzhiDay}日・${reading.chong}',
+              style: TextStyle(fontSize: 10.5, color: colors.ink60),
+            ),
+          ],
         ),
       ],
     );

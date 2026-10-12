@@ -7,6 +7,7 @@ import 'package:xuanli/engine/copywriter.dart';
 import 'package:xuanli/engine/profile_builder.dart';
 import 'package:xuanli/screens/today/today_screen.dart';
 import 'package:xuanli/theme/xuanli_theme.dart';
+import 'package:xuanli/widgets/orrery.dart';
 
 void main() {
   setUpAll(() {
@@ -30,10 +31,9 @@ void main() {
   );
 
   testWidgets('顯示 2026-07-11（丙戌平日）golden fixture 嘅日期/干支/雙環/宜忌', (tester) async {
-    await tester.pumpWidget(wrap(TodayScreen(
-      profile: profile,
-      initialDate: DateTime(2026, 7, 11),
-    )));
+    await tester.pumpWidget(
+      wrap(TodayScreen(profile: profile, initialDate: DateTime(2026, 7, 11))),
+    );
 
     expect(find.textContaining('7月11日'), findsOneWidget);
     expect(find.textContaining('五月廿七'), findsOneWidget);
@@ -43,10 +43,9 @@ void main() {
   });
 
   testWidgets('撳未來七日條入面第二日，畫面內容轉去嗰日', (tester) async {
-    await tester.pumpWidget(wrap(TodayScreen(
-      profile: profile,
-      initialDate: DateTime(2026, 7, 11),
-    )));
+    await tester.pumpWidget(
+      wrap(TodayScreen(profile: profile, initialDate: DateTime(2026, 7, 11))),
+    );
 
     expect(find.textContaining('7月11日'), findsOneWidget);
 
@@ -57,5 +56,33 @@ void main() {
 
     expect(find.textContaining('7月12日'), findsOneWidget);
     expect(find.textContaining('五月廿八'), findsOneWidget);
+  });
+
+  testWidgets('今日頁：天體儀中心顯示命理分，旁邊細環顯示契合度，header 有 Kairo', (tester) async {
+    await tester.pumpWidget(
+      wrap(TodayScreen(profile: profile, initialDate: DateTime(2026, 7, 20))),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(Orrery), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(Orrery),
+        matching: find.textContaining('命理分'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('狀態契合'), findsOneWidget);
+    expect(find.text('Kairo'), findsOneWidget);
+  });
+
+  testWidgets('今日頁 360×640 唔 overflow', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      wrap(TodayScreen(profile: profile, initialDate: DateTime(2026, 7, 20))),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
