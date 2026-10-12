@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#B23A3A</color>
+    <color name="ic_launcher_background">#0D1120</color>
     <!-- 桌面 widget 配色（design html tokens；深色見 values-night/colors.xml） -->
     <color name="xuanli_widget_bg">#F6EFE2</color>
     <color name="xuanli_widget_ink">#1C2440</color>

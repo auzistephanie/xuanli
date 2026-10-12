@@ -44,7 +44,7 @@ struct Palette {
 
     init(dark: Bool) {
         if dark {
-            bg = Color(hex: 0x1C2440); ink = Color(hex: 0xE9DFC9)
+            bg = Color(hex: 0x0D1120); ink = Color(hex: 0xE9DFC9)
             ink60 = Color(hex: 0xE9DFC9).opacity(0.6); track = Color(hex: 0xE9DFC9).opacity(0.12)
             gold = Color(hex: 0xC9A24B); jade = Color(hex: 0x7FC0AB); red = Color(hex: 0xE08484)
         } else {
