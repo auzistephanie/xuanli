@@ -33,11 +33,12 @@
 | Starfield | `lib/widgets/starfield.dart` | 閃爍星點背景（固定公式位置） |
 | Orrery | `lib/widgets/orrery.dart` ＋ 純函數 `lib/widgets/orrery_geometry.dart` | 天體儀：3 個傾斜軌道環＋2 粒行星＋中心球（可放分數）；投影數學抽純函數方便測試 |
 | TiltCard | `lib/widgets/tilt_card.dart` ＋ `tilt_math.dart` | 傾斜（感應器／拖動）＋全息反光；角度計算抽純函數 |
-| GlassCard | `lib/theme/xuanli_theme.dart` 加 `glassDecoration()` | 半透明卡樣式 |
+| WuxingOrbs | `lib/widgets/wuxing_orbs.dart` | 五行晶球列 |
+| ShakeDetector | `lib/services/shake_detector.dart` | 純 Dart 搖動偵測 |
 | StickCylinder 3D | `lib/widgets/stick_cylinder.dart`（改寫） | 立體籤筒、搖動、一支籤彈出 |
 | FlipReveal | `lib/widgets/flip_reveal.dart` | 背面→正面 3D 翻卡 |
 | 過場 | `lib/theme/page_transitions.dart` | 淡入＋輕微放大，取代預設 slide |
-| Icon 渲染 | `tool/render_icon_test.dart`（`flutter test` 跑） | 用 Orrery 畫 icon A → `assets/icon/*.png` |
+| Icon 渲染 | `tool/render_icon_test.dart`（手動 `flutter test --update-goldens` 跑） | 用 Orrery 畫 icon A → `assets/icon/*.png` |
 
 ## 4. 落點
 
