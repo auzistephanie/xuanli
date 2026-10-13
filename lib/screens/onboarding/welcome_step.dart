@@ -121,24 +121,24 @@ class _WelcomeStepState extends State<WelcomeStep>
     return Column(
       children: [
         const Text(
-          '160 個組合，\n邊個係你？',
+          '160 種性格組合，\n邊種先似你？',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: XuanLiFonts.serif,
-            fontSize: 34,
+            fontSize: 32,
             height: 1.35,
             fontWeight: FontWeight.w900,
-            letterSpacing: 3,
+            letterSpacing: 1,
             color: _paper,
           ),
         ),
         const SizedBox(height: 14),
         Text(
-          '八字日主 × MBTI，砌出只屬於你嘅四字組合',
+          '用出生日期同一個短測驗，得出屬於你嘅四字名',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
-            letterSpacing: 1.5,
+            letterSpacing: 0.4,
             height: 1.6,
             color: _gold.withValues(alpha: 0.95),
           ),
@@ -149,8 +149,8 @@ class _WelcomeStepState extends State<WelcomeStep>
 
   Widget _points() {
     const items = [
-      '睇下你係「林間清泉」定「雪嶺孤松」',
-      '之後每日宜忌、揀日子，都跟你嘅喜忌神',
+      '睇下你偏內斂溫柔，定獨立堅定',
+      '之後每日宜忌、揀日子，都跟你邊種五行較順',
       '免註冊・全離線・出生資料唔離你部機',
     ];
     return Column(

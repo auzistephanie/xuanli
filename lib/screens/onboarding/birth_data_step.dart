@@ -135,7 +135,7 @@ class BirthDataStep extends StatelessWidget {
     required this.onChanged,
     required this.onNext,
     this.title = '你嘅出生一刻',
-    this.subtitle = '八字由出生年月日時而定，我哋以此推算你嘅五行喜忌。資料只儲存喺你部機，唔會上傳。',
+    this.subtitle = '出生年月日時用來計五行，睇邊種對你較順。資料只儲存喺你部機，唔會上傳。',
     this.showProgress = true,
   });
 

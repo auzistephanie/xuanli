@@ -41,7 +41,7 @@ void main() {
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     // Step 1：MBTI 16 宮格，冇快速測驗。
-    expect(find.text('佢嘅性格底色'), findsOneWidget);
+    expect(find.text('佢偏向邊種性格'), findsOneWidget);
     expect(find.textContaining('快速測驗'), findsNothing);
     await tester.ensureVisible(find.text(mbti));
     await tester.tap(find.text(mbti));
@@ -105,7 +105,7 @@ void main() {
 
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
-    expect(find.text('佢嘅性格底色'), findsOneWidget);
+    expect(find.text('佢偏向邊種性格'), findsOneWidget);
 
     await tester.tap(find.byTooltip('返回'));
     await tester.pumpAndSettle();

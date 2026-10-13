@@ -124,7 +124,7 @@ class _RevealStepState extends State<RevealStep>
                     _fadeUp(
                       intro,
                       Text(
-                        '你嘅八字 × MBTI 組合係……',
+                        '你嘅性格組合係……',
                         style: TextStyle(
                           fontSize: 14,
                           letterSpacing: 3,
@@ -132,11 +132,11 @@ class _RevealStepState extends State<RevealStep>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 20),
                     _seal(seal.value),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 16),
                     _fadeUp(chips, _chips(profile)),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -147,20 +147,36 @@ class _RevealStepState extends State<RevealStep>
                           ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 8),
                     _fadeUp(
                       motto,
-                      Text(
-                        combo.motto,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          letterSpacing: 3,
-                          color: _gold,
-                        ),
+                      Column(
+                        children: [
+                          Text(
+                            combo.motto,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              letterSpacing: 3,
+                              color: _gold,
+                            ),
+                          ),
+                          if (combo.strengths.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              '即係：${combo.strengths.first}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                height: 1.4,
+                                color: _paper.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 12),
                     _fadeUp(
                       rarityIn,
                       Column(

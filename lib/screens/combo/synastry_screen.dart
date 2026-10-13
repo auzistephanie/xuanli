@@ -151,6 +151,11 @@ class SynastryScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
+            '五行關係嘅稱呼',
+            style: TextStyle(fontSize: 11, letterSpacing: 2, color: colors.ink30),
+          ),
+          const SizedBox(height: 6),
+          Text(
             result.name,
             style: TextStyle(
               fontFamily: XuanLiFonts.serif,

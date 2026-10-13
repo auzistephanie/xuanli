@@ -36,9 +36,9 @@ class ShareCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const ShareBrand(),
-          const SizedBox(height: 24),
-          _chips(),
           const SizedBox(height: 16),
+          _chips(),
+          const SizedBox(height: 12),
           Text(
             combo.name,
             textAlign: TextAlign.center,
@@ -61,7 +61,19 @@ class ShareCard extends StatelessWidget {
               color: _gold,
             ),
           ),
-          const SizedBox(height: 16),
+          if (combo.strengths.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '即係：${combo.strengths.first}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.3,
+                color: _paper.withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
           _rarity(),
           const SizedBox(height: 16),
           _divider(),

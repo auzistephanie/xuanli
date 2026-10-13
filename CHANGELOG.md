@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-13：**性格流程文案改到一眼明** — 封面「睇下你係林間清泉定雪嶺孤松」同「喜忌神」改成先講感覺（內斂溫柔／獨立堅定）同「邊種五行較順」。出生、性格測驗、揭曉、檔案卡、組合頁、分享卡、合盤只改顯示字：四字名下面加「即係：」加現有強項第一句；檔案卡「喜用神／忌神／紫微命宮」改「順嘅五行／逆嘅五行／參考主星」；「點樣發力」改「幾時做大事最順手」。`combos.json` 160 組名同內文冇改（spec 鎖死）。唔改計分、儲存、部署。
+
 - 2026-10-13：**main 用 GitHub Actions 部署 web** — Vercel 自己嘅 Git 部署繼續關住（`vercel.json`，開返會把冇 `index.html` 嘅 repo 根目錄推上線，變成 404）。新 `.github/workflows/deploy-web.yml`：push `main` 或手動 Run workflow 時，裝 Flutter 3.47.7、`flutter build web --release`、確認建成嘅 `<title>` 有 Kairo，再用 Vercel CLI 63.1.2 把 `build/web` deploy 去 production（https://xuanli-opal.vercel.app）。要三個 GitHub Actions secret：`VERCEL_TOKEN`（Stephanie 自己喺 Vercel 建立，repo 冇呢粒）、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`。步驟同數值寫喺 README「部署（web）」。**未驗證**：冇 token，所以未真係 deploy 上 production。
 
 - 2026-10-13：**網頁公開品牌補齊 Kairo** — 線上 https://xuanli-opal.vercel.app 仲係 10-11 手動部署，`<title>` 同描述係「玄曆 XuanLi」。repo 入面 app 畫面同 `web/index.html` 嘅 `<title>` 喺 Kairo 改名時已經係「Kairo 吉時」。今次補 Open Graph／Twitter 標題同描述（沿用同一句，唔改文案）、`application-name`，以及 README 標題由「玄曆 XuanLi」改做「Kairo 吉時」。`vercel.json` 仍然停 git 自動部署（repo 根目錄冇 build 出嚟嘅 `index.html`，開返會令線上版 404），所以 merge 唔會自動換線上頁；更新線上版仍然要 `flutter build web --release` 之後喺 `build/web` 行 `vercel deploy --prod`。

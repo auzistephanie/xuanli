@@ -57,6 +57,7 @@ void main() {
     }
     expect(find.text('乙木日主'), findsOneWidget);
     expect(find.textContaining('柔韌有光'), findsOneWidget);
+    expect(find.text('即係：審美同直覺俱佳'), findsOneWidget);
     expect(find.text('每 114 人先有一個'), findsOneWidget);
     expect(find.text('估算約 0.88%'), findsOneWidget);
     expect(find.text('分享我嘅組合'), findsOneWidget);

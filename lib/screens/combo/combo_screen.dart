@@ -163,6 +163,14 @@ class ComboDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: KairoPalette.goldBright, letterSpacing: 2),
               textAlign: TextAlign.center,
             ),
+            if (combo.strengths.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '即係：${combo.strengths.first}',
+                style: TextStyle(fontSize: 13, height: 1.5, color: KairoPalette.paper.withValues(alpha: 0.92)),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const SizedBox(height: 18),
             WuxingOrbs(wuxing: profile.wuxing),
             const SizedBox(height: 14),
@@ -215,7 +223,7 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title('點樣發力（跟你嘅組合）',
+          _title('幾時做大事最順手',
               TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
               mark: MoonMark(color: colors.gold)),
           const SizedBox(height: 7),

@@ -153,7 +153,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (final label in ['喜用神', '乙木日主', '100%']) {
+    for (final label in ['順嘅五行', '乙木日主', '100%']) {
       final text = tester.widget<Text>(find.textContaining(label).first);
       expect(
         text.style!.color!.computeLuminance(),

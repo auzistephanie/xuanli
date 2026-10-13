@@ -33,6 +33,7 @@ void main() {
 
     expect(find.text('林間清泉'), findsOneWidget);
     expect(find.textContaining('柔韌有光'), findsOneWidget);
+    expect(find.text('即係：審美同直覺俱佳'), findsOneWidget);
     expect(find.text('乙木日主'), findsOneWidget);
     expect(find.text('ISFP'), findsOneWidget);
     for (final element in ['木', '火', '土', '金', '水']) {

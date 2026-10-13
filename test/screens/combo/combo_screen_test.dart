@@ -49,7 +49,9 @@ void main() {
     expect(find.textContaining('ISFP'), findsWidgets);
     expect(find.text('林間清泉'), findsOneWidget);
     expect(find.textContaining('柔韌有光'), findsOneWidget);
-    expect(find.textContaining('審美同直覺俱佳'), findsOneWidget);
+    expect(find.text('即係：審美同直覺俱佳'), findsOneWidget);
+    expect(find.textContaining('幾時做大事最順手'), findsOneWidget);
+    expect(find.text('審美同直覺俱佳'), findsOneWidget);
     expect(find.textContaining('諗多過講'), findsOneWidget);
     expect(find.textContaining('水木旺嘅日子'), findsOneWidget);
     expect(find.text('約 0.88%'), findsOneWidget);
@@ -66,6 +68,7 @@ void main() {
     expect(find.textContaining('INTJ'), findsWidgets);
     expect(find.text('雪嶺孤松'), findsOneWidget);
     expect(find.textContaining('立志如山・落子無聲'), findsOneWidget);
+    expect(find.text('即係：長線眼光極準'), findsOneWidget);
   });
 
   testWidgets('撳返、撳分享 icon：返會 pop，分享會開分享卡預覽頁', (tester) async {

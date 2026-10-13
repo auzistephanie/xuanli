@@ -122,8 +122,9 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
           ),
           const SizedBox(height: 4),
           Text(
-            '之後所有推薦，都跟呢張卡而行。',
-            style: TextStyle(fontSize: 12.5, color: colors.ink60),
+            '之後每日宜忌同活動建議，都跟呢張卡。',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.5, height: 1.6, color: colors.ink60),
           ),
           const SizedBox(height: 16),
           Material(
@@ -291,23 +292,23 @@ class _ProfileCardStepState extends State<ProfileCardStep> {
                       children: [
                         _profileStatBox(
                           colors,
-                          '喜用神',
+                          '順嘅五行',
                           _profile.favorable.join('・'),
-                          _wuxingLabelColors['木']!, // design html: 喜用神 值用淺翠綠 #8fd0a8
+                          _wuxingLabelColors['木']!, // design html: 順嘅五行 值用淺翠綠 #8fd0a8
                         ),
                         const SizedBox(width: 8),
                         _profileStatBox(
                           colors,
-                          '忌神',
+                          '逆嘅五行',
                           _profile.unfavorable.join('・'),
                           const Color(
                             0xFFE0A1A1,
-                          ), // design html: 忌神 值用淺紅 #e0a1a1
+                          ), // design html: 逆嘅五行 值用淺紅 #e0a1a1
                         ),
                         const SizedBox(width: 8),
                         _profileStatBox(
                           colors,
-                          '紫微命宮',
+                          '參考主星',
                           _profile.ziweiStar,
                           colors.gold,
                         ),
