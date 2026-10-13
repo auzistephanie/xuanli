@@ -17,6 +17,23 @@ const shareNavyDeep = Color(0xFF131829);
 const sharePaper = Color(0xFFF6EFE2);
 const shareGold = Color(0xFFC9A24B);
 
+/// 已出圖嘅宮職。同一 `palaceTitle` 共用一張（而家每個職位只得一個組合）。
+/// 鍵係職位名，值係 `assets/palace/` 入面嘅扁平角色圖。
+const palaceSampleAssets = <String, String>{
+  '城守將軍': 'assets/palace/chengshou-jiangjun.png',
+  '御用畫師': 'assets/palace/yuyong-huashi.png',
+  '軍師': 'assets/palace/junshi.png',
+  '大將軍': 'assets/palace/dajiangjun.png',
+  '水師將軍': 'assets/palace/shuishi-jiangjun.png',
+  '南衙統領': 'assets/palace/nanya-tongling.png',
+};
+
+/// 未出圖嘅職位用呢張通用宮官像，分享卡中間唔會空。
+const palaceFallbackAsset = 'assets/palace/fallback.png';
+
+String palaceIllustrationAsset(String palaceTitle) =>
+    palaceSampleAssets[palaceTitle] ?? palaceFallbackAsset;
+
 /// 所有分享卡共用嘅藏藍漸變底（組合卡、合盤卡）。
 class ShareCardBackground extends StatelessWidget {
   final Widget child;
@@ -87,7 +104,10 @@ class ShareFooter extends StatelessWidget {
             size: 66,
             padding: EdgeInsets.zero,
             backgroundColor: sharePaper,
-            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: shareNavy),
+            eyeStyle: const QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: shareNavy,
+            ),
             dataModuleStyle: const QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
               color: shareNavy,
@@ -113,7 +133,10 @@ class ShareFooter extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 '免註冊・全離線・資料唔離機',
-                style: TextStyle(fontSize: 11, color: shareGold.withValues(alpha: 0.9)),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: shareGold.withValues(alpha: 0.9),
+                ),
               ),
               const SizedBox(height: 5),
               Text(

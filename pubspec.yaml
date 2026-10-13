@@ -74,6 +74,7 @@ flutter:
     - lib/data/activity_categories.json
     - lib/data/combos.json
     - lib/data/mbti_tones.json
+    - assets/palace/
 
   fonts:
     - family: NotoSerifTC
