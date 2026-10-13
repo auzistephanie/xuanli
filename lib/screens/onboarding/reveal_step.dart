@@ -98,12 +98,11 @@ class _RevealStepState extends State<RevealStep>
     final dayGan = profile.pillars[2].substring(0, 1);
     final combo = getCombo(dayGan: dayGan, mbti: profile.mbti);
     final rarity = comboRarity(dayGan: dayGan, mbti: profile.mbti);
-    final chars = combo.name.characters.toList();
+    final chars = combo.palaceTitle.characters.toList();
 
     final intro = _iv(0.0, 0.12);
     final seal = _iv(0.10, 0.30, Curves.easeOutBack);
-    final chips = _iv(0.30, 0.40);
-    final motto = _iv(0.72, 0.82);
+    final seen = _iv(0.74, 0.86);
     final rarityIn = _iv(0.80, 0.90);
     final buttons = _iv(0.88, 1.0);
 
@@ -124,7 +123,7 @@ class _RevealStepState extends State<RevealStep>
                     _fadeUp(
                       intro,
                       Text(
-                        '你嘅性格組合係……',
+                        '你的宮職是',
                         style: TextStyle(
                           fontSize: 14,
                           letterSpacing: 3,
@@ -134,9 +133,7 @@ class _RevealStepState extends State<RevealStep>
                     ),
                     const SizedBox(height: 20),
                     _seal(seal.value),
-                    const SizedBox(height: 16),
-                    _fadeUp(chips, _chips(profile)),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -149,30 +146,28 @@ class _RevealStepState extends State<RevealStep>
                     ),
                     const SizedBox(height: 8),
                     _fadeUp(
-                      motto,
+                      seen,
                       Column(
                         children: [
                           Text(
-                            combo.motto,
+                            '${profile.dayMaster}命 · ${profile.mbti}',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 15,
-                              letterSpacing: 3,
+                              fontSize: 14,
+                              letterSpacing: 1.2,
                               color: _gold,
                             ),
                           ),
-                          if (combo.strengths.isNotEmpty) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              '即係：${combo.strengths.first}',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                height: 1.4,
-                                color: _paper.withValues(alpha: 0.9),
-                              ),
+                          const SizedBox(height: 8),
+                          Text(
+                            combo.thisIsYou,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              height: 1.4,
+                              color: _paper.withValues(alpha: 0.9),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
@@ -274,36 +269,6 @@ class _RevealStepState extends State<RevealStep>
     );
   }
 
-  Widget _chips(Profile profile) {
-    Widget chip(String text, {required bool filled}) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
-        color: filled ? _gold : Colors.transparent,
-        border: filled ? null : Border.all(color: _gold),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: filled ? _navy : _paper,
-        ),
-      ),
-    );
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        chip('${profile.dayMaster}日主', filled: false),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text('×', style: TextStyle(fontSize: 16, color: _gold)),
-        ),
-        chip(profile.mbti, filled: true),
-      ],
-    );
-  }
-
   Widget _char(String ch, Animation<double> a) {
     final v = a.value.clamp(0.0, 1.0);
     return Opacity(
@@ -316,7 +281,7 @@ class _RevealStepState extends State<RevealStep>
             ch,
             style: const TextStyle(
               fontFamily: XuanLiFonts.serif,
-              fontSize: 48,
+              fontSize: 40,
               fontWeight: FontWeight.w900,
               color: _paper,
             ),

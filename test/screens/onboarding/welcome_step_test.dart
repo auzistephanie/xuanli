@@ -21,6 +21,7 @@ void main() {
 
     expect(find.text('Kairo'), findsOneWidget);
     expect(find.textContaining('160 種性格組合'), findsOneWidget);
+    expect(find.textContaining('看得懂的宮職'), findsOneWidget);
     expect(find.textContaining('內斂溫柔'), findsOneWidget);
     expect(find.textContaining('獨立堅定'), findsOneWidget);
     expect(find.textContaining('邊種五行較順'), findsOneWidget);

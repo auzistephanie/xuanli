@@ -20,7 +20,7 @@ class ShareCardScreen extends StatelessWidget {
     return SharePreviewScreen(
       title: '分享我嘅組合',
       card: ShareCard(profile: profile, combo: combo),
-      filename: combo.name,
+      filename: combo.palaceTitle,
       service: service,
     );
   }

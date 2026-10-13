@@ -191,7 +191,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ComboDetailScreen), findsOneWidget);
-      expect(find.text('林間清泉'), findsOneWidget);
+      expect(find.text('御用畫師'), findsOneWidget);
     });
 
     testWidgets('連續快速撳兩下檔案卡，淨係 push 一次 ComboDetailScreen', (tester) async {
@@ -251,7 +251,7 @@ void main() {
             '個 guard 冇擋到 race。',
       );
       expect(find.byType(ComboDetailScreen), findsOneWidget);
-      expect(find.text('林間清泉'), findsOneWidget);
+      expect(find.text('御用畫師'), findsOneWidget);
 
       // ComboDetailScreen 用自己畫嘅 '‹' 返回鍵，唔係標準 AppBar back
       // button，所以直接撳嗰個 widget（唔用 tester.pageBack()）。

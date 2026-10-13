@@ -134,7 +134,7 @@ class _WelcomeStepState extends State<WelcomeStep>
         ),
         const SizedBox(height: 14),
         Text(
-          '用出生日期同一個短測驗，得出屬於你嘅四字名',
+          '出生日的天干對上性格，給你一個看得懂的宮職。',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
