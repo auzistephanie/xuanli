@@ -1,4 +1,4 @@
-# 玄曆 XuanLi
+# Kairo 吉時
 
 中國傳統擇日 × 八字五行 × 紫微 × MBTI：同一日，唔同人有唔同宜忌。
 全離線、免註冊，出生資料絕不離開你部機。
@@ -26,6 +26,7 @@ flutter build web --release       # 輸出 build/web
 
 Vercel 專案冇 build 步驟（Flutter 唔喺 Vercel 度），`vercel.json` 已停用 GitHub 自動部署。
 更新線上版：`flutter build web --release`，再喺 `build/web` 內用 `vercel deploy --prod`。
+頁面標題以 `web/index.html` 為準（「Kairo 吉時」）。2026-10-11 嗰次手動部署仲係舊標題「玄曆 XuanLi」，要重新 deploy 先會喺線上換到。
 
 ## 重新生成 app icon／字體
 
