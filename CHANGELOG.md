@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-13：**結果頁新方向，先寫 10 則樣本** — `docs/kairo-result-samples.md`。鍵確認係日柱天干（甲至癸）× MBTI，160 鍵齊。樣本用書面語，名稱改成「庚金命・開路將軍｜ESTJ」呢類看得懂嘅角色，十干各一則（指定六組＋丁 INFP、戊 ISTJ、辛 INTP、壬 ENFJ）。本月提醒按 2026-10-13 戊戌月寫。**未改** `combos.json` 同 app 程式，等 Stephanie 審語氣。
+
 - 2026-10-13：**性格流程文案改到一眼明** — 封面「睇下你係林間清泉定雪嶺孤松」同「喜忌神」改成先講感覺（內斂溫柔／獨立堅定）同「邊種五行較順」。出生、性格測驗、揭曉、檔案卡、組合頁、分享卡、合盤只改顯示字：四字名下面加「即係：」加現有強項第一句；檔案卡「喜用神／忌神／紫微命宮」改「順嘅五行／逆嘅五行／參考主星」；「點樣發力」改「幾時做大事最順手」。`combos.json` 160 組名同內文冇改（spec 鎖死）。唔改計分、儲存、部署。
 
 - 2026-10-13：**main 用 GitHub Actions 部署 web** — Vercel 自己嘅 Git 部署繼續關住（`vercel.json`，開返會把冇 `index.html` 嘅 repo 根目錄推上線，變成 404）。新 `.github/workflows/deploy-web.yml`：push `main` 或手動 Run workflow 時，裝 Flutter 3.47.7、`flutter build web --release`、確認建成嘅 `<title>` 有 Kairo，再用 Vercel CLI 63.1.2 把 `build/web` deploy 去 production（https://xuanli-opal.vercel.app）。要三個 GitHub Actions secret：`VERCEL_TOKEN`（Stephanie 自己喺 Vercel 建立，repo 冇呢粒）、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`。步驟同數值寫喺 README「部署（web）」。**未驗證**：冇 token，所以未真係 deploy 上 production。
