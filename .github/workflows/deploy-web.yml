@@ -1,0 +1,70 @@
+# Merge to main builds Flutter web and deploys build/web to the existing
+# Vercel project (xuanli-opal.vercel.app). Vercel Git deploys stay off:
+# vercel.json sets git.deploymentEnabled to false because the repo root
+# has no built site, and turning that on would publish a 404.
+name: Deploy web to Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build Flutter web and deploy
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check Vercel secrets
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::GitHub Actions secret ${name} is empty. Add it using the steps in README 部署（web）."
+              missing=1
+            fi
+          done
+          exit "${missing}"
+
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.7"
+          cache: true
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Check built page title
+        run: |
+          set -euo pipefail
+          grep -q '<title>Kairo' build/web/index.html
+
+      - name: Install Vercel CLI
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/vercel-cli"
+          npm install --prefix "${RUNNER_TEMP}/vercel-cli" vercel@63.1.2
+
+      - name: Deploy production
+        working-directory: build/web
+        run: |
+          set -euo pipefail
+          mkdir -p .vercel
+          python3 -c 'import json, os; json.dump({"orgId": os.environ["VERCEL_ORG_ID"], "projectId": os.environ["VERCEL_PROJECT_ID"]}, open(".vercel/project.json", "w"))'
+          "${RUNNER_TEMP}/vercel-cli/node_modules/.bin/vercel" deploy --prod --yes
