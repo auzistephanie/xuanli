@@ -120,8 +120,8 @@ class _PartnerFlowState extends State<PartnerFlow> {
           ),
           1 => MbtiStep(
             onDone: _onMbti,
-            title: '佢嘅性格底色',
-            subtitle: '揀朋友嘅 MBTI 類型（唔肯定可以問下佢）。',
+            title: '佢偏向邊種性格',
+            subtitle: '揀朋友嘅性格類型（四個字母）。唔肯定可以問下佢。',
             showProgress: false,
             allowQuiz: false,
           ),

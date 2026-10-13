@@ -2,28 +2,68 @@ import 'dart:convert';
 
 class Combo {
   final String name;
-  final String motto;
-  final String description;
-  final List<String> strengths;
-  final List<String> watchouts;
-  final String howToWin;
+  final String palaceTitle;
+  final String roleLine;
+  final String plainLine;
+  final String thisIsYou;
+  final List<String> daily;
+  final String blindSpot;
+  final List<String> jobs;
+  final String bestMatchKey;
+  final String bestMatchWhy;
+
+  /// 靜態一句。引擎沒有按月替換文案的入口，所以不寫月柱，過了戊戌月仍可用。
+  final String reminder;
+  final String luckyColor;
+  final String luckyNumber;
+  final String luckyDirection;
+  final String shareLine;
 
   Combo({
     required this.name,
-    required this.motto,
-    required this.description,
-    required this.strengths,
-    required this.watchouts,
-    required this.howToWin,
+    required this.palaceTitle,
+    required this.roleLine,
+    required this.plainLine,
+    required this.thisIsYou,
+    required this.daily,
+    required this.blindSpot,
+    required this.jobs,
+    required this.bestMatchKey,
+    required this.bestMatchWhy,
+    required this.reminder,
+    required this.luckyColor,
+    required this.luckyNumber,
+    required this.luckyDirection,
+    required this.shareLine,
   });
+
+  String get luckyText => '$luckyColor，數字 $luckyNumber，面朝$luckyDirection。';
+
+  /// 「癸水命・御前顧問（INFJ）。水生木，……」
+  String bestMatchDisplay() {
+    final other = loadCombos()[bestMatchKey];
+    if (other == null) return bestMatchWhy;
+    final mbti = bestMatchKey.split('_').last;
+    final head = other.name.split('｜').first;
+    return '$head（$mbti）。$bestMatchWhy';
+  }
 
   factory Combo.fromJson(Map<String, dynamic> json) => Combo(
         name: json['name'] as String,
-        motto: json['motto'] as String,
-        description: json['description'] as String,
-        strengths: List<String>.from(json['strengths'] as List),
-        watchouts: List<String>.from(json['watchouts'] as List),
-        howToWin: json['howToWin'] as String,
+        palaceTitle: json['palaceTitle'] as String,
+        roleLine: json['roleLine'] as String,
+        plainLine: json['plainLine'] as String,
+        thisIsYou: json['thisIsYou'] as String,
+        daily: List<String>.from(json['daily'] as List),
+        blindSpot: json['blindSpot'] as String,
+        jobs: List<String>.from(json['jobs'] as List),
+        bestMatchKey: json['bestMatchKey'] as String,
+        bestMatchWhy: json['bestMatchWhy'] as String,
+        reminder: json['reminder'] as String,
+        luckyColor: json['luckyColor'] as String,
+        luckyNumber: json['luckyNumber'] as String,
+        luckyDirection: json['luckyDirection'] as String,
+        shareLine: json['shareLine'] as String,
       );
 }
 

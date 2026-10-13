@@ -30,7 +30,7 @@ void main() {
   // 第二個 fixture：驗證另一個 dayGan_MBTI 組合鍵，避免 lookup bug（錯柱/錯 substring）
   // 剛好都撞中「乙_ISFP」都仍然過。1999-09-20 09:30 已知 dayGan=乙；
   // 2000-01-07 09:30 已驗證 dayGan=甲（見 pillars[2]/dayMaster），配 mbti=INTJ
-  // 對應 combos.json 嘅 '甲_INTJ'：name='雪嶺孤松', motto='立志如山・落子無聲'。
+  // 對應 combos.json 嘅 '甲_INTJ'：宮職「軍師」。
   final profile2 = buildProfile(
     id: 'p2',
     name: '阿甲',
@@ -47,11 +47,13 @@ void main() {
     expect(find.text('我嘅組合'), findsOneWidget);
     expect(find.textContaining('乙木日主'), findsOneWidget);
     expect(find.textContaining('ISFP'), findsWidgets);
-    expect(find.text('林間清泉'), findsOneWidget);
-    expect(find.textContaining('柔韌有光'), findsOneWidget);
-    expect(find.textContaining('審美同直覺俱佳'), findsOneWidget);
-    expect(find.textContaining('諗多過講'), findsOneWidget);
-    expect(find.textContaining('水木旺嘅日子'), findsOneWidget);
+    expect(find.text('御用畫師'), findsOneWidget);
+    expect(find.textContaining('看顏色、質地和細節'), findsOneWidget);
+    expect(find.textContaining('同一件衣服'), findsOneWidget);
+    expect(find.text('日常寫照'), findsOneWidget);
+    expect(find.text('你的盲點'), findsOneWidget);
+    expect(find.textContaining('視覺設計師'), findsOneWidget);
+    expect(find.textContaining('御前顧問'), findsOneWidget);
     expect(find.text('約 0.88%'), findsOneWidget);
     expect(find.textContaining('每 114 人'), findsOneWidget);
     expect(find.textContaining('估算'), findsOneWidget);
@@ -64,8 +66,9 @@ void main() {
     expect(find.text('我嘅組合'), findsOneWidget);
     expect(find.textContaining('甲木日主'), findsOneWidget);
     expect(find.textContaining('INTJ'), findsWidgets);
-    expect(find.text('雪嶺孤松'), findsOneWidget);
-    expect(find.textContaining('立志如山・落子無聲'), findsOneWidget);
+    expect(find.text('軍師'), findsOneWidget);
+    expect(find.textContaining('看長遠的棋'), findsOneWidget);
+    expect(find.textContaining('兩年後這件事還成不成立'), findsOneWidget);
   });
 
   testWidgets('撳返、撳分享 icon：返會 pop，分享會開分享卡預覽頁', (tester) async {
@@ -84,7 +87,7 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(find.text('林間清泉'), findsOneWidget);
+    expect(find.text('御用畫師'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.ios_share));
     await tester.pump();
@@ -97,7 +100,7 @@ void main() {
     await tester.tap(find.text('‹'));
     await tester.pumpAndSettle();
     expect(find.text('open'), findsOneWidget);
-    expect(find.text('林間清泉'), findsNothing);
+    expect(find.text('御用畫師'), findsNothing);
   });
 
   testWidgets('組合名卡可傾斜，有五行晶球', (tester) async {

@@ -88,8 +88,8 @@ class SynastryScreen extends StatelessWidget {
                     title: '分享合盤',
                     filename: '合盤-${result.name}',
                     card: SynastryShareCard(
-                      comboNameA: comboA.name,
-                      comboNameB: comboB.name,
+                      comboNameA: comboA.palaceTitle,
+                      comboNameB: comboB.palaceTitle,
                       result: result,
                     ),
                   ),
@@ -134,7 +134,7 @@ class SynastryScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(child: _comboLabel(colors, '你', a.name)),
+              Flexible(child: _comboLabel(colors, '你', a.palaceTitle)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
@@ -146,10 +146,15 @@ class SynastryScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Flexible(child: _comboLabel(colors, '朋友', b.name)),
+              Flexible(child: _comboLabel(colors, '朋友', b.palaceTitle)),
             ],
           ),
           const SizedBox(height: 18),
+          Text(
+            '五行關係嘅稱呼',
+            style: TextStyle(fontSize: 11, letterSpacing: 2, color: colors.ink30),
+          ),
+          const SizedBox(height: 6),
           Text(
             result.name,
             style: TextStyle(

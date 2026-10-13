@@ -13,7 +13,7 @@ void main() {
     String? result;
     await tester.pumpWidget(wrap(MbtiStep(onDone: (mbti) => result = mbti)));
 
-    expect(find.text('你嘅性格底色'), findsOneWidget);
+    expect(find.text('你偏向邊種性格'), findsOneWidget);
     // 16 宮格 + 標題等內容喺預設 800x600 test viewport 高過個 viewport，
     // 同真機一樣要靠嗰層 SingleChildScrollView 先睇到落面嘅選項——所以
     // tap 之前要 ensureVisible() 幫手 scroll 埋去，先撳得中。
@@ -130,7 +130,7 @@ void main() {
     // 切去 16 宮格模式。
     await tester.tap(find.text('我知我嘅類型'));
     await tester.pump();
-    expect(find.text('你嘅性格底色'), findsOneWidget);
+    expect(find.text('你偏向邊種性格'), findsOneWidget);
 
     // 切返去快速測驗模式。
     await tester.tap(find.text('快速測驗（8題）'));

@@ -17,8 +17,8 @@ class MbtiStep extends StatefulWidget {
   const MbtiStep({
     super.key,
     required this.onDone,
-    this.title = '你嘅性格底色',
-    this.subtitle = 'MBTI 會影響我哋同你講嘢嘅方式，同埋活動建議嘅取向。',
+    this.title = '你偏向邊種性格',
+    this.subtitle = '直接揀四個字母，或者答 8 條短題。會影響之後點同你講，同埋活動建議。',
     this.showProgress = true,
     this.allowQuiz = true,
   });

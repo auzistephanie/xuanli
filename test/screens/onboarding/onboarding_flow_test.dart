@@ -51,7 +51,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Step 2: MBTI，16 宮格揀 ISFP。
-    expect(find.text('你嘅性格底色'), findsOneWidget);
+    expect(find.text('你偏向邊種性格'), findsOneWidget);
     // 16 宮格 + 標題等內容喺預設 800x600 test viewport 高過個 viewport
     // （同 mbti_step_test.dart 個 wrap() 註解講嘅一樣），要靠嗰層
     // SingleChildScrollView 先睇到落面嘅選項——所以 tap 之前要

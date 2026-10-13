@@ -41,7 +41,7 @@ void main() {
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     // Step 1：MBTI 16 宮格，冇快速測驗。
-    expect(find.text('佢嘅性格底色'), findsOneWidget);
+    expect(find.text('佢偏向邊種性格'), findsOneWidget);
     expect(find.textContaining('快速測驗'), findsNothing);
     await tester.ensureVisible(find.text(mbti));
     await tester.tap(find.text(mbti));
@@ -67,8 +67,9 @@ void main() {
     expect(find.text('相處之道'), findsOneWidget);
     expect(find.text('分享合盤卡'), findsOneWidget);
     expect(find.textContaining('唔會儲存'), findsOneWidget);
-    // 兩個組合名都喺度：乙_ISFP「林間清泉」，2000-01-01 係戊日／INTJ 另一個組合。
-    expect(find.text('林間清泉'), findsOneWidget);
+    // 兩個宮職都喺度：乙_ISFP「御用畫師」，2000-01-01 係戊日／INTJ「定局參謀」。
+    expect(find.text('御用畫師'), findsOneWidget);
+    expect(find.text('定局參謀'), findsOneWidget);
   });
 
   testWidgets('私隱：朋友資料由頭到尾冇寫入任何儲存', (tester) async {
@@ -105,7 +106,7 @@ void main() {
 
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
-    expect(find.text('佢嘅性格底色'), findsOneWidget);
+    expect(find.text('佢偏向邊種性格'), findsOneWidget);
 
     await tester.tap(find.byTooltip('返回'));
     await tester.pumpAndSettle();
@@ -132,7 +133,7 @@ void main() {
       title: '分享合盤',
       filename: '合盤-${result.name}',
       service: service,
-      card: SynastryShareCard(comboNameA: '林間清泉', comboNameB: '雪嶺孤松', result: result),
+      card: SynastryShareCard(comboNameA: '御用畫師', comboNameB: '軍師', result: result),
     )));
 
     expect(find.text(result.name), findsOneWidget);
@@ -175,7 +176,7 @@ void main() {
       await tester.pumpWidget(wrap(SharePreviewScreen(
         title: '分享合盤',
         filename: pair.join(),
-        card: SynastryShareCard(comboNameA: '林間清泉', comboNameB: '雪嶺孤松', result: result),
+        card: SynastryShareCard(comboNameA: '御用畫師', comboNameB: '軍師', result: result),
       )));
       expect(tester.takeException(), isNull, reason: pair.join());
     }

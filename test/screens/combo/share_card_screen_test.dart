@@ -31,14 +31,11 @@ void main() {
   testWidgets('預覽顯示組合名、motto、五行同優勢，但唔洩露姓名同出生資料', (tester) async {
     await tester.pumpWidget(wrap(ShareCardScreen(profile: profile)));
 
-    expect(find.text('林間清泉'), findsOneWidget);
-    expect(find.textContaining('柔韌有光'), findsOneWidget);
-    expect(find.text('乙木日主'), findsOneWidget);
-    expect(find.text('ISFP'), findsOneWidget);
-    for (final element in ['木', '火', '土', '金', '水']) {
-      expect(find.text(element), findsOneWidget);
-    }
-    expect(find.text('估算約 0.88%・每 114 人先有一個'), findsOneWidget);
+    expect(find.text('御用畫師'), findsOneWidget);
+    expect(find.text('乙木命 · ISFP'), findsOneWidget);
+    expect(find.textContaining('同一件衣服'), findsOneWidget);
+    expect(find.textContaining('適合當視覺設計師'), findsOneWidget);
+    expect(find.textContaining('你呢'), findsNothing);
     expect(find.textContaining('阿玄'), findsNothing);
     expect(find.textContaining('1999'), findsNothing);
     expect(find.textContaining('香港'), findsNothing);
@@ -52,7 +49,8 @@ void main() {
     expect(find.byType(QrImageView), findsOneWidget);
     expect(find.bySemanticsLabel('Kairo 網站 QR code'), findsOneWidget);
     expect(xuanliWebUrl, 'https://xuanli-opal.vercel.app');
-    expect(find.text('掃碼睇你嘅組合'), findsOneWidget);
+    expect(find.text('Kairo・僅供參考'), findsOneWidget);
+    expect(find.textContaining('你呢'), findsNothing);
   });
 
   testWidgets('撳分享會截出 1080×1920 PNG 交畀 share service', (tester) async {
@@ -74,7 +72,7 @@ void main() {
     await tester.pump();
 
     expect(shared, isNotNull);
-    expect(name, 'xuanli-林間清泉.png');
+    expect(name, 'xuanli-御用畫師.png');
     // PNG signature + IHDR width/height
     final bytes = shared!;
     expect(bytes.sublist(0, 8), [137, 80, 78, 71, 13, 10, 26, 10]);

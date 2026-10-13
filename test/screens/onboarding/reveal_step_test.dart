@@ -52,11 +52,11 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    for (final ch in ['林', '間', '清', '泉']) {
+    for (final ch in ['御', '用', '畫', '師']) {
       expect(find.text(ch), findsOneWidget);
     }
-    expect(find.text('乙木日主'), findsOneWidget);
-    expect(find.textContaining('柔韌有光'), findsOneWidget);
+    expect(find.text('乙木命 · ISFP'), findsOneWidget);
+    expect(find.textContaining('同一件衣服'), findsOneWidget);
     expect(find.text('每 114 人先有一個'), findsOneWidget);
     expect(find.text('估算約 0.88%'), findsOneWidget);
     expect(find.text('分享我嘅組合'), findsOneWidget);
@@ -68,7 +68,7 @@ void main() {
     await tester.pumpWidget(wrap(onContinue: () => continued = true));
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(opacityOf(tester, find.text('林')), 0);
+    expect(opacityOf(tester, find.text('御')), 0);
     await tester.tap(find.text('儲存並睇我嘅命理檔案'), warnIfMissed: false);
     expect(continued, isFalse);
   });
@@ -80,7 +80,7 @@ void main() {
     await tester.tapAt(const Offset(200, 100));
     await tester.pump();
 
-    expect(opacityOf(tester, find.text('泉')), 1);
+    expect(opacityOf(tester, find.text('師')), 1);
     expect(opacityOf(tester, find.text('分享我嘅組合')), 1);
   });
 
@@ -88,7 +88,7 @@ void main() {
     await tester.pumpWidget(wrap(disableAnimations: true));
     await tester.pump();
 
-    expect(opacityOf(tester, find.text('林')), 1);
+    expect(opacityOf(tester, find.text('御')), 1);
     expect(opacityOf(tester, find.text('儲存並睇我嘅命理檔案')), 1);
   });
 

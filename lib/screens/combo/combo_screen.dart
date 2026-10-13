@@ -37,17 +37,17 @@ class ComboDetailScreen extends StatelessWidget {
                   children: [
                     _buildNameCard(colors, combo),
                     const SizedBox(height: 12),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _buildListCard(colors, '你嘅優勢', colors.jade, combo.strengths)),
-                        const SizedBox(width: 10),
-                        Expanded(child: _buildListCard(colors, '留意位', colors.red, combo.watchouts,
-                            mark: DiamondMark(color: colors.red))),
-                      ],
-                    ),
+                    _buildListCard(colors, '日常寫照', colors.jade, combo.daily),
                     const SizedBox(height: 12),
-                    _buildHowToWinCard(colors, combo),
+                    _buildTextCard(colors, '你的盲點', colors.red, combo.blindSpot, mark: DiamondMark(color: colors.red)),
+                    const SizedBox(height: 12),
+                    _buildListCard(colors, '適合的工作', colors.ink, combo.jobs),
+                    const SizedBox(height: 12),
+                    _buildTextCard(colors, '最合得來的人', colors.jade, combo.bestMatchDisplay()),
+                    const SizedBox(height: 12),
+                    _buildTextCard(colors, '給你的提醒', colors.gold, combo.reminder, mark: MoonMark(color: colors.gold)),
+                    const SizedBox(height: 12),
+                    _buildTextCard(colors, '開運小物', colors.gold, combo.luckyText),
                     const SizedBox(height: 12),
                     _buildRarityCard(colors, dayGan),
                     const SizedBox(height: 12),
@@ -147,30 +147,36 @@ class ComboDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              combo.name,
-              style: TextStyle(
+              combo.palaceTitle,
+              style: const TextStyle(
                 fontFamily: XuanLiFonts.serif,
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 6,
+                letterSpacing: 4,
                 color: KairoPalette.paper,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
             Text(
-              combo.motto,
-              style: const TextStyle(fontSize: 11, color: KairoPalette.goldBright, letterSpacing: 2),
+              combo.roleLine,
+              style: const TextStyle(fontSize: 12, height: 1.5, color: KairoPalette.goldBright),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              combo.plainLine,
+              style: TextStyle(fontSize: 13, height: 1.5, color: KairoPalette.paper.withValues(alpha: 0.92)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              combo.thisIsYou,
+              style: TextStyle(fontSize: 13, height: 1.55, color: KairoPalette.paper.withValues(alpha: 0.92)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 18),
             WuxingOrbs(wuxing: profile.wuxing),
-            const SizedBox(height: 14),
-            Text(
-              combo.description,
-              style: TextStyle(fontSize: 12.5, height: 1.8, color: KairoPalette.paper.withValues(alpha: 0.65)),
-              textAlign: TextAlign.left,
-            ),
           ],
         ),
       ),
@@ -180,6 +186,7 @@ class ComboDetailScreen extends StatelessWidget {
   Widget _buildListCard(XuanLiColors colors, String title, Color titleColor, List<String> items,
       {Widget? mark}) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: colors.cardSurface,
@@ -204,7 +211,7 @@ class ComboDetailScreen extends StatelessWidget {
   Widget _title(String text, TextStyle style, {Widget? mark}) =>
       mark == null ? Text(text, style: style) : MarkedTitle(mark: mark, text: text, style: style);
 
-  Widget _buildHowToWinCard(XuanLiColors colors, Combo combo) {
+  Widget _buildTextCard(XuanLiColors colors, String title, Color titleColor, String body, {Widget? mark}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(13),
@@ -215,11 +222,10 @@ class ComboDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title('點樣發力（跟你嘅組合）',
-              TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: colors.gold),
-              mark: MoonMark(color: colors.gold)),
+          _title(title, TextStyle(fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w700, color: titleColor),
+              mark: mark),
           const SizedBox(height: 7),
-          Text(combo.howToWin, style: TextStyle(fontSize: 12, height: 1.7, color: colors.ink)),
+          Text(body, style: TextStyle(fontSize: 12, height: 1.7, color: colors.ink)),
         ],
       ),
     );

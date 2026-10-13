@@ -20,8 +20,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kairo'), findsOneWidget);
-    expect(find.textContaining('160 個組合'), findsOneWidget);
-    expect(find.textContaining('每日宜忌'), findsOneWidget);
+    expect(find.textContaining('160 種性格組合'), findsOneWidget);
+    expect(find.textContaining('看得懂的宮職'), findsOneWidget);
+    expect(find.textContaining('內斂溫柔'), findsOneWidget);
+    expect(find.textContaining('獨立堅定'), findsOneWidget);
+    expect(find.textContaining('邊種五行較順'), findsOneWidget);
+    expect(find.text('睇下你係「林間清泉」定「雪嶺孤松」'), findsNothing);
+    expect(find.textContaining('喜忌神'), findsNothing);
     expect(find.textContaining('出生資料唔離你部機'), findsOneWidget);
     expect(find.textContaining('僅供參考'), findsOneWidget);
     expect(find.text('睇我嘅組合'), findsOneWidget);
