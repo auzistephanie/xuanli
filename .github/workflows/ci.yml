@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: analyze, test, web
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Check built web title and manifest
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          html = pathlib.Path("build/web/index.html").read_text()
+          manifest = json.loads(pathlib.Path("build/web/manifest.json").read_text())
+          problems = []
+          if "<title>Kairo 吉時</title>" not in html:
+              problems.append("index.html title is not Kairo 吉時")
+          if 'apple-mobile-web-app-title" content="Kairo"' not in html:
+              problems.append("apple-mobile-web-app-title is not Kairo")
+          if "玄曆" in html:
+              problems.append("index.html still contains 玄曆")
+          if manifest.get("name") != "Kairo 吉時" or manifest.get("short_name") != "Kairo":
+              problems.append(
+                  f"manifest name={manifest.get('name')!r} short_name={manifest.get('short_name')!r}"
+              )
+          if "玄曆" in json.dumps(manifest, ensure_ascii=False):
+              problems.append("manifest.json still contains 玄曆")
+          if problems:
+              print("::error::" + "; ".join(problems))
+              sys.exit(1)
+          print("web branding ok:", manifest["name"])
+          PY

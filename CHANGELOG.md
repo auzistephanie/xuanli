@@ -1,6 +1,8 @@
-# CHANGELOG — xuanli（玄曆）
+# CHANGELOG — Kairo（原名玄曆）
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
+
+- 2026-10-14：**PR #3 rebase 之後仲留低嘅部分** — `main` 已經有 Kairo 公開品牌同 `.github/workflows/deploy-web.yml`，所以呢條唔再重複部署。新加 `.github/workflows/ci.yml`：push／pull request 跑 `flutter analyze`、`flutter test`、`flutter build web --release`，並檢查 build 出嚟嘅標題同 manifest 係 Kairo。`intl` ^0.19.0 → ^0.20.3；`flutter_local_notifications` ^17.2.0 → ^18.0.1（再上 19+ 要 `timezone` ≥0.10，同 `device_calendar` 鎖住嘅 `timezone ^0.9.0` 撞）。通知 plugin 18 喺 test 要 `AndroidFlutterLocalNotificationsPlugin.registerWith()`。CLI demo 橫額改做 Kairo。`vercel.json` 嘅 `buildCommand` 失敗退出，避免有人開返 Vercel Git deploy 時把 repo 根目錄當成網站。
 
 - 2026-10-13：**分享卡中間補宮職圖同三句** — 原本職位、「這就是你」同分享句之間係空白。而家中間放一張宮職角色圖，再加三行書面語：適合（`jobs` 頭 1–2 個）、盲點（`blindSpot`）、合得來（`bestMatchDisplay()`：對方職位／命＋MBTI＋`bestMatchWhy`）。唔顯示「一句白話」`plainLine`，亦唔放姓名、出生日期、時辰。圖放 `assets/palace/`，同一 `palaceTitle` 共用一張；已出城守將軍、御用畫師、軍師、大將軍、水師將軍、南衙統領六張樣本（五行色調跟職位所屬天干），其餘職位用 `fallback.png`。圖載入失敗會畫一個同色剪影，中間唔會空。分享卡鎖住文字縮放，避免系統大字體把 9:16 卡撐爆。
 

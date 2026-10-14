@@ -31,3 +31,6 @@ analyzer:
   exclude:
     - _to_delete/**
     - build/**
+    - android/**
+    - ios/**
+    - web/**

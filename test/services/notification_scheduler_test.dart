@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xuanli/engine/almanac.dart';
 import 'package:xuanli/engine/copywriter.dart';
@@ -15,6 +16,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
+    // v18 起 test 唔會自動註冊 platform implementation。flutter test 嘅
+    // defaultTargetPlatform 係 Android，唔 register 嘅話 initialize／cancel
+    // 會靜靜 no-op，mock channel 收唔到 call。
+    AndroidFlutterLocalNotificationsPlugin.registerWith();
     initMbtiTones(File('lib/data/mbti_tones.json').readAsStringSync());
     initActivityCategories(File('lib/data/activity_categories.json').readAsStringSync());
   });
