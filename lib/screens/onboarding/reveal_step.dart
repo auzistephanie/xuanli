@@ -295,20 +295,21 @@ class _RevealStepState extends State<RevealStep>
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(XuanLiRadii.card),
     );
+    // 宮職名已經係結果。主掣繼續去儲存／命理檔案；分享留喺揭曉頁，但降做外框次掣。
     return Column(
       children: [
         SizedBox(
           width: double.infinity,
           height: 50,
           child: FilledButton(
-            onPressed: widget.onShare,
+            onPressed: widget.onContinue,
             style: FilledButton.styleFrom(
               backgroundColor: _gold,
               foregroundColor: _navy,
               shape: shape,
               textStyle: const TextStyle(fontFamily: XuanLiFonts.sans, fontSize: 15, fontWeight: FontWeight.w700),
             ),
-            child: const Text('分享我嘅組合'),
+            child: const Text('儲存並睇我嘅命理檔案'),
           ),
         ),
         const SizedBox(height: 10),
@@ -316,14 +317,14 @@ class _RevealStepState extends State<RevealStep>
           width: double.infinity,
           height: 50,
           child: OutlinedButton(
-            onPressed: widget.onContinue,
+            onPressed: widget.onShare,
             style: OutlinedButton.styleFrom(
               foregroundColor: _paper,
               side: BorderSide(color: _paper.withValues(alpha: 0.35)),
               shape: shape,
               textStyle: const TextStyle(fontFamily: XuanLiFonts.sans, fontSize: 15),
             ),
-            child: const Text('儲存並睇我嘅命理檔案'),
+            child: const Text('分享我嘅組合'),
           ),
         ),
         if (widget.onTryAnother != null) ...[

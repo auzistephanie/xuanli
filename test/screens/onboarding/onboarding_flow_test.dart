@@ -65,9 +65,22 @@ void main() {
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
 
-    // 揭曉一刻：組合名 + 稀有度，撳「睇我嘅命理檔案」。
-    expect(find.text('分享我嘅組合'), findsOneWidget);
+    // 揭曉一刻：宮職結果先出。金底主掣係儲存並睇命理檔案；分享係外框次掣。
     expect(find.textContaining('人先有一個'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(FilledButton),
+        matching: find.text('儲存並睇我嘅命理檔案'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(OutlinedButton),
+        matching: find.text('分享我嘅組合'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.text('儲存並睇我嘅命理檔案'));
     await tester.pumpAndSettle();
 

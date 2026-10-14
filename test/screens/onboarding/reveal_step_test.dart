@@ -92,7 +92,7 @@ void main() {
     expect(opacityOf(tester, find.text('儲存並睇我嘅命理檔案')), 1);
   });
 
-  testWidgets('兩粒掣分別觸發 onShare／onContinue', (tester) async {
+  testWidgets('主掣係儲存並睇命理檔案，分享係外框次掣', (tester) async {
     var shared = false;
     var continued = false;
     await tester.pumpWidget(wrap(
@@ -101,10 +101,26 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('分享我嘅組合'));
-    expect(shared, isTrue);
-    await tester.tap(find.text('儲存並睇我嘅命理檔案'));
+    final primary = find.byType(FilledButton);
+    final secondary = find.byType(OutlinedButton);
+    expect(
+      find.descendant(of: primary, matching: find.text('儲存並睇我嘅命理檔案')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: secondary, matching: find.text('分享我嘅組合')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getTopLeft(primary).dy,
+      lessThan(tester.getTopLeft(secondary).dy),
+    );
+
+    await tester.tap(primary);
     expect(continued, isTrue);
+    expect(shared, isFalse);
+    await tester.tap(secondary);
+    expect(shared, isTrue);
   });
 
   testWidgets('顯示「未儲存任何資料」，同「幫朋友再試一個」觸發 onTryAnother', (tester) async {
