@@ -1,5 +1,6 @@
 {
   "git": {
     "deploymentEnabled": false
-  }
+  },
+  "buildCommand": "echo 'Flutter web is built in GitHub Actions (.github/workflows/deploy-web.yml), not on Vercel.' && exit 1"
 }

@@ -1,6 +1,7 @@
 import 'package:app_links_platform_interface/app_links_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xuanli/engine/profile_builder.dart';
@@ -38,6 +39,8 @@ class _FakeAppLinksPlatform extends AppLinksPlatform {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  // flutter_local_notifications 18 起要手動註冊，bootstrap 先會打到 mock channel。
+  AndroidFlutterLocalNotificationsPlugin.registerWith();
 
   // 起 test 之前捕捉住真實嘅預設 platform instance，等每個 test 完咗
   // 都可以復原返去——唔可以好似 plan 度噉樣用 `addTearDown(() =>

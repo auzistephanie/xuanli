@@ -20,6 +20,8 @@ dart run tool/demo.dart 1999-09-20 09:30 ISFP
 flutter build web --release       # 輸出 build/web
 ```
 
+GitHub Actions（`.github/workflows/ci.yml`）喺 push 同 pull request 跑 `flutter analyze`、`flutter test`、`flutter build web --release`。部署仍然只由 `.github/workflows/deploy-web.yml` 喺 `main` 做。
+
 產品規格：[XUANLI_SPEC.md](XUANLI_SPEC.md)　視覺稿：[design/design-preview.html](design/design-preview.html)　協作規則：[CLAUDE.md](CLAUDE.md)
 
 ## 部署（web）

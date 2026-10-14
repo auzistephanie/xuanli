@@ -13,7 +13,7 @@ const _paper = Color(0xFFF6EFE2);
 const _gold = Color(0xFFC9A24B);
 
 /// Onboarding 第 0 步：封面。畀未用過嘅人（包括掃分享卡 QR 入嚟嗰班）
-/// 十秒內明白玄曆係咩、點解值得填資料，然後撳「睇我嘅組合」開始。
+/// 十秒內明白 Kairo 係咩、點解值得填資料，然後撳「睇我嘅組合」開始。
 /// 風格同 [RevealStep] 一致（藏藍＋朱紅印＋金），令「封面 → … → 揭曉」似一個故事。
 class WelcomeStep extends StatefulWidget {
   final VoidCallback onStart;

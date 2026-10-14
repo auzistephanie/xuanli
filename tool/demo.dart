@@ -46,7 +46,7 @@ void main(List<String> args) {
   final today = DateTime.now();
   final reading = buildDayReading(profile: profile, date: DateTime(today.year, today.month, today.day));
 
-  print('=== 玄曆 Demo ===');
+  print('=== Kairo Demo ===');
   print('四柱：${profile.pillars.join(' ')}');
   print('日主：${profile.dayMaster}　肖：${profile.zodiac}　完整度：${profile.completeness}%');
   print('喜：${profile.favorable.join('')}　忌：${profile.unfavorable.join('')}');
