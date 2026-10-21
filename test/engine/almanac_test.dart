@@ -37,6 +37,25 @@ void main() {
     });
   });
 
+  group('AlmanacDay observed-date fixture (2026-10-21)', () {
+    test('農曆及曆法輸出為可驗證欄位，避免由文案推斷計算結果', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+
+      // 2026-10-21 = 農曆九月十二 per Hong Kong Observatory's 2026 calendar;
+      // validate this independently of the UI.
+      expect(day.lunarLabel, '九月十二');
+      expect(day.ganzhiDay, isNotEmpty);
+      expect(day.zhiXing, isNotEmpty);
+      expect(day.chong, startsWith('沖'));
+      expect(day.yi, isNotEmpty);
+      expect(day.ji, isNotEmpty);
+      for (final item in [...day.yi, ...day.ji]) {
+        expect(item, isNot(contains('诸')));
+        expect(item, isNot(contains('余')));
+      }
+    });
+  });
+
   group('宜/忌繁體化', () {
     test('2026-07-11 宜含「祭祀」「餘事勿取」，忌「諸事不宜」', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 11));

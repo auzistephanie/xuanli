@@ -33,7 +33,22 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('行完 3 步（用預設出生資料 + 16 宮格揀 ISFP）會跳去 TabShell', (tester) async {
+  testWidgets('預填資料未確認唔可以直接產生 profile', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: XuanLiTheme.light(), home: const OnboardingFlow()),
+    );
+    await tester.tap(find.text('睇我嘅組合'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('下一步'));
+    await tester.tap(find.text('下一步'));
+    await tester.pump();
+
+    expect(find.text('你嘅出生一刻'), findsOneWidget);
+    expect(find.text('請先確認出生資料，預填日期只係示例'), findsOneWidget);
+    expect(await StorageService().loadPrimaryProfile(), isNull);
+  });
+
+  testWidgets('行完 3 步（明確確認示例出生資料 + 16 宮格揀 ISFP）會跳去 TabShell', (tester) async {
     // `theme:` required — see birth_data_step_test.dart's wrap() note;
     // every step OnboardingFlow renders needs context.xuanliColors present.
     await tester.pumpWidget(
@@ -45,8 +60,12 @@ void main() {
     await tester.tap(find.text('睇我嘅組合'));
     await tester.pumpAndSettle();
 
-    // Step 1: 出生資料，用晒預設值直接下一步。
+    // Step 1: 明確確認預填資料後先繼續。
     expect(find.text('你嘅出生一刻'), findsOneWidget);
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
 
@@ -100,6 +119,10 @@ void main() {
 
     await tester.tap(find.text('睇我嘅組合'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('ISFP'));
@@ -131,6 +154,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('農曆'));
     await tester.pump();
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('ISFP'));

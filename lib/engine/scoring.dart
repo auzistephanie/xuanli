@@ -36,13 +36,16 @@ FortuneScoreResult computeFortuneScore({
   score += (day.jiShenCount * 3).clamp(0, 12);
   score -= (day.xiongShaCount * 4).clamp(0, 16);
 
-  final dayGanElement = ganWuxing[day.dayGan]!;
-  if (favorable.contains(dayGanElement)) score += 8;
-  if (unfavorable.contains(dayGanElement)) score -= 8;
-
-  final dayZhiElement = zhiWuxing[day.dayZhi]!;
-  if (favorable.contains(dayZhiElement)) score += 8;
-  if (unfavorable.contains(dayZhiElement)) score -= 8;
+  // 同一個五行即使同時出現喺天干同地支，亦只係一個喜／忌信號。
+  // 否則戊辰等同元素日會將相同忌神重複扣兩次。
+  final dayElements = {
+    ganWuxing[day.dayGan]!,
+    zhiWuxing[day.dayZhi]!,
+  };
+  for (final element in dayElements) {
+    if (favorable.contains(element)) score += 8;
+    if (unfavorable.contains(element)) score -= 8;
+  }
 
   String? clashWarning;
   if (zhiClash[day.dayZhi] == userYearZhi) {
@@ -55,7 +58,8 @@ FortuneScoreResult computeFortuneScore({
     score = 40;
   }
 
-  score = score.clamp(0, 100);
+  // 極端凶日仍有有效讀數；同未載入／計算失敗嘅狀態區分。
+  score = score.clamp(1, 100);
 
   return FortuneScoreResult(score: score, band: bandFor(score), clashWarning: clashWarning);
 }

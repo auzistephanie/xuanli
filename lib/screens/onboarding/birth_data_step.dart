@@ -116,6 +116,8 @@ class BirthDataStep extends StatelessWidget {
   final String birthPlace;
   final ValueChanged<BirthDataState> onChanged;
   final VoidCallback onNext;
+  final bool birthDataConfirmed;
+  final ValueChanged<bool>? onBirthDataConfirmed;
 
   /// 預設係「你嘅出生一刻」；幫朋友合盤時由 caller 改成講「佢」。
   final String title;
@@ -134,6 +136,8 @@ class BirthDataStep extends StatelessWidget {
     required this.birthPlace,
     required this.onChanged,
     required this.onNext,
+    this.birthDataConfirmed = false,
+    this.onBirthDataConfirmed,
     this.title = '你嘅出生一刻',
     this.subtitle = '出生年月日時用來計五行，睇邊種對你較順。資料只儲存喺你部機，唔會上傳。',
     this.showProgress = true,
@@ -357,6 +361,17 @@ class BirthDataStep extends StatelessWidget {
             value: birthPlace,
             onTap: () => _editPlace(context),
           ),
+          if (onBirthDataConfirmed != null)
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                '我確認 $dateLabel、${birthTimeUnknown ? '出生時間不詳' : timeLabel}、$birthPlace 係我嘅出生資料',
+              ),
+              subtitle: const Text('上面係預填示例；如果唔係你嘅資料，請先更改。'),
+              value: birthDataConfirmed,
+              onChanged: (value) => onBirthDataConfirmed!(value ?? false),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
           OnboardingPrimaryButton(label: '下一步', onPressed: onNext),
         ],
       ),

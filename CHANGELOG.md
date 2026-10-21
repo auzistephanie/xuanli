@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。
 
+- 2026-10-21：**修正同一五行重複扣分、預填出生資料及貼身建議** — production 實際試玩發現：首次進入直接用預填 2000-01-01 09:00、不改生日而只揀 ESTJ，會產生同第二張截圖一致嘅喜木金／忌火土、0 命理分／32 契合度。兩張截圖嘅 2026-10-21 戊辰破日，舊公式將同一個「土」從日干、日支重複扣兩次：20 + 12 − 16 − 8 − 8 = 0。修正為每日每種五行只計一次；改後呢組為 8，喜土對照組由 32 變 24。極端凶日仍可能計到負值，有效分數最低為 1；MBTI 四軸契合度 ISTJ 49、ESTJ 32 不變。新用戶及朋友合盤輸入預填資料前須明確確認，修改任一出生欄位會重設確認；已有儲存檔案不變。新增 2026 全年兩喜兩忌／生肖組合、預填生日及確認流程測試。`lunar` 日期及通勝 fixture 與截圖一致：九月十二、戊辰、破日、沖狗煞南。另修正文案曾將喜忌神誤寫為實際五行旺弱，改為「對你較順／要留意」。Flutter widget tests、完整 `flutter test` 及 web build 未能執行，因 Flutter 啟動觸發雲端 metadata 存取並被環境安全審查阻擋。
+
 - 2026-10-14：**揭曉頁主掣改為儲存並睇命理檔案** — Stephanie 拍板：揭曉頁見到宮職名已經算「有結果」，唔使等晒組合詳情。金底主掣由「分享我嘅組合」改做「儲存並睇我嘅命理檔案」（原本條繼續路徑，去檔案卡再儲存）；「分享我嘅組合」留喺揭曉頁，降做外框次掣，分享流程唔變。分享卡、合盤分享、籤卡分享冇郁。
 
 - 2026-10-14：**PR #3 rebase 之後仲留低嘅部分** — `main` 已經有 Kairo 公開品牌同 `.github/workflows/deploy-web.yml`，所以呢條唔再重複部署。新加 `.github/workflows/ci.yml`：push／pull request 跑 `flutter analyze`、`flutter test`、`flutter build web --release`，並檢查 build 出嚟嘅標題同 manifest 係 Kairo。`intl` ^0.19.0 → ^0.20.3；`flutter_local_notifications` ^17.2.0 → ^18.0.1（再上 19+ 要 `timezone` ≥0.10，同 `device_calendar` 鎖住嘅 `timezone ^0.9.0` 撞）。通知 plugin 18 喺 test 要 `AndroidFlutterLocalNotificationsPlugin.registerWith()`。CLI demo 橫額改做 Kairo。`vercel.json` 嘅 `buildCommand` 失敗退出，避免有人開返 Vercel Git deploy 時把 repo 根目錄當成網站。

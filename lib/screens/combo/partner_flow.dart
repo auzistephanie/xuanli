@@ -33,8 +33,15 @@ class _PartnerFlowState extends State<PartnerFlow> {
 
   DateTime? _solarBirthDate;
   Profile? _friend;
+  bool _birthDataConfirmed = false;
 
   void _continueFromBirthData() {
+    if (!_birthDataConfirmed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('請先確認朋友出生資料，預填日期只係示例')),
+      );
+      return;
+    }
     DateTime solarDate;
     try {
       solarDate = _birthData.toSolarDate();
@@ -112,8 +119,14 @@ class _PartnerFlowState extends State<PartnerFlow> {
             birthMinute: _birthData.birthMinute,
             birthTimeUnknown: _birthData.birthTimeUnknown,
             birthPlace: _birthData.birthPlace,
-            onChanged: (state) => setState(() => _birthData = state),
+            onChanged: (state) => setState(() {
+              _birthData = state;
+              _birthDataConfirmed = false;
+            }),
             onNext: _continueFromBirthData,
+            birthDataConfirmed: _birthDataConfirmed,
+            onBirthDataConfirmed: (confirmed) =>
+                setState(() => _birthDataConfirmed = confirmed),
             title: '佢嘅出生一刻',
             subtitle: '輸入朋友嘅出生年月日時，即場計你哋嘅合盤。佢嘅資料唔會儲存，計完就冇。',
             showProgress: false,
@@ -132,6 +145,7 @@ class _PartnerFlowState extends State<PartnerFlow> {
               _step = 0;
               _friend = null;
               _solarBirthDate = null;
+              _birthDataConfirmed = false;
             }),
           ),
         },
