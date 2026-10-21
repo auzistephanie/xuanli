@@ -13,6 +13,23 @@ void main() {
   });
 
   group('今日貼身建議模板引擎', () {
+    test('喜忌神唔可以寫成五行實際旺弱', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+      final advice = buildAdvice(
+        day: day,
+        favorable: const ['木', '金'],
+        unfavorable: const ['火', '土'],
+        mbti: 'ISTJ',
+        ziweiStar: null,
+        avoidHour: null,
+      );
+
+      expect(advice, contains('木、金對你較順'));
+      expect(advice, contains('火、土要留意'));
+      expect(advice, isNot(contains('木金旺')));
+      expect(advice, isNot(contains('火土弱')));
+    });
+
     test('拼接命理段 + MBTI 段（有紫微段可省略）', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 11));
       final advice = buildAdvice(

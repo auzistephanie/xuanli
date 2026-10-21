@@ -31,6 +31,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   AppSettings? _settings;
+  Profile? _profile;
   bool _transferInProgress = false;
 
   late final DataTransferService _dataTransfer =
@@ -44,8 +45,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _load() async {
     final settings = await StorageService().loadSettings();
+    final profile = await StorageService().loadPrimaryProfile();
     if (!mounted) return;
-    setState(() => _settings = settings);
+    setState(() { _settings = settings; _profile = profile; });
   }
 
   Future<void> _save(AppSettings next) async {
@@ -104,7 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (confirmed != true || !mounted) return;
       await _dataTransfer.importBackup(backup);
       themeModeController.value = backup.settings.themeMode;
-      setState(() => _settings = backup.settings);
+      setState(() { _settings = backup.settings; _profile = backup.profiles.first; });
       _showMessage('Kairo 資料已成功匯入 ✓');
       widget.onDataImported?.call(backup.profiles.first);
     } on BackupFormatException catch (error) {
@@ -234,6 +236,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _notificationCard(colors, settings),
                           const SizedBox(height: 12),
                           _sectionLabel(colors, '資料'),
+                          if (_profile != null) ...[
+                            _birthDataSummary(colors, _profile!),
+                            const SizedBox(height: 8),
+                          ],
                           _actionTile(
                             colors,
                             '匯出 Kairo 資料',
@@ -259,6 +265,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _birthDataSummary(XuanLiColors colors, Profile profile) {
+    final date = profile.birthDate;
+    final hour = profile.birthHour;
+    // Profile 只儲存小時；唔將未知分鐘冒充為 00 分。
+    final time = hour == null ? '時間不詳' : '${hour.toString().padLeft(2, '0')}時';
+    final mayBeExample = date.year == 2000 && date.month == 1 && date.day == 1 && hour == 9;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('目前檔案出生資料', style: TextStyle(fontSize: 12, color: colors.ink60)),
+          Text('${date.year}年${date.month}月${date.day}日・$time・${profile.birthPlace}・${profile.mbti}',
+              style: TextStyle(fontSize: 13, color: colors.ink)),
+          if (mayBeExample)
+            Text('呢份檔案可能沿用咗預填示例。請核對；如有錯，先備份，再重新做 Onboarding。',
+                style: TextStyle(fontSize: 12, color: colors.ink60)),
+        ],
       ),
     );
   }

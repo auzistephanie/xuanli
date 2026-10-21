@@ -24,7 +24,10 @@ Map<String, List<String>> _loadMbtiTones() {
 
 /// 命理段：日干支 × 用戶喜忌關係。
 String _fortuneSegment(AlmanacDay day, List<String> favorable, List<String> unfavorable) {
-  final leaning = favorable.isNotEmpty ? '你${favorable.join('')}旺而${unfavorable.join('')}弱' : '';
+  // 喜忌神係扶抑法嘅建議方向，唔代表各五行實際旺弱（後者要睇 wuxing）。
+  final leaning = favorable.isNotEmpty
+      ? '按五行喜忌，${favorable.join('、')}對你較順，${unfavorable.join('、')}要留意'
+      : '';
   return '${day.ganzhiDay}${day.zhiXing}日，$leaning。'.replaceAll('，。', '。');
 }
 

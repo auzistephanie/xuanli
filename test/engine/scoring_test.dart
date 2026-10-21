@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import 'package:xuanli/engine/almanac.dart';
+import 'package:xuanli/engine/bazi.dart';
 import 'package:xuanli/engine/scoring.dart';
 
 void main() {
@@ -8,6 +9,90 @@ void main() {
   const unfavorable = ['金', '土'];
 
   group('fortuneScore smoke tests', () {
+    test('onboarding 預填 2000-01-01 09:00 對應截圖嘅喜忌五行', () {
+      final bazi = computeBazi(
+        birthDate: DateTime(2000, 1, 1),
+        birthHour: 9,
+        birthMinute: 0,
+      );
+      expect(bazi.favorable, containsAll(['木', '金']));
+      expect(bazi.unfavorable, containsAll(['火', '土']));
+      final result = computeFortuneScore(
+        day: AlmanacDay.forDate(DateTime(2026, 10, 21)),
+        favorable: bazi.favorable,
+        unfavorable: bazi.unfavorable,
+        userYearZhi: bazi.pillars.first.substring(1),
+      );
+      expect(result.score, 8);
+    });
+    test('2026-10-21 戊辰破日：同一個土忌神只扣一次', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+      final result = computeFortuneScore(
+        day: day,
+        favorable: const ['木', '金'],
+        unfavorable: const ['火', '土'],
+        userYearZhi: '卯',
+      );
+
+      expect(day.ganzhiDay, '戊辰');
+      expect(day.zhiXing, '破');
+      expect(result.score, 8);
+      expect(result.band, '忌');
+      expect(result.clashWarning, isNull);
+    });
+
+    test('同日喜土用戶有唔同分數', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+      final favorableEarth = computeFortuneScore(
+        day: day,
+        favorable: const ['土', '金'],
+        unfavorable: const ['木', '火'],
+        userYearZhi: '卯',
+      );
+
+      expect(favorableEarth.score, 24);
+      expect(favorableEarth.band, '忌');
+    });
+
+    test('同日生肖相沖嘅低分仍顯示有效分數同警告', () {
+      final result = computeFortuneScore(
+        day: AlmanacDay.forDate(DateTime(2026, 10, 21)),
+        favorable: const ['木', '金'],
+        unfavorable: const ['火', '土'],
+        userYearZhi: '戌',
+      );
+      expect(result.score, 1);
+      expect(result.band, '忌');
+      expect(result.clashWarning, isNotNull);
+    });
+
+    test('2026 每日兩喜兩忌及生肖組合有效讀數均在 1–100', () {
+      const elements = ['木', '火', '土', '金', '水'];
+      const yearBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+      for (var dayNumber = 0; dayNumber < 365; dayNumber++) {
+        final day = AlmanacDay.forDate(DateTime(2026, 1, 1 + dayNumber));
+        for (var first = 0; first < elements.length; first++) {
+          for (var second = first + 1; second < elements.length; second++) {
+            final favorable = [elements[first], elements[second]];
+            final remaining = elements.where((element) => !favorable.contains(element)).toList();
+            for (var third = 0; third < remaining.length; third++) {
+              for (var fourth = third + 1; fourth < remaining.length; fourth++) {
+                for (final yearZhi in yearBranches) {
+                  final result = computeFortuneScore(
+                    day: day,
+                    favorable: favorable,
+                    unfavorable: [remaining[third], remaining[fourth]],
+                    userYearZhi: yearZhi,
+                  );
+                  expect(result.score, inInclusiveRange(1, 100));
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
     test('2026-07-14（破日 + 諸事不宜）分數 <=40 帶「忌」', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 14));
       final result = computeFortuneScore(
@@ -77,6 +162,23 @@ void main() {
   });
 
   group('契合度四軸（獨立於命理分）', () {
+    test('2026-10-21 破日對 ISTJ 按四軸計為 49', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+
+      expect(day.yi, contains('餘事勿取'));
+      expect(
+        computeMbtiScore(day: day, mbti: 'ISTJ', hasClash: false),
+        49,
+      );
+    });
+    test('2026-10-21 破日對 ESTJ 按四軸計為 32', () {
+      final day = AlmanacDay.forDate(DateTime(2026, 10, 21));
+
+      expect(
+        computeMbtiScore(day: day, mbti: 'ESTJ', hasClash: false),
+        32,
+      );
+    });
     test('E/I：建除屬動（建除危成開）對 E 高分', () {
       final day = AlmanacDay.forDate(DateTime(2026, 7, 15));
       expect(axisScoreEI(day, 'E'), 25);

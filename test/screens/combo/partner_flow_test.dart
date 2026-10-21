@@ -38,6 +38,10 @@ void main() {
   Future<void> pickFriend(WidgetTester tester, {String mbti = 'INTJ'}) async {
     // Step 0：出生資料（預設 2000-01-01 09:00）。
     expect(find.text('佢嘅出生一刻'), findsOneWidget);
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     // Step 1：MBTI 16 宮格，冇快速測驗。
@@ -104,6 +108,10 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('下一步'));
     await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     expect(find.text('佢偏向邊種性格'), findsOneWidget);

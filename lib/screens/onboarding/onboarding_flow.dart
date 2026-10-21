@@ -38,17 +38,25 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   );
 
   String? _mbti;
+  bool _birthDataConfirmed = false;
   DateTime? _solarBirthDate;
   Profile? _revealProfile;
 
   void _updateBirthData(BirthDataState state) {
     setState(() {
       _birthData = state;
+      _birthDataConfirmed = false;
       _solarBirthDate = null;
     });
   }
 
   void _continueFromBirthData() {
+    if (!_birthDataConfirmed) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('請先確認出生資料，預填日期只係示例')));
+      return;
+    }
     DateTime solarDate;
     try {
       solarDate = _birthData.toSolarDate();
@@ -98,9 +106,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             _mbti = null;
             _revealProfile = null;
             _solarBirthDate = null;
+            _birthDataConfirmed = false;
           }),
           onShare: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ShareCardScreen(profile: profile)),
+            MaterialPageRoute(
+              builder: (_) => ShareCardScreen(profile: profile),
+            ),
           ),
         ),
       );
@@ -119,6 +130,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             birthPlace: _birthData.birthPlace,
             onChanged: _updateBirthData,
             onNext: _continueFromBirthData,
+            birthDataConfirmed: _birthDataConfirmed,
+            onBirthDataConfirmed: (confirmed) =>
+                setState(() => _birthDataConfirmed = confirmed),
           ),
           2 => MbtiStep(
             onDone: (mbti) => setState(() {
