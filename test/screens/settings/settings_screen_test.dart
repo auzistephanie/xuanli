@@ -59,6 +59,29 @@ void main() {
     expect(find.text('關於 Kairo'), findsOneWidget);
   });
 
+  testWidgets('已有檔案可核對出生資料而唔會被改寫', (tester) async {
+    final profile = _sampleProfile();
+    await StorageService().savePrimaryProfile(profile);
+    await tester.pumpWidget(wrap(const SettingsScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1999年9月20日・09時・香港・ISFP'), findsOneWidget);
+    expect((await StorageService().loadPrimaryProfile())!.toJson(), profile.toJson());
+  });
+
+  testWidgets('舊示例生日會提示核對，唔自動覆蓋原檔案', (tester) async {
+    final profile = Profile.fromJson({
+      ..._sampleProfile().toJson(),
+      'birthDate': DateTime(2000, 1, 1).toIso8601String(),
+    });
+    await StorageService().savePrimaryProfile(profile);
+    await tester.pumpWidget(wrap(const SettingsScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('可能沿用咗預填示例'), findsOneWidget);
+    expect((await StorageService().loadPrimaryProfile())!.toJson(), profile.toJson());
+  });
+
   testWidgets('撳「常開」會即刻更新 themeModeController 並存落 storage', (tester) async {
     await tester.pumpWidget(wrap(const SettingsScreen()));
     await tester.pumpAndSettle();
