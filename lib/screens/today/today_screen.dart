@@ -181,7 +181,7 @@ class _TodayScreenState extends State<TodayScreen> {
                 ),
                 AdviceCard(advice: reading.advice),
                 const SizedBox(height: 12),
-                _buildLuckyColors(colors),
+                _buildLuckyColors(colors, reading),
                 if (isToday)
                   DailyStickCard(
                     stick: drawDailyStick(
@@ -215,12 +215,15 @@ class _TodayScreenState extends State<TodayScreen> {
     );
   }
 
-  Widget _buildLuckyColors(XuanLiColors colors) {
-    final suggestions = luckyColorsForProfile(widget.profile);
+  Widget _buildLuckyColors(XuanLiColors colors, DayReading reading) {
+    final suggestions = luckyColorsForDay(
+      profile: widget.profile,
+      ganzhiDay: reading.ganzhiDay,
+    );
     return Text(
       suggestions.isEmpty
-          ? '五行配色參考：未有可用喜用神資料'
-          : '五行配色參考：${suggestions.join('、')}（按個人喜用神；非每日運勢預測）',
+          ? '當日五行配色參考：未有可用喜用神資料'
+          : '當日五行配色參考：${suggestions.join('、')}（按日干支及個人喜用神；僅供參考）',
       style: TextStyle(fontSize: 12, color: colors.ink60),
     );
   }
