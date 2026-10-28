@@ -1,4 +1,5 @@
 import '../models/profile.dart';
+import 'wuxing_tables.dart';
 
 /// Traditional five-element colour associations for optional styling.
 /// These are a cultural interpretation, not an objective prediction.
@@ -20,4 +21,36 @@ List<String> luckyColorsForProfile(Profile profile) {
     }
   }
   return List.unmodifiable(result);
+}
+
+ 
+/// Date-aware colour references: prioritize favorable elements present in the
+/// day's heavenly stem and earthly branch. Fall back to the user's favorable
+/// order if neither matches. This is a deterministic cultural convention.
+List<String> luckyColorsForDay({
+  required Profile profile,
+  required String ganzhiDay,
+}) {
+  if (ganzhiDay.runes.length != 2) {
+    throw ArgumentError.value(ganzhiDay, 'ganzhiDay', 'Expected two characters');
+  }
+  final characters = ganzhiDay.split('');
+  final stem = ganWuxing[characters[0]];
+  final branch = zhiWuxing[characters[1]];
+  if (stem == null || branch == null) {
+    throw ArgumentError.value(ganzhiDay, 'ganzhiDay', 'Unknown stem or branch');
+  }
+  final favored = profile.favorable.toSet();
+  final order = <String>[
+    if (favored.contains(stem)) stem,
+    if (favored.contains(branch) && branch != stem) branch,
+    ...profile.favorable.where((element) => element != stem && element != branch),
+  ];
+  final colors = <String>[];
+  for (final element in order) {
+    for (final color in elementColors[element] ?? const <String>[]) {
+      if (!colors.contains(color)) colors.add(color);
+    }
+  }
+  return List.unmodifiable(colors);
 }
