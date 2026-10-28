@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../engine/daily_stick.dart';
 import '../../engine/day_reading_engine.dart';
+import '../../engine/lucky_colors.dart';
 import '../../models/day_reading.dart';
 import '../../models/profile.dart';
 import '../../services/storage_service.dart';
@@ -179,6 +180,8 @@ class _TodayScreenState extends State<TodayScreen> {
                   ],
                 ),
                 AdviceCard(advice: reading.advice),
+                const SizedBox(height: 12),
+                _buildLuckyColors(colors),
                 if (isToday)
                   DailyStickCard(
                     stick: drawDailyStick(
@@ -209,6 +212,16 @@ class _TodayScreenState extends State<TodayScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLuckyColors(XuanLiColors colors) {
+    final suggestions = luckyColorsForProfile(widget.profile);
+    return Text(
+      suggestions.isEmpty
+          ? '五行配色參考：未有可用喜用神資料'
+          : '五行配色參考：${suggestions.join('、')}（按個人喜用神；非每日運勢預測）',
+      style: TextStyle(fontSize: 12, color: colors.ink60),
     );
   }
 
